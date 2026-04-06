@@ -1,16 +1,20 @@
+import logging
+import os
 from functools import lru_cache
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+logger = logging.getLogger(__name__)
 
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(env_file=".env", env_file_encoding="utf-8", extra="ignore")
 
-    # Database
-    DATABASE_URL: str = "postgresql://repuser:reppass@postgres:5432/reputation_db"
+    # Database – falls back to a local SQLite file when DATABASE_URL is not set
+    DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite+aiosqlite:///./reputation.db")
 
-    # Redis
-    REDIS_URL: str = "redis://redis:6379/0"
+    # Redis – optional; empty string means Redis is disabled
+    REDIS_URL: str = os.getenv("REDIS_URL", "")
 
     # JWT
     JWT_SECRET_KEY: str = "change-me-in-production"
@@ -65,12 +69,23 @@ class Settings(BaseSettings):
     SENTIMENT_BATCH_SIZE: int = 32
     NEGATIVE_SPIKE_THRESHOLD: int = 40
     MIN_CLUSTER_SIZE: int = 3
-    CORS_ORIGINS: list[str] = ["http://localhost:3000"]
+    CORS_ORIGINS: list[str] = ["http://localhost:3000", "*"]
+
+    @property
+    def is_sqlite(self) -> bool:
+        return self.DATABASE_URL.startswith("sqlite")
+
+    @property
+    def redis_enabled(self) -> bool:
+        return bool(self.REDIS_URL)
 
 
 @lru_cache()
 def get_settings() -> Settings:
-    return Settings()
+    s = Settings()
+    logger.info("DATABASE_URL scheme: %s", s.DATABASE_URL.split("://")[0] if "://" in s.DATABASE_URL else "unknown")
+    logger.info("Redis enabled: %s", s.redis_enabled)
+    return s
 
 
 settings = get_settings()

@@ -23,7 +23,7 @@ export default function Sidebar() {
   const [apiStatus, setApiStatus] = useState<"checking" | "online" | "offline">("checking");
 
   useEffect(() => {
-    const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:8000";
+    const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "";
     fetch(`${apiBase}/health`, { signal: AbortSignal.timeout(4000) })
       .then((r) => setApiStatus(r.ok ? "online" : "offline"))
       .catch(() => setApiStatus("offline"));
@@ -109,7 +109,7 @@ export default function Sidebar() {
             </span>
           </div>
           <p className="text-[10px] text-slate-600 truncate">
-            {process.env.NEXT_PUBLIC_API_URL ?? "localhost:8000"}
+            {process.env.NEXT_PUBLIC_API_URL ?? "Not configured"}
           </p>
         </div>
       </div>

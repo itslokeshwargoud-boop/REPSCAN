@@ -10,6 +10,30 @@ interface InsightsPanelProps {
   };
 }
 
+/** Renders detail text, extracting any "Source: <url>" suffix as a clickable proof link */
+function InsightDetail({ detail, className }: { detail: string; className: string }) {
+  const sourceMatch = detail.match(/Source:\s*(https?:\/\/\S+)$/);
+  if (!sourceMatch) {
+    return <p className={className}>{detail}</p>;
+  }
+  const text = detail.slice(0, sourceMatch.index).replace(/·\s*$/, "").trim();
+  const url = sourceMatch[1];
+  return (
+    <p className={className}>
+      {text}{" "}
+      <a
+        href={url}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="underline underline-offset-2 opacity-80 hover:opacity-100 transition-opacity"
+        aria-label="View original source"
+      >
+        View source ↗
+      </a>
+    </p>
+  );
+}
+
 const TYPE_CONFIG = {
   positive: {
     bg: "bg-green-50",
@@ -100,9 +124,7 @@ export default function InsightsPanel({ insights, apiStatus }: InsightsPanelProp
                 <p className={`text-sm font-semibold leading-snug ${cfg.title}`}>
                   {insight.message}
                 </p>
-                <p className={`text-xs mt-1 leading-relaxed ${cfg.text}`}>
-                  {insight.detail}
-                </p>
+                <InsightDetail detail={insight.detail} className={`text-xs mt-1 leading-relaxed ${cfg.text}`} />
                 <p className="text-[11px] text-gray-400 mt-1.5">{insight.timestamp}</p>
               </div>
             </div>

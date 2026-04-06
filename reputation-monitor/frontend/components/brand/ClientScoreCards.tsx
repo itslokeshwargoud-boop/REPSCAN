@@ -1,8 +1,18 @@
-import { getAllClientSummaries, ClientId } from "@/lib/mockData";
+import type { ClientId } from "@/lib/mockData";
+
+interface ClientSummary {
+  clientId: ClientId;
+  clientName: string;
+  score: number;
+  trend: number;
+  trendLabel: string;
+  status: "good" | "attention" | "risky";
+}
 
 interface ClientScoreCardsProps {
   activeClient: ClientId;
   onClientSelect: (id: ClientId) => void;
+  summaries: ClientSummary[];
 }
 
 const STATUS_CONFIG = {
@@ -26,8 +36,7 @@ const STATUS_CONFIG = {
   },
 };
 
-export default function ClientScoreCards({ activeClient, onClientSelect }: ClientScoreCardsProps) {
-  const summaries = getAllClientSummaries();
+export default function ClientScoreCards({ activeClient, onClientSelect, summaries }: ClientScoreCardsProps) {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

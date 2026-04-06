@@ -38,7 +38,7 @@ function ConnectionBadge({
   const map = {
     connected: { color: "text-emerald-400", dot: "bg-emerald-400", label: "Connected" },
     connecting: { color: "text-yellow-400", dot: "bg-yellow-400", label: "Connecting…" },
-    disconnected: { color: "text-slate-400", dot: "bg-slate-400", label: "Disconnected" },
+    disconnected: { color: "text-gray-500", dot: "bg-gray-400", label: "Disconnected" },
     error: { color: "text-red-400", dot: "bg-red-400", label: "Error" },
   };
   const cfg = map[status];
@@ -64,9 +64,9 @@ function StatsBar({ stats }: { stats: LiveStats }) {
   const riskColor = riskColors[stats.risk_level] ?? riskColors.low;
 
   return (
-    <div className="grid grid-cols-5 gap-px bg-slate-700/40 rounded-lg overflow-hidden text-center text-xs">
-      <div className="bg-slate-800/80 px-2 py-2">
-        <p className="text-slate-400 mb-0.5">Score</p>
+    <div className="grid grid-cols-5 gap-px bg-gray-200 rounded-lg overflow-hidden text-center text-xs">
+      <div className="bg-gray-50 px-2 py-2">
+        <p className="text-gray-500 mb-0.5">Score</p>
         <p
           className={`font-bold text-sm tabular-nums ${
             stats.reputation_score >= 0 ? "text-emerald-400" : "text-red-400"
@@ -76,26 +76,26 @@ function StatsBar({ stats }: { stats: LiveStats }) {
           {stats.reputation_score.toFixed(1)}
         </p>
       </div>
-      <div className="bg-slate-800/80 px-2 py-2">
-        <p className="text-slate-400 mb-0.5">Positive</p>
+      <div className="bg-gray-50 px-2 py-2">
+        <p className="text-gray-500 mb-0.5">Positive</p>
         <p className="font-bold text-sm text-emerald-400 tabular-nums">
           {stats.positive_count.toLocaleString()}
         </p>
       </div>
-      <div className="bg-slate-800/80 px-2 py-2">
-        <p className="text-slate-400 mb-0.5">Negative</p>
+      <div className="bg-gray-50 px-2 py-2">
+        <p className="text-gray-500 mb-0.5">Negative</p>
         <p className="font-bold text-sm text-red-400 tabular-nums">
           {stats.negative_count.toLocaleString()}
         </p>
       </div>
-      <div className="bg-slate-800/80 px-2 py-2">
-        <p className="text-slate-400 mb-0.5">Neutral</p>
-        <p className="font-bold text-sm text-blue-400 tabular-nums">
+      <div className="bg-gray-50 px-2 py-2">
+        <p className="text-gray-500 mb-0.5">Neutral</p>
+        <p className="font-bold text-sm text-gray-500 tabular-nums">
           {stats.neutral_count.toLocaleString()}
         </p>
       </div>
-      <div className="bg-slate-800/80 px-2 py-2">
-        <p className="text-slate-400 mb-0.5">Risk</p>
+      <div className="bg-gray-50 px-2 py-2">
+        <p className="text-gray-500 mb-0.5">Risk</p>
         <span
           className={`inline-block px-1.5 py-0.5 rounded border text-[10px] font-bold uppercase tracking-wide ${riskColor}`}
         >
@@ -114,9 +114,9 @@ function SentimentBadge({
   confidence: number;
 }) {
   const cfg = {
-    positive: "bg-emerald-500/20 text-emerald-300 border-emerald-500/30",
-    negative: "bg-red-500/20 text-red-300 border-red-500/30",
-    neutral: "bg-blue-500/20 text-blue-300 border-blue-500/30",
+    positive: "bg-emerald-50 text-emerald-600 border-emerald-200",
+    negative: "bg-red-50 text-red-600 border-red-200",
+    neutral: "bg-gray-100 text-gray-600 border-gray-200",
   }[sentiment];
 
   const labels = { positive: "POS", negative: "NEG", neutral: "NEU" };
@@ -145,9 +145,9 @@ function PostCard({ post, isNew }: { post: LivePost; isNew: boolean }) {
   }, [isNew]);
 
   const bgMap = {
-    negative: "bg-red-950/20 border-red-900/30",
-    positive: "bg-green-950/10 border-green-900/20",
-    neutral: "bg-slate-800/50 border-slate-700/30",
+    negative: "bg-red-50 border-red-200",
+    positive: "bg-emerald-50 border-emerald-200",
+    neutral: "bg-gray-50 border-gray-200",
   };
   const bg = bgMap[post.sentiment] ?? bgMap.neutral;
 
@@ -175,7 +175,7 @@ function PostCard({ post, isNew }: { post: LivePost; isNew: boolean }) {
           >
             {platformIcon(post.platform)}
           </span>
-          <span className="text-xs font-semibold text-slate-200 truncate">
+          <span className="text-xs font-semibold text-gray-800 truncate">
             {post.author_name}
           </span>
           {post.is_flagged_author && (
@@ -191,13 +191,13 @@ function PostCard({ post, isNew }: { post: LivePost; isNew: boolean }) {
       </div>
 
       {/* Content */}
-      <p className="text-xs text-slate-300 leading-relaxed line-clamp-2 mb-2">
+      <p className="text-xs text-gray-700 leading-relaxed line-clamp-2 mb-2">
         {post.content}
       </p>
 
       {/* Footer row */}
       <div className="flex items-center justify-between gap-2">
-        <div className="flex items-center gap-3 text-[11px] text-slate-500">
+        <div className="flex items-center gap-3 text-[11px] text-gray-500">
           {post.followers_count > 0 && (
             <span title="Followers">
               👥 {post.followers_count >= 1000
@@ -219,7 +219,7 @@ function PostCard({ post, isNew }: { post: LivePost; isNew: boolean }) {
             href={post.url}
             target="_blank"
             rel="noopener noreferrer"
-            className="text-[11px] text-blue-400 hover:text-blue-300 transition-colors flex-shrink-0"
+            className="text-[11px] text-orange-500 hover:text-orange-600 transition-colors flex-shrink-0"
           >
             View original →
           </a>
@@ -236,8 +236,8 @@ function EmptyState() {
     <div className="flex flex-col items-center justify-center h-full gap-4 text-center py-16">
       <div className="text-5xl animate-pulse">📡</div>
       <div>
-        <p className="text-slate-300 font-semibold text-sm">Monitoring…</p>
-        <p className="text-slate-500 text-xs mt-1">
+        <p className="text-gray-700 font-semibold text-sm">Monitoring…</p>
+        <p className="text-gray-500 text-xs mt-1">
           Waiting for incoming posts
         </p>
       </div>
@@ -285,9 +285,9 @@ export default function LiveFeedPanel({ keyword }: LiveFeedPanelProps) {
   }, [clearFeed]);
 
   return (
-    <aside className="flex flex-col h-screen w-[360px] flex-shrink-0 bg-gray-900 border-l border-slate-700/50">
+    <aside className="flex flex-col h-screen w-[360px] flex-shrink-0 bg-white border-l border-gray-200">
       {/* ── Header ── */}
-      <div className="flex-shrink-0 px-4 pt-4 pb-3 border-b border-slate-700/50 space-y-3">
+      <div className="flex-shrink-0 px-4 pt-4 pb-3 border-b border-gray-200 space-y-3">
         {/* Title row */}
         <div className="flex items-center justify-between gap-2">
           <div className="flex items-center gap-2">
@@ -295,10 +295,10 @@ export default function LiveFeedPanel({ keyword }: LiveFeedPanelProps) {
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75" />
               <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500" />
             </span>
-            <span className="text-sm font-bold text-white tracking-wide">
+            <span className="text-sm font-bold text-gray-900 tracking-wide">
               LIVE
             </span>
-            <span className="px-2 py-0.5 rounded-full bg-blue-500/20 border border-blue-500/30 text-blue-300 text-xs font-semibold truncate max-w-[120px]">
+            <span className="px-2 py-0.5 rounded-full bg-orange-50 border border-orange-200 text-orange-600 text-xs font-semibold truncate max-w-[120px]">
               #{keyword}
             </span>
           </div>
@@ -313,7 +313,7 @@ export default function LiveFeedPanel({ keyword }: LiveFeedPanelProps) {
             {Array.from({ length: 5 }).map((_, i) => (
               <div
                 key={i}
-                className="bg-slate-800/80 h-12 animate-pulse rounded-sm"
+                className="bg-gray-50 h-12 animate-pulse rounded-sm"
               />
             ))}
           </div>
@@ -321,13 +321,13 @@ export default function LiveFeedPanel({ keyword }: LiveFeedPanelProps) {
 
         {/* Clear button */}
         <div className="flex items-center justify-between">
-          <span className="text-xs text-slate-500">
+          <span className="text-xs text-gray-500">
             {posts.length} post{posts.length !== 1 ? "s" : ""} in feed
           </span>
           {posts.length > 0 && (
             <button
               onClick={handleClear}
-              className="text-xs text-slate-400 hover:text-white transition-colors px-2 py-1 rounded hover:bg-slate-700/50"
+              className="text-xs text-gray-500 hover:text-gray-900 transition-colors px-2 py-1 rounded hover:bg-gray-100"
             >
               Clear feed ✕
             </button>
@@ -336,7 +336,7 @@ export default function LiveFeedPanel({ keyword }: LiveFeedPanelProps) {
       </div>
 
       {/* ── Feed ── */}
-      <div className="flex-1 overflow-y-auto overscroll-contain px-3 py-3 space-y-2 scrollbar-thin scrollbar-track-slate-900 scrollbar-thumb-slate-700">
+      <div className="flex-1 overflow-y-auto overscroll-contain px-3 py-3 space-y-2 scrollbar-thin scrollbar-track-gray-100 scrollbar-thumb-gray-300">
         {posts.length === 0 ? (
           <EmptyState />
         ) : (
@@ -363,9 +363,9 @@ export default function LiveFeedPanel({ keyword }: LiveFeedPanelProps) {
           animation: slideIn 0.35s ease-out forwards;
         }
         .scrollbar-thin::-webkit-scrollbar { width: 4px; }
-        .scrollbar-track-slate-900::-webkit-scrollbar-track { background: rgb(17 24 39); }
-        .scrollbar-thumb-slate-700::-webkit-scrollbar-thumb {
-          background: rgb(51 65 85);
+        .scrollbar-track-gray-100::-webkit-scrollbar-track { background: rgb(243 244 246); }
+        .scrollbar-thumb-gray-300::-webkit-scrollbar-thumb {
+          background: rgb(209 213 219);
           border-radius: 2px;
         }
       `}</style>

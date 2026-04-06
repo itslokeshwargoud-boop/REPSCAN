@@ -64,18 +64,18 @@ function AuthorPopup({ author, onClose }: AuthorPopupProps) {
     author.risk_score > 60 ? "high" : author.risk_score > 30 ? "mid" : "low";
 
   return (
-    <div className="absolute bottom-4 left-4 z-10 bg-slate-800 border border-slate-600/50 rounded-xl p-4 shadow-2xl w-64">
+    <div className="absolute bottom-4 left-4 z-10 bg-white border border-gray-200 rounded-xl p-4 shadow-xl w-64">
       {/* Header */}
       <div className="flex items-start justify-between mb-3">
         <div>
-          <p className="text-white font-semibold text-sm">{author.author_name}</p>
-          <p className="text-slate-400 text-xs capitalize mt-0.5">
+          <p className="text-gray-900 font-semibold text-sm">{author.author_name}</p>
+          <p className="text-gray-500 text-xs capitalize mt-0.5">
             📡 {author.platform}
           </p>
         </div>
         <button
           onClick={onClose}
-          className="text-slate-500 hover:text-white transition-colors p-0.5"
+          className="text-gray-500 hover:text-gray-900 transition-colors p-0.5"
           aria-label="Close"
         >
           ✕
@@ -84,26 +84,26 @@ function AuthorPopup({ author, onClose }: AuthorPopupProps) {
 
       {/* Stats */}
       <div className="grid grid-cols-2 gap-2 mb-3">
-        <div className="bg-slate-700/50 rounded-lg p-2 text-center">
-          <p className="text-[10px] text-slate-400 uppercase tracking-wide">
+        <div className="bg-gray-100 rounded-lg p-2 text-center">
+          <p className="text-[10px] text-gray-500 uppercase tracking-wide">
             Followers
           </p>
-          <p className="text-xs font-bold text-slate-200 mt-0.5 tabular-nums">
+          <p className="text-xs font-bold text-gray-800 mt-0.5 tabular-nums">
             {author.followers_count >= 1000
               ? `${(author.followers_count / 1000).toFixed(1)}k`
               : author.followers_count}
           </p>
         </div>
-        <div className="bg-slate-700/50 rounded-lg p-2 text-center">
-          <p className="text-[10px] text-slate-400 uppercase tracking-wide">
+        <div className="bg-gray-100 rounded-lg p-2 text-center">
+          <p className="text-[10px] text-gray-500 uppercase tracking-wide">
             Neg. Posts
           </p>
           <p className="text-xs font-bold text-red-400 mt-0.5 tabular-nums">
             {author.negative_post_count}
           </p>
         </div>
-        <div className="bg-slate-700/50 rounded-lg p-2 text-center">
-          <p className="text-[10px] text-slate-400 uppercase tracking-wide">
+        <div className="bg-gray-100 rounded-lg p-2 text-center">
+          <p className="text-[10px] text-gray-500 uppercase tracking-wide">
             Risk Score
           </p>
           <p
@@ -114,13 +114,13 @@ function AuthorPopup({ author, onClose }: AuthorPopupProps) {
             {author.risk_score.toFixed(1)}
           </p>
         </div>
-        <div className="bg-slate-700/50 rounded-lg p-2 text-center">
-          <p className="text-[10px] text-slate-400 uppercase tracking-wide">
+        <div className="bg-gray-100 rounded-lg p-2 text-center">
+          <p className="text-[10px] text-gray-500 uppercase tracking-wide">
             Status
           </p>
           <p
             className={`text-xs font-bold mt-0.5 ${
-              author.is_flagged ? "text-red-400" : "text-slate-300"
+              author.is_flagged ? "text-red-400" : "text-gray-700"
             }`}
           >
             {author.is_flagged ? "⚑ Flagged" : "Normal"}
@@ -138,10 +138,10 @@ function EmptyState() {
     <div className="flex flex-col items-center justify-center h-full gap-4 text-center">
       <span className="text-5xl">🛡️</span>
       <div>
-        <p className="text-slate-300 font-semibold text-sm">
+        <p className="text-gray-700 font-semibold text-sm">
           No attack clusters detected
         </p>
-        <p className="text-slate-500 text-xs mt-1">
+        <p className="text-gray-500 text-xs mt-1">
           The reputation graph is clean
         </p>
       </div>
@@ -158,14 +158,14 @@ function GraphLegend() {
     { color: "#EF4444", label: "High risk / Flagged (> 60)" },
   ];
   return (
-    <div className="absolute top-3 right-3 bg-slate-800/90 border border-slate-600/40 rounded-lg px-3 py-2 text-xs space-y-1.5">
+    <div className="absolute top-3 right-3 bg-white/95 border border-gray-200 rounded-lg px-3 py-2 text-xs space-y-1.5">
       {items.map((item) => (
         <div key={item.label} className="flex items-center gap-2">
           <span
             className="h-2.5 w-2.5 rounded-full flex-shrink-0"
             style={{ background: item.color }}
           />
-          <span className="text-slate-400">{item.label}</span>
+          <span className="text-gray-500">{item.label}</span>
         </div>
       ))}
     </div>
@@ -269,8 +269,8 @@ export default function AttackClusterGraph({
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-full gap-3">
-        <div className="h-5 w-5 rounded-full border-2 border-blue-500 border-t-transparent animate-spin" />
-        <span className="text-slate-400 text-sm">Building attack graph…</span>
+        <div className="h-5 w-5 rounded-full border-2 border-orange-500 border-t-transparent animate-spin" />
+        <span className="text-gray-500 text-sm">Building attack graph…</span>
       </div>
     );
   }
@@ -327,12 +327,12 @@ export default function AttackClusterGraph({
       )}
 
       {/* Stats overlay */}
-      <div className="absolute top-3 left-3 bg-slate-800/90 border border-slate-600/40 rounded-lg px-3 py-2 text-xs space-y-1">
-        <p className="text-slate-400">
-          <span className="text-white font-bold">{graphData.nodes.length}</span>{" "}
+      <div className="absolute top-3 left-3 bg-white/95 border border-gray-200 rounded-lg px-3 py-2 text-xs space-y-1">
+        <p className="text-gray-500">
+          <span className="text-gray-900 font-bold">{graphData.nodes.length}</span>{" "}
           tracked authors
         </p>
-        <p className="text-slate-400">
+        <p className="text-gray-500">
           <span className="text-red-400 font-bold">{clusters.length}</span>{" "}
           cluster{clusters.length !== 1 ? "s" : ""} detected
         </p>

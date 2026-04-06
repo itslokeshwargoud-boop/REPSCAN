@@ -102,15 +102,15 @@ function RiskBadge({ level }: { level: string }) {
   const cfg: Record<string, { label: string; cls: string }> = {
     low: {
       label: "LOW RISK",
-      cls: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30",
+      cls: "bg-emerald-50 text-emerald-600 border-emerald-200",
     },
     moderate: {
       label: "MODERATE",
-      cls: "bg-yellow-500/15 text-yellow-400 border-yellow-500/30",
+      cls: "bg-yellow-50 text-yellow-600 border-yellow-200",
     },
     high: {
       label: "HIGH RISK",
-      cls: "bg-red-500/15 text-red-400 border-red-500/30",
+      cls: "bg-red-50 text-red-600 border-red-200",
     },
   };
   const { label, cls } = cfg[level] ?? cfg.moderate;
@@ -145,7 +145,7 @@ function MiniStat({
       >
         {value.toLocaleString()}
       </span>
-      <span className="text-[11px] text-slate-500 uppercase tracking-wide">
+      <span className="text-[11px] text-gray-500 uppercase tracking-wide">
         {label}
       </span>
     </div>
@@ -157,14 +157,14 @@ function MiniStat({
 function ScoreCardSkeleton() {
   return (
     <div className="flex flex-col items-center gap-4 animate-pulse py-4">
-      <div className="h-40 w-40 rounded-full bg-slate-700/50" />
-      <div className="h-5 w-24 bg-slate-700/50 rounded-full" />
+      <div className="h-40 w-40 rounded-full bg-gray-100" />
+      <div className="h-5 w-24 bg-gray-100 rounded-full" />
       <div className="flex gap-8">
         {[1, 2, 3].map((i) => (
           <div key={i} className="flex flex-col items-center gap-2">
-            <div className="h-4 w-4 bg-slate-700/50 rounded" />
-            <div className="h-5 w-8 bg-slate-700/50 rounded" />
-            <div className="h-3 w-12 bg-slate-700/50 rounded" />
+            <div className="h-4 w-4 bg-gray-100 rounded" />
+            <div className="h-5 w-8 bg-gray-100 rounded" />
+            <div className="h-3 w-12 bg-gray-100 rounded" />
           </div>
         ))}
       </div>
@@ -178,8 +178,8 @@ function ErrorState() {
   return (
     <div className="flex flex-col items-center justify-center gap-3 py-8 text-center">
       <span className="text-3xl">⚠️</span>
-      <p className="text-red-400 text-sm font-medium">Failed to load score</p>
-      <p className="text-slate-500 text-xs">Check your connection and retry</p>
+      <p className="text-red-500 text-sm font-medium">Failed to load score</p>
+      <p className="text-gray-500 text-xs">Check your connection and retry</p>
     </div>
   );
 }
@@ -220,7 +220,7 @@ export default function ReputationScoreCard({
           >
             {formattedScore}
           </span>
-          <span className="text-slate-500 text-xs mt-1 uppercase tracking-widest">
+          <span className="text-gray-500 text-xs mt-1 uppercase tracking-widest">
             Score
           </span>
         </div>
@@ -237,14 +237,14 @@ export default function ReputationScoreCard({
           color="#10B981"
           icon="📈"
         />
-        <div className="h-10 w-px bg-slate-700/50" />
+        <div className="h-10 w-px bg-gray-200" />
         <MiniStat
           label="Negative"
           value={score.negative_count}
           color="#EF4444"
           icon="📉"
         />
-        <div className="h-10 w-px bg-slate-700/50" />
+        <div className="h-10 w-px bg-gray-200" />
         <MiniStat
           label="Neutral"
           value={score.neutral_count}
@@ -254,9 +254,9 @@ export default function ReputationScoreCard({
       </div>
 
       {/* Total */}
-      <p className="text-xs text-slate-500">
+      <p className="text-xs text-gray-500">
         Based on{" "}
-        <span className="text-slate-300 font-semibold">
+        <span className="text-gray-700 font-semibold">
           {score.total_count.toLocaleString()}
         </span>{" "}
         posts · {(score.negative_ratio * 100).toFixed(1)}% negative ratio

@@ -54,8 +54,8 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   const icon = platformIcon(label ?? "");
 
   return (
-    <div className="bg-slate-800 border border-slate-600/50 rounded-lg px-3 py-2.5 shadow-xl text-xs min-w-[170px]">
-      <p className="text-slate-300 font-semibold mb-2">
+    <div className="bg-white border border-gray-200 rounded-lg px-3 py-2.5 shadow-lg text-xs min-w-[170px]">
+      <p className="text-gray-700 font-semibold mb-2">
         {icon} {label}
       </p>
       {payload.map((entry) => {
@@ -70,18 +70,18 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
                 className="h-2 w-2 rounded-sm flex-shrink-0"
                 style={{ background: entry.color }}
               />
-              <span className="text-slate-400 capitalize">{entry.name}</span>
+              <span className="text-gray-500 capitalize">{entry.name}</span>
             </span>
             <span className="font-bold tabular-nums" style={{ color: entry.color }}>
               {entry.value.toLocaleString()}{" "}
-              <span className="text-slate-500 font-normal">({pct}%)</span>
+              <span className="text-gray-500 font-normal">({pct}%)</span>
             </span>
           </div>
         );
       })}
-      <div className="border-t border-slate-600/50 mt-2 pt-2 flex justify-between">
-        <span className="text-slate-500">Total</span>
-        <span className="font-bold text-slate-300 tabular-nums">
+      <div className="border-t border-gray-200 mt-2 pt-2 flex justify-between">
+        <span className="text-gray-500">Total</span>
+        <span className="font-bold text-gray-700 tabular-nums">
           {total.toLocaleString()}
         </span>
       </div>
@@ -114,9 +114,9 @@ function ChartSkeleton() {
     <div className="w-full h-full flex flex-col gap-4 animate-pulse p-4">
       {Array.from({ length: 4 }).map((_, i) => (
         <div key={i} className="flex items-center gap-3">
-          <div className="h-3 w-20 bg-slate-700/50 rounded" />
+          <div className="h-3 w-20 bg-gray-100 rounded" />
           <div
-            className="h-7 bg-slate-700/50 rounded"
+            className="h-7 bg-gray-100 rounded"
             style={{ width: `${40 + i * 15}%` }}
           />
         </div>

@@ -63,9 +63,9 @@ function Th({ label, sortKey, current, direction, onSort, className = "" }: ThPr
   const isActive = sortKey && current === sortKey;
   return (
     <th
-      className={`px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-400 whitespace-nowrap select-none ${
+      className={`px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500 whitespace-nowrap select-none ${
         sortKey
-          ? "cursor-pointer hover:text-white transition-colors"
+          ? "cursor-pointer hover:text-gray-900 transition-colors"
           : ""
       } ${className}`}
       onClick={() => sortKey && onSort(sortKey)}
@@ -73,7 +73,7 @@ function Th({ label, sortKey, current, direction, onSort, className = "" }: ThPr
       <span className="flex items-center gap-1">
         {label}
         {sortKey && (
-          <span className={isActive ? "text-blue-400" : "text-slate-600"}>
+          <span className={isActive ? "text-orange-500" : "text-gray-400"}>
             {isActive ? (direction === "desc" ? "↓" : "↑") : "⇅"}
           </span>
         )}
@@ -85,7 +85,7 @@ function Th({ label, sortKey, current, direction, onSort, className = "" }: ThPr
 // ── Confidence badge ──────────────────────────────────────────────────────────
 
 function ConfidenceBadge({ value }: { value: number | null }) {
-  if (value === null) return <span className="text-slate-500">—</span>;
+  if (value === null) return <span className="text-gray-500">—</span>;
   const pct = Math.round(value * 100);
   const high = pct >= 80;
   return (
@@ -105,10 +105,10 @@ function ConfidenceBadge({ value }: { value: number | null }) {
 
 function SkeletonRow() {
   return (
-    <tr className="border-t border-slate-700/40 animate-pulse">
+    <tr className="border-t border-gray-200 animate-pulse">
       {Array.from({ length: 7 }).map((_, i) => (
         <td key={i} className="px-3 py-3">
-          <div className="h-3 bg-slate-700/50 rounded w-full" />
+          <div className="h-3 bg-gray-100 rounded w-full" />
         </td>
       ))}
     </tr>
@@ -159,14 +159,14 @@ export default function TopNegativePostsList({
       {/* Controls */}
       <div className="flex items-center justify-between gap-3 flex-wrap">
         <div className="flex items-center gap-2">
-          <label className="text-xs text-slate-400 font-medium">Platform:</label>
+          <label className="text-xs text-gray-500 font-medium">Platform:</label>
           <select
             value={platformFilter}
             onChange={(e) => {
               setPlatformFilter(e.target.value);
               setPage(1);
             }}
-            className="bg-slate-800 border border-slate-600/50 text-slate-300 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-blue-500 capitalize"
+            className="bg-gray-50 border border-gray-300 text-gray-700 text-xs rounded-lg px-3 py-1.5 focus:outline-none focus:ring-1 focus:ring-orange-400 capitalize"
           >
             {ALL_PLATFORMS.map((p) => (
               <option key={p} value={p}>
@@ -175,15 +175,15 @@ export default function TopNegativePostsList({
             ))}
           </select>
         </div>
-        <span className="text-xs text-slate-500">
+        <span className="text-xs text-gray-500">
           {total.toLocaleString()} negative post{total !== 1 ? "s" : ""}
         </span>
       </div>
 
       {/* Table */}
-      <div className="overflow-x-auto rounded-xl border border-slate-700/50">
+      <div className="overflow-x-auto rounded-xl border border-gray-200">
         <table className="w-full text-sm">
-          <thead className="bg-slate-800/80">
+          <thead className="bg-gray-50">
             <tr>
               <Th
                 label="Platform"
@@ -197,7 +197,7 @@ export default function TopNegativePostsList({
                 direction={sortDir}
                 onSort={handleSort}
               />
-              <th className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+              <th className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
                 Content
               </th>
               <Th
@@ -221,12 +221,12 @@ export default function TopNegativePostsList({
                 direction={sortDir}
                 onSort={handleSort}
               />
-              <th className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-slate-400">
+              <th className="px-3 py-2.5 text-left text-xs font-semibold uppercase tracking-wide text-gray-500">
                 Link
               </th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-slate-700/30">
+          <tbody className="divide-y divide-gray-100">
             {isLoading &&
               Array.from({ length: 8 }).map((_, i) => <SkeletonRow key={i} />)}
 
@@ -234,7 +234,7 @@ export default function TopNegativePostsList({
               <tr>
                 <td
                   colSpan={7}
-                  className="px-4 py-8 text-center text-red-400 text-sm"
+                  className="px-4 py-8 text-center text-red-500 text-sm"
                 >
                   ⚠ Failed to load posts. Please try again.
                 </td>
@@ -245,7 +245,7 @@ export default function TopNegativePostsList({
               <tr>
                 <td
                   colSpan={7}
-                  className="px-4 py-12 text-center text-slate-500 text-sm"
+                  className="px-4 py-12 text-center text-gray-500 text-sm"
                 >
                   <div className="flex flex-col items-center gap-2">
                     <span className="text-2xl">✅</span>
@@ -273,13 +273,13 @@ export default function TopNegativePostsList({
                 return (
                   <tr
                     key={post.id}
-                    className="bg-slate-900/40 hover:bg-slate-800/60 transition-colors"
+                    className="bg-white hover:bg-gray-50 transition-colors"
                   >
                     {/* Platform */}
                     <td className="px-3 py-3 whitespace-nowrap">
-                      <span className="flex items-center gap-1.5 text-slate-300 text-xs">
+                      <span className="flex items-center gap-1.5 text-gray-700 text-xs">
                         <span>{platformIcon(post.platform)}</span>
-                        <span className="capitalize text-slate-400">
+                        <span className="capitalize text-gray-500">
                           {post.platform}
                         </span>
                       </span>
@@ -287,11 +287,11 @@ export default function TopNegativePostsList({
 
                     {/* Author */}
                     <td className="px-3 py-3 whitespace-nowrap">
-                      <span className="text-slate-200 text-xs font-medium">
+                      <span className="text-gray-800 text-xs font-medium">
                         {post.author_name}
                       </span>
                       {post.followers_count > 0 && (
-                        <p className="text-slate-500 text-[11px]">
+                        <p className="text-gray-500 text-[11px]">
                           {post.followers_count >= 1000
                             ? `${(post.followers_count / 1000).toFixed(1)}k`
                             : post.followers_count}{" "}
@@ -303,7 +303,7 @@ export default function TopNegativePostsList({
                     {/* Content */}
                     <td className="px-3 py-3 max-w-[280px]">
                       <p
-                        className="text-slate-300 text-xs leading-relaxed"
+                        className="text-gray-700 text-xs leading-relaxed"
                         title={post.content}
                       >
                         {truncated}
@@ -316,7 +316,7 @@ export default function TopNegativePostsList({
                     </td>
 
                     {/* Likes */}
-                    <td className="px-3 py-3 whitespace-nowrap text-xs text-slate-400 tabular-nums">
+                    <td className="px-3 py-3 whitespace-nowrap text-xs text-gray-500 tabular-nums">
                       {post.likes_count > 0
                         ? post.likes_count >= 1000
                           ? `${(post.likes_count / 1000).toFixed(1)}k`
@@ -325,7 +325,7 @@ export default function TopNegativePostsList({
                     </td>
 
                     {/* Date */}
-                    <td className="px-3 py-3 whitespace-nowrap text-xs text-slate-400">
+                    <td className="px-3 py-3 whitespace-nowrap text-xs text-gray-500">
                       {dateStr}
                     </td>
 
@@ -336,12 +336,12 @@ export default function TopNegativePostsList({
                           href={post.url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-blue-400 hover:text-blue-300 text-xs transition-colors"
+                          className="inline-flex items-center gap-1 text-orange-500 hover:text-orange-600 text-xs transition-colors"
                         >
                           ↗ View
                         </a>
                       ) : (
-                        <span className="text-slate-600 text-xs">—</span>
+                        <span className="text-gray-400 text-xs">—</span>
                       )}
                     </td>
                   </tr>
@@ -353,7 +353,7 @@ export default function TopNegativePostsList({
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-between text-xs text-slate-400">
+        <div className="flex items-center justify-between text-xs text-gray-500">
           <span>
             Page {page} of {totalPages}
           </span>
@@ -361,14 +361,14 @@ export default function TopNegativePostsList({
             <button
               disabled={page <= 1}
               onClick={() => setPage((p) => Math.max(1, p - 1))}
-              className="px-3 py-1.5 rounded bg-slate-800 border border-slate-600/50 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="px-3 py-1.5 rounded bg-gray-50 border border-gray-300 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               ← Prev
             </button>
             <button
               disabled={page >= totalPages}
               onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-              className="px-3 py-1.5 rounded bg-slate-800 border border-slate-600/50 hover:bg-slate-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
+              className="px-3 py-1.5 rounded bg-gray-50 border border-gray-300 hover:bg-gray-100 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
             >
               Next →
             </button>

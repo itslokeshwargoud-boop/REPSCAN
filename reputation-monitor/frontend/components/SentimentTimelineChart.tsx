@@ -28,12 +28,12 @@ function ChartSkeleton() {
         {Array.from({ length: 12 }).map((_, i) => (
           <div
             key={i}
-            className="flex-1 bg-slate-700/50 rounded-sm"
+            className="flex-1 bg-gray-100 rounded-sm"
             style={{ height: `${30 + Math.random() * 60}%` }}
           />
         ))}
       </div>
-      <div className="h-3 w-48 bg-slate-700/50 rounded mx-auto" />
+      <div className="h-3 w-48 bg-gray-100 rounded mx-auto" />
     </div>
   );
 }
@@ -66,8 +66,8 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
   const total = payload.reduce((sum, p) => sum + (p.value ?? 0), 0);
 
   return (
-    <div className="bg-slate-800 border border-slate-600/50 rounded-lg px-3 py-2.5 shadow-xl text-xs min-w-[160px]">
-      <p className="text-slate-400 font-medium mb-2">{formattedLabel}</p>
+    <div className="bg-white border border-gray-200 rounded-lg px-3 py-2.5 shadow-lg text-xs min-w-[160px]">
+      <p className="text-gray-500 font-medium mb-2">{formattedLabel}</p>
       {payload.map((entry) => (
         <div key={entry.name} className="flex items-center justify-between gap-4 mb-1">
           <span className="flex items-center gap-1.5">
@@ -75,16 +75,16 @@ function CustomTooltip({ active, payload, label }: CustomTooltipProps) {
               className="h-2 w-2 rounded-full flex-shrink-0"
               style={{ background: entry.color }}
             />
-            <span className="text-slate-300 capitalize">{entry.name}</span>
+            <span className="text-gray-700 capitalize">{entry.name}</span>
           </span>
           <span className="font-bold tabular-nums" style={{ color: entry.color }}>
             {entry.value.toLocaleString()}
           </span>
         </div>
       ))}
-      <div className="border-t border-slate-600/50 mt-2 pt-2 flex justify-between">
-        <span className="text-slate-500">Total</span>
-        <span className="font-bold text-slate-300 tabular-nums">
+      <div className="border-t border-gray-200 mt-2 pt-2 flex justify-between">
+        <span className="text-gray-500">Total</span>
+        <span className="font-bold text-gray-700 tabular-nums">
           {total.toLocaleString()}
         </span>
       </div>

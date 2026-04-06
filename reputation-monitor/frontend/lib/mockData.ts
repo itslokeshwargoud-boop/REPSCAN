@@ -16,6 +16,7 @@ export interface RHIMetric {
   tooltip: string;         // plain-English explanation
   unit: string;            // "%", "/100", "pts", etc.
   higherIsBetter: boolean;
+  displayMax: number;      // upper bound for progress bar normalization (e.g. 100 or 10 for engagement rate)
 }
 
 export interface RHIScore {
@@ -82,6 +83,7 @@ function buildRanaData(): ClientData {
         tooltip: "This shows how people feel about you online. A higher percentage means more people have positive things to say.",
         unit: "%",
         higherIsBetter: true,
+        displayMax: 100,
       },
       {
         key: "media",
@@ -96,6 +98,7 @@ function buildRanaData(): ClientData {
         tooltip: "How often your brand appears in news articles and online publications. Higher is better.",
         unit: "/100",
         higherIsBetter: true,
+        displayMax: 100,
       },
       {
         key: "engagement",
@@ -110,6 +113,7 @@ function buildRanaData(): ClientData {
         tooltip: "The percentage of people who interact with your content — likes, shares, comments. More interaction means people care about your brand.",
         unit: "%",
         higherIsBetter: true,
+        displayMax: 10,
       },
       {
         key: "trust",
@@ -124,6 +128,7 @@ function buildRanaData(): ClientData {
         tooltip: "A measure of how much people trust your brand based on reviews, mentions, and public feedback.",
         unit: "pts",
         higherIsBetter: true,
+        displayMax: 100,
       },
       {
         key: "peer",
@@ -138,6 +143,7 @@ function buildRanaData(): ClientData {
         tooltip: "How your brand is regarded by industry peers, partners, and competitors. Higher scores mean strong respect in your field.",
         unit: "/100",
         higherIsBetter: true,
+        displayMax: 100,
       },
       {
         key: "risk",
@@ -152,6 +158,7 @@ function buildRanaData(): ClientData {
         tooltip: "The level of negative risk your brand is currently facing online. Lower is better — it means fewer threats or controversies.",
         unit: "%",
         higherIsBetter: false,
+        displayMax: 100,
       },
       {
         key: "growth",
@@ -166,6 +173,7 @@ function buildRanaData(): ClientData {
         tooltip: "How quickly your brand is growing its presence and reach online. 'High' means you are gaining momentum fast.",
         unit: "pts",
         higherIsBetter: true,
+        displayMax: 100,
       },
       {
         key: "influencer",
@@ -180,6 +188,7 @@ function buildRanaData(): ClientData {
         tooltip: "How influential people who talk about your brand are. A higher score means key opinion leaders are mentioning you positively.",
         unit: "pts",
         higherIsBetter: true,
+        displayMax: 100,
       },
     ],
     trendData: [
@@ -247,6 +256,7 @@ function buildKimsData(): ClientData {
         tooltip: "This shows how people feel about you online. A higher percentage means more people have positive things to say.",
         unit: "%",
         higherIsBetter: true,
+        displayMax: 100,
       },
       {
         key: "media",
@@ -261,6 +271,7 @@ function buildKimsData(): ClientData {
         tooltip: "How often your brand appears in news articles and online publications. Higher is better.",
         unit: "/100",
         higherIsBetter: true,
+        displayMax: 100,
       },
       {
         key: "engagement",
@@ -275,6 +286,7 @@ function buildKimsData(): ClientData {
         tooltip: "The percentage of people who interact with your content. More interaction means people care about your brand.",
         unit: "%",
         higherIsBetter: true,
+        displayMax: 10,
       },
       {
         key: "trust",
@@ -289,6 +301,7 @@ function buildKimsData(): ClientData {
         tooltip: "A measure of how much people trust your brand based on reviews, mentions, and public feedback.",
         unit: "pts",
         higherIsBetter: true,
+        displayMax: 100,
       },
       {
         key: "peer",
@@ -303,6 +316,7 @@ function buildKimsData(): ClientData {
         tooltip: "How your brand is regarded by industry peers, partners, and competitors.",
         unit: "/100",
         higherIsBetter: true,
+        displayMax: 100,
       },
       {
         key: "risk",
@@ -317,6 +331,7 @@ function buildKimsData(): ClientData {
         tooltip: "The level of negative risk your brand is currently facing online. Lower is better.",
         unit: "%",
         higherIsBetter: false,
+        displayMax: 100,
       },
       {
         key: "growth",
@@ -331,6 +346,7 @@ function buildKimsData(): ClientData {
         tooltip: "How quickly your brand is growing its presence and reach online.",
         unit: "pts",
         higherIsBetter: true,
+        displayMax: 100,
       },
       {
         key: "influencer",
@@ -345,6 +361,7 @@ function buildKimsData(): ClientData {
         tooltip: "How influential people who talk about your brand are.",
         unit: "pts",
         higherIsBetter: true,
+        displayMax: 100,
       },
     ],
     trendData: [
@@ -413,6 +430,7 @@ function buildPeddiData(): ClientData {
         tooltip: "This shows how people feel about you online. A higher percentage means more people have positive things to say.",
         unit: "%",
         higherIsBetter: true,
+        displayMax: 100,
       },
       {
         key: "media",
@@ -427,6 +445,7 @@ function buildPeddiData(): ClientData {
         tooltip: "How often your brand appears in news articles and online publications. Higher is better.",
         unit: "/100",
         higherIsBetter: true,
+        displayMax: 100,
       },
       {
         key: "engagement",
@@ -441,6 +460,7 @@ function buildPeddiData(): ClientData {
         tooltip: "The percentage of people who interact with your content. More interaction means people care about your brand.",
         unit: "%",
         higherIsBetter: true,
+        displayMax: 10,
       },
       {
         key: "trust",
@@ -455,6 +475,7 @@ function buildPeddiData(): ClientData {
         tooltip: "A measure of how much people trust your brand based on reviews, mentions, and public feedback.",
         unit: "pts",
         higherIsBetter: true,
+        displayMax: 100,
       },
       {
         key: "peer",
@@ -469,6 +490,7 @@ function buildPeddiData(): ClientData {
         tooltip: "How your brand is regarded by industry peers, partners, and competitors.",
         unit: "/100",
         higherIsBetter: true,
+        displayMax: 100,
       },
       {
         key: "risk",
@@ -483,6 +505,7 @@ function buildPeddiData(): ClientData {
         tooltip: "The level of negative risk your brand is currently facing online. Lower is better.",
         unit: "%",
         higherIsBetter: false,
+        displayMax: 100,
       },
       {
         key: "growth",
@@ -497,6 +520,7 @@ function buildPeddiData(): ClientData {
         tooltip: "How quickly your brand is growing its presence and reach online.",
         unit: "pts",
         higherIsBetter: true,
+        displayMax: 100,
       },
       {
         key: "influencer",
@@ -511,6 +535,7 @@ function buildPeddiData(): ClientData {
         tooltip: "How influential people who talk about your brand are.",
         unit: "pts",
         higherIsBetter: true,
+        displayMax: 100,
       },
     ],
     trendData: [

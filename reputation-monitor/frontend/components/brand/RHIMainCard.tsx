@@ -43,14 +43,16 @@ export default function RHIMainCard({ data }: RHIMainCardProps) {
   const cfg = STATUS_CONFIG[rhi.status];
   const trendPositive = rhi.trend >= 0;
 
-  // Compute mini RHI trend for sparkline
+  // Compute mini RHI trend for sparkline — returns numeric values for chart scaling
   const sparklineData = trendData.map((d) => ({
     date: d.date,
-    value: (
-      d.sentiment * SPARKLINE_SENTIMENT_COEFF +
-      d.engagement * SPARKLINE_ENGAGEMENT_COEFF +
-      d.mediaPresence * SPARKLINE_MEDIA_COEFF
-    ).toFixed(1),
+    value: parseFloat(
+      (
+        d.sentiment * SPARKLINE_SENTIMENT_COEFF +
+        d.engagement * SPARKLINE_ENGAGEMENT_COEFF +
+        d.mediaPresence * SPARKLINE_MEDIA_COEFF
+      ).toFixed(1)
+    ),
   }));
 
   // Show formula breakdown

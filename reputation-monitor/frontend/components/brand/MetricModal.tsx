@@ -16,12 +16,15 @@ const STATUS_CONFIG = {
 // Simulates 5% monthly growth rate to reconstruct historical values leading to current
 const MONTHLY_DECAY_RATE = 0.05;
 
-// Simulated historical data for drill-down
+// Simulated historical data for drill-down.
+// Generates ascending values from (currentValue * 0.7) to currentValue over 7 months,
+// ensuring the chart always shows a sensible upward or flat trend.
 function generateHistory(currentValue: number): Array<{ month: string; value: number }> {
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"];
+  const startValue = currentValue * (1 - MONTHLY_DECAY_RATE * (months.length - 1));
   return months.map((month, i) => ({
     month,
-    value: Math.max(0, currentValue - (months.length - 1 - i) * (currentValue * MONTHLY_DECAY_RATE)),
+    value: parseFloat(Math.max(0, startValue + i * currentValue * MONTHLY_DECAY_RATE).toFixed(1)),
   }));
 }
 

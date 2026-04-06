@@ -37,7 +37,7 @@ function MetricCard({ metric, onClick }: { metric: RHIMetric; onClick: () => voi
   const [showTooltip, setShowTooltip] = useState(false);
   const cfg = STATUS_CONFIG[metric.status];
   const changePositive = metric.higherIsBetter ? metric.change >= 0 : metric.change <= 0;
-  const barWidth = `${Math.min(100, Math.max(0, metric.value))}%`;
+  const barWidth = `${Math.min(100, Math.max(0, (metric.value / metric.displayMax) * 100))}%`;
 
   return (
     <button

@@ -2,6 +2,7 @@ reputation-monitor/frontend/.next/
 reputation-monitor/frontend/node_modules/
 reputation-monitor/frontend/tsconfig.tsbuildinfo
 reputation-monitor/frontend/package-lock.json
+reputation-monitor/frontend/.env.local
 __pycache__/
 *.py[cod]
 *.pyc

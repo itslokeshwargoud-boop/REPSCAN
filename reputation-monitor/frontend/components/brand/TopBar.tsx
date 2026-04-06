@@ -1,4 +1,9 @@
-import { ClientId, getAllClientSummaries } from "@/lib/mockData";
+import type { ClientId } from "@/lib/mockData";
+
+interface ClientSummary {
+  clientId: ClientId;
+  clientName: string;
+}
 
 interface TopBarProps {
   activeClient: ClientId;
@@ -6,6 +11,7 @@ interface TopBarProps {
   dateRange: "30d" | "90d" | "1y";
   onDateRangeChange: (range: "30d" | "90d" | "1y") => void;
   onExport: () => void;
+  summaries: ClientSummary[];
 }
 
 export default function TopBar({
@@ -14,8 +20,8 @@ export default function TopBar({
   dateRange,
   onDateRangeChange,
   onExport,
+  summaries,
 }: TopBarProps) {
-  const summaries = getAllClientSummaries();
   const DATE_OPTS: { label: string; value: "30d" | "90d" | "1y" }[] = [
     { label: "30 Days", value: "30d" },
     { label: "90 Days", value: "90d" },

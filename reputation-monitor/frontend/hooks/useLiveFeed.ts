@@ -23,7 +23,7 @@ export interface LiveStats {
   total_last_hour: number;
 }
 
-const WS_BASE = process.env.NEXT_PUBLIC_WS_URL ?? "ws://localhost:8000";
+const WS_BASE = process.env.NEXT_PUBLIC_WS_URL ?? "";
 const MAX_POSTS = 200;
 const RECONNECT_DELAY_MS = 5000;
 

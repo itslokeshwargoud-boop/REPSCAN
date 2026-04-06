@@ -13,12 +13,15 @@ const STATUS_CONFIG = {
   risky: { color: "text-red-700", bg: "bg-red-50", badge: "bg-red-100 text-red-700", bar: "bg-red-500" },
 };
 
+// Simulates 5% monthly growth rate to reconstruct historical values leading to current
+const MONTHLY_DECAY_RATE = 0.05;
+
 // Simulated historical data for drill-down
 function generateHistory(currentValue: number): Array<{ month: string; value: number }> {
   const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul"];
   return months.map((month, i) => ({
     month,
-    value: Math.max(0, currentValue - (months.length - 1 - i) * (currentValue * 0.05)),
+    value: Math.max(0, currentValue - (months.length - 1 - i) * (currentValue * MONTHLY_DECAY_RATE)),
   }));
 }
 

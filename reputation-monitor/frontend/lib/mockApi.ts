@@ -56,13 +56,10 @@ export async function fetchClientDashboard(
   tweetCount = 50,
   youtubeCount = 30
 ): Promise<ApiResponse<ClientData>> {
-  const { result: tweets, retriesUsed } = await withRetry(
-    () => fetchTweets(clientId, tweetCount)
-  );
-
-  const { result: youtube } = await withRetry(
-    () => fetchYouTube(youtubeCount)
-  );
+  const [{ result: tweets, retriesUsed }, { result: youtube }] = await Promise.all([
+    withRetry(() => fetchTweets(clientId, tweetCount)),
+    withRetry(() => fetchYouTube(youtubeCount)),
+  ]);
 
   const clientData = getClientData(clientId);
 

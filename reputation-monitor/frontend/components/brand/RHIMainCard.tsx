@@ -32,6 +32,12 @@ const STATUS_CONFIG = {
   },
 };
 
+// Coefficients for the sparkline approximation of the RHI trend.
+// These are visual-only weights and do not need to match the exact RHI formula.
+const SPARKLINE_SENTIMENT_COEFF = 0.35;
+const SPARKLINE_ENGAGEMENT_COEFF = 5;
+const SPARKLINE_MEDIA_COEFF = 0.30;
+
 export default function RHIMainCard({ data }: RHIMainCardProps) {
   const { rhi, trendData, metrics } = data;
   const cfg = STATUS_CONFIG[rhi.status];
@@ -40,7 +46,11 @@ export default function RHIMainCard({ data }: RHIMainCardProps) {
   // Compute mini RHI trend for sparkline
   const sparklineData = trendData.map((d) => ({
     date: d.date,
-    value: (d.sentiment * 0.35 + d.engagement * 5 + d.mediaPresence * 0.30).toFixed(1),
+    value: (
+      d.sentiment * SPARKLINE_SENTIMENT_COEFF +
+      d.engagement * SPARKLINE_ENGAGEMENT_COEFF +
+      d.mediaPresence * SPARKLINE_MEDIA_COEFF
+    ).toFixed(1),
   }));
 
   // Show formula breakdown

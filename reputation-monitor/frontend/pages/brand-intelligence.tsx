@@ -40,6 +40,10 @@ export default function BrandIntelligencePage() {
     setActiveClient(id);
   }
 
+  function generateExportFilename(clientName: string, date: Date): string {
+    return `brand-intelligence-${clientName.toLowerCase()}-${date.toISOString().split("T")[0]}.json`;
+  }
+
   function handleExport() {
     if (!clientData) return;
     const exportData = {
@@ -60,7 +64,7 @@ export default function BrandIntelligencePage() {
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `brand-intelligence-${clientData.clientName.toLowerCase()}-${new Date().toISOString().split("T")[0]}.json`;
+    a.download = generateExportFilename(clientData.clientName, new Date());
     a.click();
     URL.revokeObjectURL(url);
   }

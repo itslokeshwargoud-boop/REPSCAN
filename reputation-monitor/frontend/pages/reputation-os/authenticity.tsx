@@ -13,6 +13,7 @@ import ROLayout from "@/components/reputation-os/ROLayout";
 import ROCard from "@/components/reputation-os/ROCard";
 import ROBadge from "@/components/reputation-os/ROBadge";
 import ROMetricCard from "@/components/reputation-os/ROMetricCard";
+import ROProofLink from "@/components/reputation-os/ROProofLink";
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -208,7 +209,8 @@ function AuthenticityContent() {
                   <th className="pb-3 pr-4 font-medium">Pattern</th>
                   <th className="pb-3 pr-4 font-medium">Count</th>
                   <th className="pb-3 pr-4 font-medium">Severity</th>
-                  <th className="pb-3 font-medium">Frequency</th>
+                  <th className="pb-3 pr-4 font-medium">Frequency</th>
+                  <th className="pb-3 font-medium">Proof</th>
                 </tr>
               </thead>
               <tbody>
@@ -241,6 +243,9 @@ function AuthenticityContent() {
                           }}
                         />
                       </div>
+                    </td>
+                    <td className="py-3">
+                      <ROProofLink href={p.proof_url} label="View example" />
                     </td>
                   </tr>
                 ))}

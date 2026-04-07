@@ -13,6 +13,7 @@ import {
 import ROLayout from "@/components/reputation-os/ROLayout";
 import ROCard from "@/components/reputation-os/ROCard";
 import ROBadge from "@/components/reputation-os/ROBadge";
+import ROProofLink from "@/components/reputation-os/ROProofLink";
 
 // ---------------------------------------------------------------------------
 // Types & constants
@@ -188,6 +189,11 @@ function ActionsContent() {
                   <p className="text-xs font-medium text-emerald-400">
                     {action.expected_impact}
                   </p>
+                </div>
+
+                {/* Proof link */}
+                <div className="mt-3 pt-3 border-t border-slate-800/40">
+                  <ROProofLink href={action.proof_url} label="View source evidence" />
                 </div>
               </div>
             ))

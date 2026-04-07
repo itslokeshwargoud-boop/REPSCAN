@@ -25,6 +25,7 @@ import {
 import ROLayout from "@/components/reputation-os/ROLayout";
 import ROCard from "@/components/reputation-os/ROCard";
 import ROBadge from "@/components/reputation-os/ROBadge";
+import ROProofLink from "@/components/reputation-os/ROProofLink";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -256,6 +257,7 @@ function MoodMapContent() {
                   <th className="px-3 py-2">Score</th>
                   <th className="px-3 py-2">Comments</th>
                   <th className="px-3 py-2">Spike</th>
+                  <th className="px-3 py-2">Proof</th>
                 </tr>
               </thead>
               <tbody>
@@ -292,6 +294,9 @@ function MoodMapContent() {
                       ) : (
                         <span className="text-slate-600">—</span>
                       )}
+                    </td>
+                    <td className="px-3 py-2">
+                      <ROProofLink href={seg.proof_url} />
                     </td>
                   </tr>
                 ))}

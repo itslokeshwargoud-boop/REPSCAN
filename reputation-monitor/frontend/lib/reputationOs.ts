@@ -285,46 +285,46 @@ const ALERT_TEMPLATES: Record<
     {
       type: "velocity_surge",
       severity: "low",
-      message: "Mentions increased 15% in the last hour",
+      message: "Vijay Deverakonda mentions up 15% in the last hour",
       details:
-        "Organic growth detected — new product review gaining traction on tech channels.",
+        "Organic buzz detected — his latest film teaser is trending on YouTube and Twitter in Telugu-speaking regions.",
     },
     {
       type: "narrative_shift",
       severity: "medium",
-      message: "New narrative cluster emerging around sustainability",
+      message: "New narrative cluster around Vijay Deverakonda's next film",
       details:
-        "3 influencers started discussing your environmental commitments. Sentiment is 78% positive.",
+        "3 entertainment influencers started discussing his upcoming pan-India project. Sentiment is 78% positive.",
     },
   ],
   prabhasx: [
     {
       type: "negative_spike",
       severity: "critical",
-      message: "Negative mentions surged 340% in 2 hours",
+      message: "Negative mentions about Prabhas surged 340% in 2 hours",
       details:
-        "A viral thread is amplifying customer complaints about delayed deliveries. 12k impressions and growing.",
+        "A viral thread is amplifying criticism of his latest film's box office performance. 12k impressions and growing.",
     },
     {
       type: "bot_activity",
       severity: "high",
-      message: "Coordinated bot network detected",
+      message: "Coordinated bot network targeting Prabhas detected",
       details:
-        "147 accounts with matching creation dates are posting identical negative reviews. Confidence: 94%.",
+        "147 accounts with matching creation dates are posting identical negative comments about his recent release. Confidence: 94%.",
     },
     {
       type: "reputation_drop",
       severity: "high",
-      message: "Reputation score dropped 8 points in 24h",
+      message: "Prabhas reputation score dropped 8 points in 24h",
       details:
-        "Primary drivers: negative sentiment spike (+23%) and declining engagement quality (-11%).",
+        "Primary drivers: negative film reviews (+23% negative sentiment) and declining fan engagement quality (-11%).",
     },
     {
       type: "velocity_surge",
       severity: "medium",
-      message: "Mention velocity tripled compared to baseline",
+      message: "Prabhas mention velocity tripled compared to baseline",
       details:
-        "Rate jumped from 29/hr to 87/hr. 62% of new mentions carry negative sentiment.",
+        "Rate jumped from 29/hr to 87/hr. 62% of new mentions carry negative sentiment around box office numbers.",
     },
   ],
   default: [
@@ -369,92 +369,92 @@ export async function fetchAlerts(tenantId: string): Promise<Alert[]> {
 const NARRATIVE_SETS: Record<string, NarrativeCluster[]> = {
   vijayx: [
     {
-      label: "Product Innovation",
+      label: "Acting & Film Performances",
       percentage: 38,
       sentiment: "positive",
       sample_texts: [
-        "Their new AI features are game-changing",
-        "Finally a product that delivers on promises",
-        "Best release this quarter from any competitor",
+        "Vijay Deverakonda was phenomenal in his latest film — raw emotion and powerful screen presence",
+        "Nobody in Telugu cinema does intense roles like Vijay Deverakonda right now",
+        "His range from Arjun Reddy to family entertainer roles is incredible",
       ],
       trend: "growing",
     },
     {
-      label: "Customer Experience",
+      label: "Fan Community & Social Media",
       percentage: 27,
       sentiment: "positive",
       sample_texts: [
-        "Support team resolved my issue in under 10 minutes",
-        "Onboarding was seamless — great UX",
-        "Impressed with the response time",
+        "Vijay Deverakonda's Instagram live had over 500k viewers — the fan base is massive",
+        "The Rowdy brand merchandise sold out in minutes, fans are super loyal",
+        "His interactions with fans at events are so genuine and down-to-earth",
       ],
       trend: "stable",
     },
     {
-      label: "Pricing Discussion",
+      label: "Upcoming Projects & Collaborations",
       percentage: 20,
       sentiment: "mixed",
       sample_texts: [
-        "Premium tier is worth it for enterprise",
-        "Wish there was a free tier for startups",
-        "Competitive pricing compared to alternatives",
+        "Excited about Vijay Deverakonda's next film with the new director",
+        "Hope his Bollywood projects live up to the Telugu originals",
+        "The pan-India strategy is risky but could pay off big time",
       ],
       trend: "stable",
     },
     {
-      label: "Industry Leadership",
+      label: "Style & Public Image",
       percentage: 15,
       sentiment: "positive",
       sample_texts: [
-        "Setting the standard for the industry",
-        "Thought leadership content is top-notch",
-        "Conference keynote was outstanding",
+        "Vijay Deverakonda's fashion sense is setting trends across South India",
+        "His Rowdy brand is becoming a lifestyle statement for young fans",
+        "Always keeps it real — no pretence, just authenticity",
       ],
       trend: "growing",
     },
   ],
   prabhasx: [
     {
-      label: "Delivery Complaints",
+      label: "Box Office & Film Reception",
       percentage: 34,
       sentiment: "negative",
       sample_texts: [
-        "Still waiting after 3 weeks — no updates",
-        "Worst delivery experience I have ever had",
-        "Customer support keeps giving generic responses",
+        "Prabhas's recent film underperformed at the box office despite massive hype",
+        "The storyline was weak — expected much more from a star of his calibre",
+        "Audience reviews are harsh, especially after the Baahubali benchmark",
       ],
       trend: "growing",
     },
     {
-      label: "Product Quality Concerns",
+      label: "Film Quality Concerns",
       percentage: 24,
       sentiment: "negative",
       sample_texts: [
-        "Received a damaged item for the second time",
-        "Quality has gone downhill since last year",
-        "Not worth the price given recent issues",
+        "Prabhas needs to pick better scripts — the VFX alone cannot carry a film",
+        "The dubbing quality in the Hindi version was disappointing",
+        "Too many high-budget flops in a row — the magic seems to be fading",
       ],
       trend: "growing",
     },
     {
-      label: "Brand Loyalty",
+      label: "Loyal Fan Base",
       percentage: 22,
       sentiment: "positive",
       sample_texts: [
-        "Been a customer for 5 years and still believe in them",
-        "They will bounce back — great fundamentals",
-        "Long-term value is still there",
+        "Prabhas will always be Baahubali for us — one bad film does not change that",
+        "True fans stand by him — he will bounce back stronger",
+        "His dedication to physically demanding roles is still unmatched",
       ],
       trend: "declining",
     },
     {
-      label: "Competitor Comparisons",
+      label: "Industry Comparisons",
       percentage: 20,
       sentiment: "mixed",
       sample_texts: [
-        "Switching to their competitor next month",
-        "Still better than most alternatives in the space",
-        "Feature-wise they lead, but execution is lagging",
+        "Other Telugu stars are outshining Prabhas at the box office lately",
+        "Still the biggest pan-India star from Tollywood despite recent setbacks",
+        "The competition from younger actors is getting fierce",
       ],
       trend: "stable",
     },
@@ -531,7 +531,7 @@ const INFLUENCER_SETS: Record<string, InfluencerSet> = {
   vijayx: {
     supporters: [
       {
-        username: "@techreviewer_pro",
+        username: "@tollywood_reviews",
         classification: "supporter",
         influence_score: 92,
         reach: 245_000,
@@ -541,7 +541,7 @@ const INFLUENCER_SETS: Record<string, InfluencerSet> = {
         avatar_color: "#22c55e",
       },
       {
-        username: "@saas_daily",
+        username: "@telugu_cinema_daily",
         classification: "supporter",
         influence_score: 85,
         reach: 182_000,
@@ -551,7 +551,7 @@ const INFLUENCER_SETS: Record<string, InfluencerSet> = {
         avatar_color: "#16a34a",
       },
       {
-        username: "@digital_insider",
+        username: "@rowdy_fanclub",
         classification: "supporter",
         influence_score: 78,
         reach: 97_000,
@@ -563,7 +563,7 @@ const INFLUENCER_SETS: Record<string, InfluencerSet> = {
     ],
     attackers: [
       {
-        username: "@honest_consumer",
+        username: "@film_critic_honest",
         classification: "attacker",
         influence_score: 61,
         reach: 53_000,
@@ -575,7 +575,7 @@ const INFLUENCER_SETS: Record<string, InfluencerSet> = {
     ],
     neutrals: [
       {
-        username: "@market_watch_ai",
+        username: "@entertainment_news_india",
         classification: "neutral",
         influence_score: 74,
         reach: 128_000,
@@ -585,7 +585,7 @@ const INFLUENCER_SETS: Record<string, InfluencerSet> = {
         avatar_color: "#a3a3a3",
       },
       {
-        username: "@industry_pulse",
+        username: "@south_film_tracker",
         classification: "neutral",
         influence_score: 68,
         reach: 91_000,
@@ -599,7 +599,7 @@ const INFLUENCER_SETS: Record<string, InfluencerSet> = {
   prabhasx: {
     supporters: [
       {
-        username: "@loyal_fan_2019",
+        username: "@prabhas_fan_forever",
         classification: "supporter",
         influence_score: 54,
         reach: 22_000,
@@ -611,7 +611,7 @@ const INFLUENCER_SETS: Record<string, InfluencerSet> = {
     ],
     attackers: [
       {
-        username: "@consumer_rights_now",
+        username: "@box_office_tracker",
         classification: "attacker",
         influence_score: 88,
         reach: 310_000,
@@ -621,7 +621,7 @@ const INFLUENCER_SETS: Record<string, InfluencerSet> = {
         avatar_color: "#dc2626",
       },
       {
-        username: "@expose_brands",
+        username: "@film_flop_watchdog",
         classification: "attacker",
         influence_score: 79,
         reach: 198_000,
@@ -631,7 +631,7 @@ const INFLUENCER_SETS: Record<string, InfluencerSet> = {
         avatar_color: "#ef4444",
       },
       {
-        username: "@viral_complaints",
+        username: "@tollywood_gossip",
         classification: "attacker",
         influence_score: 72,
         reach: 145_000,
@@ -643,7 +643,7 @@ const INFLUENCER_SETS: Record<string, InfluencerSet> = {
     ],
     neutrals: [
       {
-        username: "@ecommerce_analyst",
+        username: "@indian_cinema_analyst",
         classification: "neutral",
         influence_score: 81,
         reach: 167_000,
@@ -653,7 +653,7 @@ const INFLUENCER_SETS: Record<string, InfluencerSet> = {
         avatar_color: "#a3a3a3",
       },
       {
-        username: "@retail_insights",
+        username: "@south_media_digest",
         classification: "neutral",
         influence_score: 65,
         reach: 74_000,
@@ -906,9 +906,9 @@ export async function fetchMoodMap(
     overall_mood: p.overallMood,
     summary:
       tenantId === "vijayx"
-        ? "Audience sentiment is predominantly positive with occasional spikes around product announcements. Trust and joy are the dominant emotions across all segments."
+        ? "Fan sentiment for Vijay Deverakonda is predominantly positive with occasional spikes around film teasers and public appearances. Trust and joy are the dominant emotions across all segments."
         : tenantId === "prabhasx"
-          ? "Sentiment is volatile with frequent negative spikes driven by delivery-related complaints. Anger and frustration dominate recent segments."
+          ? "Sentiment around Prabhas is volatile with frequent negative spikes driven by box office performance concerns. Anger and frustration dominate recent segments following his latest release."
           : "Mixed sentiment with a slight positive lean. Audience mood is relatively stable with no significant spikes in the last 24 hours.",
   };
 }
@@ -922,10 +922,10 @@ const ACTION_SETS: Record<string, ActionRecommendation[]> = {
     {
       id: "act-v-1",
       priority: "medium",
-      category: "Engagement",
-      title: "Amplify positive influencer content",
+      category: "Fan Engagement",
+      title: "Amplify positive fan and film review content",
       description:
-        "Three high-reach supporters posted favourable reviews this week. Retweet or co-create content to maximise organic reach.",
+        "Three high-reach Telugu cinema influencers posted favourable reviews of Vijay Deverakonda this week. Retweet or co-create content to maximise organic reach among fans.",
       expected_impact: "+5% positive sentiment within 48h",
       icon: "📣",
     },
@@ -933,21 +933,21 @@ const ACTION_SETS: Record<string, ActionRecommendation[]> = {
       id: "act-v-2",
       priority: "low",
       category: "Monitoring",
-      title: "Track emerging sustainability narrative",
+      title: "Track upcoming film release narrative",
       description:
-        "A new narrative cluster around sustainability is growing. Set up dedicated keyword alerts to stay ahead of the conversation.",
+        "A new narrative cluster around Vijay Deverakonda's next pan-India project is growing. Set up dedicated keyword alerts to stay ahead of the conversation.",
       expected_impact: "Early narrative control, reduced risk of misframing",
-      icon: "🌱",
+      icon: "🎬",
     },
     {
       id: "act-v-3",
       priority: "low",
       category: "Content",
-      title: "Publish thought leadership on AI features",
+      title: "Share behind-the-scenes content from upcoming film",
       description:
-        "Product innovation is the top narrative. A detailed blog post or webinar could solidify leadership positioning.",
+        "Fan community engagement is the second-largest narrative. Exclusive BTS content or Instagram Lives could solidify fan loyalty and boost positive sentiment.",
       expected_impact: "+3 points on narrative positivity score",
-      icon: "✍️",
+      icon: "🎥",
     },
   ],
   prabhasx: [
@@ -955,9 +955,9 @@ const ACTION_SETS: Record<string, ActionRecommendation[]> = {
       id: "act-p-1",
       priority: "critical",
       category: "Crisis Response",
-      title: "Issue public statement on delivery delays",
+      title: "Address box office criticism with positive PR",
       description:
-        "The top negative narrative (34%) centres on delivery complaints. A transparent statement with a concrete timeline could reduce anger by 20-30%.",
+        "The top negative narrative (34%) centres on box office underperformance. A candid interview or social media post acknowledging fans could reduce negative buzz by 20-30%.",
       expected_impact: "-15% negative mentions within 72h",
       icon: "🚨",
     },
@@ -965,40 +965,40 @@ const ACTION_SETS: Record<string, ActionRecommendation[]> = {
       id: "act-p-2",
       priority: "critical",
       category: "Bot Mitigation",
-      title: "Report coordinated bot network to platforms",
+      title: "Report coordinated bot network targeting Prabhas",
       description:
-        "147 accounts are amplifying negative content with identical messaging. File platform abuse reports immediately.",
+        "147 accounts are amplifying negative content about Prabhas with identical messaging. File platform abuse reports immediately.",
       expected_impact: "Remove 60-70% of artificial negative volume",
       icon: "🤖",
     },
     {
       id: "act-p-3",
       priority: "high",
-      category: "Engagement",
-      title: "Activate brand ambassador programme",
+      category: "Fan Engagement",
+      title: "Activate loyal fan base for counter-narrative",
       description:
-        "Loyal supporters are declining in visibility. Provide them with exclusive updates and incentives to counter negative coverage.",
+        "Loyal Prabhas supporters are declining in visibility. Provide them with exclusive content and event access to counter negative coverage.",
       expected_impact: "+8% positive narrative share",
       icon: "🛡️",
     },
     {
       id: "act-p-4",
       priority: "high",
-      category: "Operations",
-      title: "Publish delivery tracking improvements",
+      category: "PR Strategy",
+      title: "Announce next compelling project",
       description:
-        "Ship a real-time tracking page and proactively notify affected customers. Address root cause to stop new complaints.",
-      expected_impact: "Reduce delivery complaint volume by 40%",
-      icon: "📦",
+        "Shift the narrative from past box office results to future excitement. An announcement of a highly anticipated collaboration can redirect fan energy.",
+      expected_impact: "Redirect 40% of conversation to positive anticipation",
+      icon: "🎬",
     },
     {
       id: "act-p-5",
       priority: "medium",
       category: "Monitoring",
-      title: "Set up competitor comparison alerts",
+      title: "Set up industry comparison alerts",
       description:
-        "20% of narratives involve competitor comparisons. Monitor and prepare counter-positioning content.",
-      expected_impact: "Prevent narrative loss to competitors",
+        "20% of narratives involve comparisons with other Telugu stars. Monitor and prepare counter-positioning content highlighting Prabhas's unique strengths.",
+      expected_impact: "Prevent narrative loss to competitor actors",
       icon: "👀",
     },
   ],
@@ -1095,9 +1095,9 @@ export async function fetchPredictions(
 
   const riskForecast =
     tenantId === "vijayx"
-      ? "Low risk — reputation trajectory is positive. No significant threats detected on the horizon."
+      ? "Low risk — Vijay Deverakonda's reputation trajectory is positive. No significant threats detected on the horizon. Film buzz and fan loyalty are strong."
       : tenantId === "prabhasx"
-        ? "High risk — score is projected to drop below 45 within 30 days if current negative trends continue unchecked."
+        ? "High risk — Prabhas's reputation score is projected to drop below 45 within 30 days if current negative film reception trends continue unchecked."
         : "Moderate risk — score is expected to remain stable. Monitor emerging narratives for early warning signs.";
 
   return { forecasts, historical, risk_forecast: riskForecast };
@@ -1112,26 +1112,26 @@ export async function fetchCampaignImpact(
 ): Promise<CampaignReport> {
   if (tenantId === "vijayx") {
     return {
-      campaign_name: "Q4 Product Launch Campaign",
+      campaign_name: "Film Teaser Launch Campaign",
       impact_score: jitterInt(82, 0.02),
       status: "positive",
       metrics: [
         {
-          name: "Positive Mentions",
+          name: "Positive Fan Mentions",
           before: jitterInt(1_240),
           after: jitterInt(2_890),
           change: jitterInt(1_650),
           change_percentage: jitter(133),
         },
         {
-          name: "Brand Awareness Score",
+          name: "Star Power Score",
           before: jitterInt(64),
           after: jitterInt(78),
           change: jitterInt(14),
           change_percentage: jitter(21.9),
         },
         {
-          name: "Engagement Rate",
+          name: "Fan Engagement Rate",
           before: jitter(3.2),
           after: jitter(5.1),
           change: jitter(1.9),
@@ -1146,18 +1146,18 @@ export async function fetchCampaignImpact(
         },
       ],
       assessment:
-        "The Q4 product launch campaign significantly boosted positive mentions and brand awareness. Influencer amplification nearly doubled, driving organic engagement.",
+        "The film teaser launch campaign for Vijay Deverakonda significantly boosted positive fan mentions and star power score. Influencer amplification from Telugu cinema channels nearly doubled, driving organic fan engagement.",
       recommendations: [
-        "Extend influencer partnerships through Q1 to maintain momentum",
-        "Repurpose top-performing content into short-form video",
-        "Launch a follow-up campaign targeting the sustainability narrative",
+        "Extend influencer partnerships through the film release window to maintain momentum",
+        "Repurpose top-performing fan content into short-form promotional videos",
+        "Launch a follow-up campaign around the film's music album release",
       ],
     };
   }
 
   if (tenantId === "prabhasx") {
     return {
-      campaign_name: "Customer Trust Recovery Initiative",
+      campaign_name: "Public Image Recovery Initiative",
       impact_score: jitterInt(31, 0.02),
       status: "negative",
       metrics: [
@@ -1169,7 +1169,7 @@ export async function fetchCampaignImpact(
           change_percentage: jitter(-13.6),
         },
         {
-          name: "Customer Satisfaction Score",
+          name: "Fan Sentiment Score",
           before: jitterInt(38),
           after: jitterInt(42),
           change: jitterInt(4),
@@ -1183,7 +1183,7 @@ export async function fetchCampaignImpact(
           change_percentage: jitter(-17.4),
         },
         {
-          name: "Support Response Time (hrs)",
+          name: "PR Response Time (hrs)",
           before: jitter(18.5),
           after: jitter(8.2),
           change: jitter(-10.3),
@@ -1191,12 +1191,12 @@ export async function fetchCampaignImpact(
         },
       ],
       assessment:
-        "The trust recovery initiative achieved marginal improvements. Negative mentions dropped 14% but remain elevated. Support response time improved significantly, though customer satisfaction recovery is slow.",
+        "Prabhas's public image recovery initiative achieved marginal improvements. Negative mentions dropped 14% but remain elevated after the box office underperformance. PR response time improved significantly, though fan sentiment recovery is slow.",
       recommendations: [
-        "Increase campaign duration — 2 weeks is insufficient for trust recovery",
-        "Add a direct customer outreach component for top complainants",
-        "Publish a public post-mortem on delivery issues to rebuild transparency",
-        "Invest in bot mitigation before the next campaign cycle",
+        "Increase campaign duration — 2 weeks is insufficient for image recovery after a box office setback",
+        "Add a direct fan outreach component through meet-and-greet events",
+        "Announce a compelling upcoming project to shift narrative towards anticipation",
+        "Invest in bot mitigation before the next film release campaign",
       ],
     };
   }

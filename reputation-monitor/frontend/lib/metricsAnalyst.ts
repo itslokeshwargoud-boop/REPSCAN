@@ -329,7 +329,7 @@ function scoreIndividualMetrics(
       name: "Emotional Intensity",
       weight: 10,
       metric_score: clamp(
-        (1 - Math.abs(posRatio - negRatio) < 0.1 ? 50 : posRatio > negRatio ? 70 + posRatio * 20 : 30 - negRatio * 20)
+        Math.abs(posRatio - negRatio) < 0.1 ? 50 : posRatio > negRatio ? 70 + posRatio * 20 : 30 - negRatio * 20
       ),
       data_quality: commentCount > 30 ? "high" : "medium",
       basis: [

@@ -1,8 +1,21 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import {
+  Bar,
+  BarChart,
+  Cell,
+  Pie,
+  PieChart,
+  ResponsiveContainer,
+  Tooltip,
+} from "recharts";
 import Sidebar from "@/components/Sidebar";
-import AlertsPanel from "@/components/AlertsPanel";
+import Card from "@/components/dashboard/Card";
+import DataTableShell from "@/components/dashboard/DataTableShell";
+import MetricCard from "@/components/dashboard/MetricCard";
+import PlatformBadges from "@/components/dashboard/PlatformBadges";
+import SeverityPill, { type SeverityLevel } from "@/components/dashboard/SeverityPill";
 import {
   useKeywords,
   useCreateKeyword,
@@ -10,171 +23,240 @@ import {
   useAlerts,
   useCurrentScore,
 } from "@/hooks/useKeywordData";
-import type { Keyword } from "@/lib/api";
-
-// ── Helpers ────────────────────────────────────────────────────────────────────
-
-function riskColor(score: number): { bar: string; text: string; badge: string } {
-  if (score > 20) return { bar: "bg-emerald-500", text: "text-emerald-400", badge: "bg-emerald-500/15 text-emerald-400 border-emerald-500/30" };
-  if (score >= -20) return { bar: "bg-yellow-500", text: "text-yellow-400", badge: "bg-yellow-500/15 text-yellow-400 border-yellow-500/30" };
-  return { bar: "bg-red-500", text: "text-red-400", badge: "bg-red-500/15 text-red-400 border-red-500/30" };
-}
-
-function riskLabel(score: number): string {
-  if (score > 20) return "Low";
-  if (score >= -20) return "Moderate";
-  return "High";
-}
-
-function scoreBarWidth(score: number): string {
-  const pct = Math.round(((score + 100) / 200) * 100);
-  return `${Math.min(100, Math.max(0, pct))}%`;
-}
+import { SUPPORTED_PLATFORMS, type Keyword } from "@/lib/api";
 
 function formatDate(iso: string): string {
   try {
-    return new Date(iso).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+    return new Date(iso).toLocaleString("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "2-digit" });
   } catch {
     return "—";
   }
 }
 
-// ── KPI Card ──────────────────────────────────────────────────────────────────
-
-interface KpiCardProps {
-  icon: string;
-  title: string;
-  value: string | number;
-  sub?: string;
-  trend?: "up" | "down" | "neutral";
-  color?: string;
+function scoreBarWidth(score: number): number {
+  const pct = Math.round(((score + 100) / 200) * 100);
+  return Math.min(100, Math.max(0, pct));
 }
 
-function KpiCard({ icon, title, value, sub, trend, color = "text-white" }: KpiCardProps) {
-  const trendIcon = trend === "up" ? "↑" : trend === "down" ? "↓" : "—";
-  const trendCls = trend === "up" ? "text-emerald-400" : trend === "down" ? "text-red-400" : "text-slate-500";
-  return (
-    <div className="bg-slate-800 border border-slate-700/50 rounded-xl p-5 flex flex-col gap-3 hover:border-slate-600/70 transition-colors">
-      <div className="flex items-center justify-between">
-        <span className="text-2xl">{icon}</span>
-        <span className={`text-sm font-bold ${trendCls}`}>{trendIcon}</span>
-      </div>
-      <div>
-        <p className="text-slate-400 text-xs font-medium uppercase tracking-wider mb-1">{title}</p>
-        <p className={`text-3xl font-black tabular-nums leading-none ${color}`}>{value}</p>
-      </div>
-      {sub && <p className="text-xs text-slate-500">{sub}</p>}
-    </div>
-  );
+function percentageDelta(current: number, previous: number): number {
+  if (previous <= 0) return current > 0 ? 100 : 0;
+  return ((current - previous) / previous) * 100;
 }
 
-// ── Keyword Score Cell (fetches score per keyword) ────────────────────────────
+function parseDateOrZero(iso: string): number {
+  const timestamp = new Date(iso).getTime();
+  return Number.isFinite(timestamp) ? timestamp : 0;
+}
 
-function KeywordScoreCell({ keyword }: { keyword: string }) {
+function scoreTone(score: number): { track: string; fill: string; text: string; label: SeverityLevel } {
+  if (score <= -20) {
+    return {
+      track: "bg-rose-100",
+      fill: "bg-[#F97360]",
+      text: "text-rose-700",
+      label: "high",
+    };
+  }
+  if (score <= 20) {
+    return {
+      track: "bg-amber-100",
+      fill: "bg-amber-400",
+      text: "text-amber-700",
+      label: "medium",
+    };
+  }
+  return {
+    track: "bg-emerald-100",
+    fill: "bg-emerald-500",
+    text: "text-emerald-700",
+    label: "low",
+  };
+}
+
+function bucketTimestamps(timestamps: string[], days: number, bins = 7): number[] {
+  const now = Date.now();
+  const totalMs = days * 24 * 60 * 60 * 1000;
+  const start = now - totalMs;
+  const bucketMs = totalMs / bins;
+  const counts = Array.from({ length: bins }, () => 0);
+
+  timestamps.forEach((timestamp) => {
+    const value = parseDateOrZero(timestamp);
+    if (value < start || value > now) return;
+    const index = Math.min(bins - 1, Math.floor((value - start) / bucketMs));
+    counts[Math.max(0, index)] += 1;
+  });
+
+  return counts;
+}
+
+function inferPlatform(message: string): (typeof SUPPORTED_PLATFORMS)[number] | null {
+  const text = message.toLowerCase();
+  if (text.includes("twitter") || text.includes("tweet")) return "twitter";
+  if (text.includes("youtube") || text.includes("video")) return "youtube";
+  if (text.includes("instagram") || text.includes("insta")) return "instagram";
+  return null;
+}
+
+function isClusterAlert(alertType: string, message: string): boolean {
+  return alertType === "attack_detected" || message.toLowerCase().includes("cluster");
+}
+
+function mapSeverity(alertType: string): SeverityLevel {
+  if (alertType === "attack_detected" || alertType === "high_risk_author_active") return "high";
+  if (alertType === "negative_spike" || alertType === "viral_negative") return "medium";
+  return "low";
+}
+
+function alertCue(severity: SeverityLevel): string {
+  if (severity === "high") return "border-l-[#F97360] bg-rose-50/70";
+  if (severity === "medium") return "border-l-amber-400 bg-amber-50/60";
+  return "border-l-slate-300 bg-slate-50";
+}
+
+function KeywordRiskScoreCell({ keyword }: { keyword: string }) {
   const { data } = useCurrentScore(keyword);
   const score = data?.score ?? 0;
-  const colors = riskColor(score);
-  const pct = scoreBarWidth(score);
-  const label = (score > 0 ? "+" : "") + score.toFixed(1);
+  const tone = scoreTone(score);
+  const width = scoreBarWidth(score);
+  const scoreLabel = `${score > 0 ? "+" : ""}${score.toFixed(1)}`;
 
   return (
-    <div className="flex items-center gap-2 min-w-[120px]">
-      <div className="flex-1 bg-slate-700 rounded-full h-1.5">
-        <div
-          className={`h-1.5 rounded-full transition-all duration-700 ${colors.bar}`}
-          style={{ width: pct }}
-        />
+    <div className="min-w-[170px]">
+      <div className={`h-2 rounded-full ${tone.track}`}>
+        <div className={`h-2 rounded-full ${tone.fill}`} style={{ width: `${width}%` }} />
       </div>
-      <span className={`text-xs font-bold tabular-nums w-12 text-right ${colors.text}`}>
-        {label}
-      </span>
+      <div className="mt-1 flex items-center justify-between">
+        <span className={`text-xs font-semibold ${tone.text}`}>{scoreLabel}</span>
+        <SeverityPill severity={tone.label} />
+      </div>
     </div>
   );
 }
-
-function KeywordRiskCell({ keyword }: { keyword: string }) {
-  const { data } = useCurrentScore(keyword);
-  const score = data?.score ?? 0;
-  const colors = riskColor(score);
-  return (
-    <span className={`inline-block px-2 py-0.5 rounded border text-[11px] font-bold uppercase tracking-wide ${colors.badge}`}>
-      {riskLabel(score)}
-    </span>
-  );
-}
-
-// ── Platform config ─────────────────────────────────────────────────────────────
-
-const PLATFORM_CONFIG: Record<string, { icon: string; color: string; label: string }> = {
-  twitter: { icon: "𝕏", color: "text-sky-400", label: "Twitter (X)" },
-  instagram: { icon: "📸", color: "text-pink-400", label: "Instagram" },
-  youtube: { icon: "▶️", color: "text-red-400", label: "YouTube" },
-};
-
-function PlatformBadge({ platform }: { platform: string }) {
-  const cfg = PLATFORM_CONFIG[platform?.toLowerCase()] ?? { icon: "🌐", color: "text-slate-400", label: platform };
-  return (
-    <span className={`text-xs font-semibold ${cfg.color}`}>
-      {cfg.icon} {cfg.label}
-    </span>
-  );
-}
-
-// ── Dashboard stat aggregator ──────────────────────────────────────────────────
-
-function DashboardKpiRow({ keywords }: { keywords: Keyword[] }) {
-  const alertsData = useAlerts(1, 100);
-  const alerts = alertsData.data?.items ?? [];
-  const unreadAlerts = alerts.filter((a) => !a.is_read).length;
-  const totalKeywords = keywords.length;
-
-  return (
-    <div className="grid grid-cols-2 xl:grid-cols-4 gap-4 mb-8">
-      <KpiCard
-        icon="🔑"
-        title="Total Keywords"
-        value={totalKeywords}
-        sub="Active monitoring targets"
-        trend="neutral"
-      />
-      <KpiCard
-        icon="🔔"
-        title="Active Alerts"
-        value={unreadAlerts}
-        sub={`${alerts.length} total alerts`}
-        trend={unreadAlerts > 0 ? "down" : "neutral"}
-        color={unreadAlerts > 0 ? "text-red-400" : "text-white"}
-      />
-      <KpiCard
-        icon="⚠️"
-        title="Flagged Authors"
-        value={0}
-        sub="Coordinated attack actors"
-        trend="neutral"
-      />
-      <KpiCard
-        icon="🕸️"
-        title="Attack Clusters"
-        value={0}
-        sub="Detected this week"
-        trend="neutral"
-      />
-    </div>
-  );
-}
-
-// ── Main Page ─────────────────────────────────────────────────────────────────
 
 export default function Dashboard() {
   const router = useRouter();
   const [newKeyword, setNewKeyword] = useState("");
   const [addError, setAddError] = useState("");
+  const [range, setRange] = useState("7d");
 
   const { data: keywordsData, isLoading } = useKeywords(1, 50);
+  const alertsData = useAlerts(1, 8);
   const createKeyword = useCreateKeyword();
   const deleteKeyword = useDeleteKeyword();
 
   const keywords: Keyword[] = keywordsData?.items ?? [];
+  const alerts = alertsData.data?.items ?? [];
+  const unreadAlerts = alerts.filter((alert) => !alert.is_read);
+  const rangeDays = range === "7d" ? 7 : range === "30d" ? 30 : 90;
+  const now = Date.now();
+  const periodMs = rangeDays * 24 * 60 * 60 * 1000;
+  const currentStart = now - periodMs;
+  const previousStart = now - periodMs * 2;
+
+  const currentKeywords = keywords.filter((keyword) => parseDateOrZero(keyword.created_at) >= currentStart);
+  const previousKeywords = keywords.filter((keyword) => {
+    const created = parseDateOrZero(keyword.created_at);
+    return created >= previousStart && created < currentStart;
+  });
+  const currentAlerts = alerts.filter((alert) => parseDateOrZero(alert.triggered_at) >= currentStart);
+  const previousAlerts = alerts.filter((alert) => {
+    const triggered = parseDateOrZero(alert.triggered_at);
+    return triggered >= previousStart && triggered < currentStart;
+  });
+
+  const suspiciousAuthors = useMemo(
+    () => currentAlerts.filter((alert) => alert.alert_type === "high_risk_author_active").length,
+    [currentAlerts]
+  );
+  const previousSuspiciousAuthors = useMemo(
+    () => previousAlerts.filter((alert) => alert.alert_type === "high_risk_author_active").length,
+    [previousAlerts]
+  );
+  const attackClusters = useMemo(
+    () => currentAlerts.filter((alert) => isClusterAlert(alert.alert_type, alert.message)).length,
+    [currentAlerts]
+  );
+  const previousAttackClusters = useMemo(
+    () => previousAlerts.filter((alert) => isClusterAlert(alert.alert_type, alert.message)).length,
+    [previousAlerts]
+  );
+
+  const metrics = [
+    {
+      title: "Monitored Keywords",
+      value: keywords.length,
+      delta: percentageDelta(currentKeywords.length, previousKeywords.length),
+      sparkline: bucketTimestamps(keywords.map((keyword) => keyword.created_at), rangeDays),
+      positiveIsGood: true,
+    },
+    {
+      title: "Active Threat Alerts",
+      value: unreadAlerts.filter((alert) => parseDateOrZero(alert.triggered_at) >= currentStart).length,
+      delta: percentageDelta(currentAlerts.length, previousAlerts.length),
+      sparkline: bucketTimestamps(currentAlerts.map((alert) => alert.triggered_at), rangeDays),
+      positiveIsGood: false,
+    },
+    {
+      title: "Suspicious Authors",
+      value: suspiciousAuthors,
+      delta: percentageDelta(suspiciousAuthors, previousSuspiciousAuthors),
+      sparkline: bucketTimestamps(
+        currentAlerts
+          .filter((alert) => alert.alert_type === "high_risk_author_active")
+          .map((alert) => alert.triggered_at),
+        rangeDays
+      ),
+      positiveIsGood: false,
+    },
+    {
+      title: "Attack Clusters",
+      value: attackClusters,
+      delta: percentageDelta(attackClusters, previousAttackClusters),
+      sparkline: bucketTimestamps(
+        currentAlerts
+          .filter((alert) => isClusterAlert(alert.alert_type, alert.message))
+          .map((alert) => alert.triggered_at),
+        rangeDays
+      ),
+      positiveIsGood: false,
+    },
+  ];
+
+  const platformCounts = { twitter: 0, youtube: 0, instagram: 0 };
+  currentAlerts.forEach((alert) => {
+    const platform = inferPlatform(alert.message);
+    if (platform) {
+      platformCounts[platform] += 1;
+    }
+  });
+  const hasPlatformMixData = platformCounts.twitter + platformCounts.youtube + platformCounts.instagram > 0;
+
+  const platformMix = [
+    { name: "Twitter/X", value: platformCounts.twitter, color: "#FB7185" },
+    { name: "YouTube", value: platformCounts.youtube, color: "#FDBA74" },
+    { name: "Instagram", value: platformCounts.instagram, color: "#CBD5E1" },
+  ];
+
+  const clusterFormation = bucketTimestamps(
+    currentAlerts
+      .filter((alert) => isClusterAlert(alert.alert_type, alert.message))
+      .map((alert) => alert.triggered_at),
+    rangeDays,
+    5
+  ).map((clusters, index) => ({ label: `T${index + 1}`, clusters }));
+  const clusterAlerts = currentAlerts.filter((alert) => isClusterAlert(alert.alert_type, alert.message));
+  const distinctClusterPlatforms = new Set(clusterAlerts.map((alert) => inferPlatform(alert.message)).filter(Boolean));
+  const multiPlatformClusters = distinctClusterPlatforms.size > 1 ? attackClusters : 0;
+
+  const severitySummary = currentAlerts.reduce(
+    (acc, alert) => {
+      const severity = mapSeverity(alert.alert_type);
+      acc[severity] += 1;
+      return acc;
+    },
+    { high: 0, medium: 0, low: 0 } as Record<SeverityLevel, number>
+  );
 
   async function handleAdd(e: React.FormEvent) {
     e.preventDefault();
@@ -194,90 +276,208 @@ export default function Dashboard() {
     await deleteKeyword.mutateAsync(id);
   }
 
+  function handleRefresh() {
+    router.replace(router.asPath);
+  }
+
   return (
-    <div className="flex min-h-screen bg-slate-950">
+    <div className="flex min-h-screen bg-slate-50 text-slate-900">
       <Sidebar />
 
-      {/* Main content */}
-      <div className="flex-1 ml-64 flex flex-col min-h-screen">
-        {/* Top header */}
-        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-slate-700/50 bg-slate-950/90 backdrop-blur px-8">
+      <div className="ml-64 flex min-h-screen flex-1 flex-col">
+        <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-slate-200 bg-white/90 px-8 backdrop-blur">
           <div className="flex items-center gap-3">
-            <h1 className="text-xl font-bold text-white">Dashboard</h1>
-            <span className="rounded bg-blue-600/20 border border-blue-500/30 px-2 py-0.5 text-[11px] font-bold text-blue-400 uppercase tracking-wider">
-              Live
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-rose-200 bg-rose-50 font-semibold text-rose-600">
+              ◉
             </span>
+            <div className="leading-tight">
+              <p className="text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">REPSCAN</p>
+              <h1 className="text-lg font-semibold text-slate-900">Dashboard</h1>
+            </div>
           </div>
-          <div className="flex items-center gap-3">
-            <div className="h-8 w-8 rounded-full bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center text-white text-xs font-bold select-none">
+
+          <div className="flex items-center gap-2">
+            <select
+              value={range}
+              onChange={(e) => setRange(e.target.value)}
+              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-medium text-slate-700 outline-none"
+            >
+              <option value="7d">Last 7 days</option>
+              <option value="30d">Last 30 days</option>
+              <option value="90d">Last 90 days</option>
+            </select>
+            <button
+              onClick={handleRefresh}
+              className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-600 transition-colors hover:bg-slate-50"
+            >
+              Refresh
+            </button>
+            <div className="inline-flex h-9 w-9 items-center justify-center rounded-xl border border-slate-200 bg-white text-sm font-semibold text-slate-700">
               U
             </div>
           </div>
         </header>
 
-        <main className="flex-1 p-8">
-          {/* KPI Row */}
-          {!isLoading && <DashboardKpiRow keywords={keywords} />}
+        <main className="flex-1 p-6 lg:p-8">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-4">
+            {metrics.map((metric) => (
+              <MetricCard
+                key={metric.title}
+                title={metric.title}
+                value={metric.value}
+                delta={metric.delta}
+                positiveIsGood={metric.positiveIsGood}
+                sparkline={metric.sparkline}
+              />
+            ))}
+          </div>
 
-          <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-            {/* Keywords table — takes 2/3 */}
-            <div className="xl:col-span-2">
-              <div className="bg-slate-900 border border-slate-700/50 rounded-xl overflow-hidden">
-                {/* Table header */}
-                <div className="flex items-center justify-between px-6 py-4 border-b border-slate-700/50">
-                  <h2 className="text-sm font-bold text-white flex items-center gap-2">
-                    🔑 <span>Monitored Keywords</span>
-                    <span className="ml-1 px-1.5 py-0.5 rounded bg-slate-700 text-slate-400 text-[11px] font-bold">
-                      {keywords.length}
-                    </span>
-                  </h2>
+          <div className="mt-6 grid grid-cols-1 gap-4 xl:grid-cols-3">
+            <Card title="Threat Pulse" subtitle="Hourly intensity profile">
+              <div className="h-[170px] px-5 pb-5 pt-3">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={clusterFormation} barSize={16}>
+                    <Tooltip
+                      cursor={{ fill: "#F8FAFC" }}
+                      contentStyle={{
+                        borderRadius: 12,
+                        border: "1px solid #E2E8F0",
+                        backgroundColor: "#FFFFFF",
+                        fontSize: 12,
+                      }}
+                    />
+                    <Bar dataKey="clusters" radius={[6, 6, 6, 6]} fill="#FDBA74" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </Card>
+
+            <Card title="Platform Mentions Mix" subtitle="Source channel distribution">
+              <div className="h-[170px] px-5 pb-5 pt-3">
+                {hasPlatformMixData ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Tooltip
+                        contentStyle={{
+                          borderRadius: 12,
+                          border: "1px solid #E2E8F0",
+                          backgroundColor: "#FFFFFF",
+                          fontSize: 12,
+                        }}
+                      />
+                      <Pie data={platformMix} dataKey="value" innerRadius={42} outerRadius={62} paddingAngle={3}>
+                        {platformMix.map((entry) => (
+                          <Cell key={entry.name} fill={entry.color} />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex h-full items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-500">
+                    No platform mentions in range
+                  </div>
+                )}
+              </div>
+            </Card>
+
+            <Card title="Cluster Formation" subtitle="Weekly coordinated groups">
+              <div className="h-[170px] px-5 pb-5 pt-3">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={clusterFormation} barGap={8}>
+                    <Tooltip
+                      cursor={{ fill: "#F8FAFC" }}
+                      contentStyle={{
+                        borderRadius: 12,
+                        border: "1px solid #E2E8F0",
+                        backgroundColor: "#FFFFFF",
+                        fontSize: 12,
+                      }}
+                    />
+                    <Bar dataKey="clusters" radius={[8, 8, 0, 0]} fill="#F97360" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </Card>
+          </div>
+
+          <div className="mt-6">
+            <Card title="Threat Intelligence" subtitle="Coordinated activity signals, cluster highlights, and severity summary">
+              <div className="grid grid-cols-1 gap-4 px-5 pb-5 pt-4 lg:grid-cols-3">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Coordinated Signals</p>
+                  <p className="mt-2 text-2xl font-bold text-slate-900">{currentAlerts.length}</p>
+                  <p className="mt-1 text-sm text-slate-600">Cross-platform synchronized activity in current watch window.</p>
                 </div>
 
-                {/* Add keyword form */}
-                <form onSubmit={handleAdd} className="flex items-center gap-3 px-6 py-3 border-b border-slate-700/30 bg-slate-800/30">
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Cluster Highlights</p>
+                  <ul className="mt-3 space-y-2 text-sm text-slate-700">
+                    <li className="flex items-center justify-between"><span>Emerging clusters</span><strong>{attackClusters}</strong></li>
+                    <li className="flex items-center justify-between"><span>Multi-platform clusters</span><strong>{multiPlatformClusters}</strong></li>
+                    <li className="flex items-center justify-between"><span>Escalating clusters</span><strong>{currentAlerts.filter((alert) => mapSeverity(alert.alert_type) === "high").length}</strong></li>
+                  </ul>
+                </div>
+
+                <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+                  <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Severity Summary</p>
+                  <div className="mt-3 flex flex-wrap gap-2">
+                    <SeverityPill severity="high" />
+                    <span className="text-sm font-semibold text-slate-700">{severitySummary.high}</span>
+                    <SeverityPill severity="medium" />
+                    <span className="text-sm font-semibold text-slate-700">{severitySummary.medium}</span>
+                    <SeverityPill severity="low" />
+                    <span className="text-sm font-semibold text-slate-700">{severitySummary.low}</span>
+                  </div>
+                  <p className="mt-3 text-sm text-slate-600">Severity distribution across the latest intelligence events.</p>
+                </div>
+              </div>
+            </Card>
+          </div>
+
+          <div className="mt-6 grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_320px]">
+            <div>
+              <DataTableShell
+                title="Monitoring Activity"
+                subtitle="Tracked keywords and platform exposure"
+                action={<span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-semibold text-slate-600">{keywords.length} tracked</span>}
+              >
+                <form onSubmit={handleAdd} className="mb-4 flex flex-col gap-2 sm:flex-row">
                   <input
                     type="text"
-                    placeholder="Add keyword to monitor…"
+                    placeholder="Add keyword to monitor"
                     value={newKeyword}
                     onChange={(e) => setNewKeyword(e.target.value)}
-                    className="flex-1 rounded-lg bg-slate-800 border border-slate-600/50 px-4 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-blue-500/70 focus:ring-1 focus:ring-blue-500/30 transition-colors"
+                    className="h-10 flex-1 rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none placeholder:text-slate-400 focus:border-rose-300"
                   />
                   <button
                     type="submit"
                     disabled={createKeyword.isPending || !newKeyword.trim()}
-                    className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-500 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold transition-colors"
+                    className="h-10 rounded-xl bg-[#F97360] px-4 text-sm font-semibold text-white transition hover:bg-[#EF6A58] disabled:cursor-not-allowed disabled:opacity-60"
                   >
-                    {createKeyword.isPending ? "Adding…" : "+ Add"}
+                    {createKeyword.isPending ? "Adding…" : "Add keyword"}
                   </button>
                 </form>
-                {addError && (
-                  <p className="px-6 py-2 text-xs text-red-400 bg-red-500/10 border-b border-red-500/20">
-                    {addError}
-                  </p>
-                )}
 
-                {/* Table */}
+                {addError && <p className="mb-4 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-xs text-rose-700">{addError}</p>}
+
                 <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
+                  <table className="w-full min-w-[860px] text-left text-sm">
                     <thead>
-                      <tr className="border-b border-slate-700/50">
-                        {["Keyword", "Score", "Risk", "Platforms", "Status", "Created", "Actions"].map((h) => (
-                          <th
-                            key={h}
-                            className="px-4 py-3 text-left text-[11px] font-bold text-slate-500 uppercase tracking-wider whitespace-nowrap"
-                          >
-                            {h}
+                      <tr className="border-b border-slate-200">
+                        {["Keyword", "Risk score", "Platforms", "Status", "Last updated", "Actions"].map((header) => (
+                          <th key={header} className="px-3 py-3 text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-500">
+                            {header}
                           </th>
                         ))}
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-700/30">
+                    <tbody>
                       {isLoading &&
-                        Array.from({ length: 4 }).map((_, i) => (
-                          <tr key={i} className="animate-pulse">
-                            {Array.from({ length: 7 }).map((__, j) => (
-                              <td key={j} className="px-4 py-3">
-                                <div className="h-4 rounded bg-slate-700/50" />
+                        Array.from({ length: 4 }).map((_, idx) => (
+                          <tr key={`skeleton-${idx}`} className="border-b border-slate-100">
+                            {Array.from({ length: 6 }).map((__, cell) => (
+                              <td key={`${idx}-${cell}`} className="px-3 py-4">
+                                <div className="h-4 w-full animate-pulse rounded bg-slate-100" />
                               </td>
                             ))}
                           </tr>
@@ -285,80 +485,50 @@ export default function Dashboard() {
 
                       {!isLoading && keywords.length === 0 && (
                         <tr>
-                          <td colSpan={7} className="px-4 py-10 text-center text-slate-500 text-sm">
-                            No keywords yet. Add one above to start monitoring.
+                          <td colSpan={6} className="px-3 py-10 text-center text-sm text-slate-500">
+                            No monitored keywords yet. Add one to start reputation tracking.
                           </td>
                         </tr>
                       )}
 
                       {keywords.map((kw) => (
-                        <tr
-                          key={kw.id}
-                          className="hover:bg-slate-800/40 transition-colors group"
-                        >
-                          {/* Keyword */}
-                          <td className="px-4 py-3">
-                            <span className="font-semibold text-white">{kw.keyword}</span>
+                        <tr key={kw.id} className="border-b border-slate-100 bg-white transition-colors hover:bg-slate-50/70">
+                          <td className="px-3 py-4 font-semibold text-slate-900">{kw.keyword}</td>
+                          <td className="px-3 py-4">
+                            <KeywordRiskScoreCell keyword={kw.keyword} />
                           </td>
-
-                          {/* Score bar */}
-                          <td className="px-4 py-3">
-                            <KeywordScoreCell keyword={kw.keyword} />
+                          <td className="px-3 py-4">
+                            <PlatformBadges platforms={[...SUPPORTED_PLATFORMS]} />
                           </td>
-
-                          {/* Risk badge */}
-                          <td className="px-4 py-3">
-                            <KeywordRiskCell keyword={kw.keyword} />
-                          </td>
-
-                          {/* Platforms */}
-                          <td className="px-4 py-3">
-                            <div className="flex gap-1.5">
-                              {Object.entries(PLATFORM_CONFIG).map(([p, cfg]) => (
-                                <span
-                                  key={p}
-                                  title={cfg.label}
-                                  className="text-sm opacity-70 hover:opacity-100 transition-opacity"
-                                >
-                                  {cfg.icon}
-                                </span>
-                              ))}
-                            </div>
-                          </td>
-
-                          {/* Status */}
-                          <td className="px-4 py-3">
+                          <td className="px-3 py-4">
                             <span
-                              className={`inline-block px-2 py-0.5 rounded border text-[11px] font-bold uppercase tracking-wide ${
-                                kw.is_active
-                                  ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
-                                  : "bg-slate-700/50 text-slate-500 border-slate-600/20"
+                              className={`inline-flex rounded-full border px-2.5 py-1 text-[11px] font-semibold uppercase ${
+                                kw.is_active ? "border-emerald-200 bg-emerald-50 text-emerald-700" : "border-slate-200 bg-slate-100 text-slate-600"
                               }`}
                             >
-                              {kw.is_active ? "Active" : "Paused"}
+                              {kw.is_active ? "Active" : "Inactive"}
                             </span>
                           </td>
-
-                          {/* Created */}
-                          <td className="px-4 py-3 text-slate-500 whitespace-nowrap text-xs">
-                            {formatDate(kw.created_at)}
-                          </td>
-
-                          {/* Actions */}
-                          <td className="px-4 py-3">
-                            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <td className="px-3 py-4 text-xs text-slate-500">{formatDate(kw.created_at)}</td>
+                          <td className="px-3 py-4">
+                            <div className="flex flex-wrap gap-2">
                               <Link
                                 href={`/keyword/${encodeURIComponent(kw.keyword)}`}
-                                className="px-3 py-1 rounded bg-blue-600/20 border border-blue-500/30 text-blue-400 text-xs font-semibold hover:bg-blue-600/40 transition-colors whitespace-nowrap"
+                                className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50"
                               >
-                                View Live →
+                                View
+                              </Link>
+                              <Link
+                                href={`/keyword/${encodeURIComponent(kw.keyword)}?mode=manage`}
+                                className="rounded-lg border border-rose-200 bg-rose-50 px-3 py-1.5 text-xs font-semibold text-rose-700 transition hover:bg-rose-100"
+                              >
+                                Manage
                               </Link>
                               <button
                                 onClick={() => handleDelete(kw.id)}
-                                className="px-2 py-1 rounded bg-red-500/10 border border-red-500/20 text-red-400 text-xs font-semibold hover:bg-red-500/20 transition-colors"
-                                title="Delete keyword"
+                                className="rounded-lg border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-500 transition hover:bg-slate-100"
                               >
-                                🗑
+                                Remove
                               </button>
                             </div>
                           </td>
@@ -367,15 +537,33 @@ export default function Dashboard() {
                     </tbody>
                   </table>
                 </div>
-              </div>
+              </DataTableShell>
             </div>
 
-            {/* Right panel — Recent alerts */}
-            <div className="xl:col-span-1">
-              <div className="bg-slate-900 border border-slate-700/50 rounded-xl p-5">
-                <AlertsPanel limit={5} />
-              </div>
-            </div>
+            <aside>
+              <Card title="Alerts Panel" subtitle="Recent alerts by severity">
+                <div className="space-y-3 px-5 pb-5 pt-4">
+                  {currentAlerts.length === 0 && (
+                    <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
+                      No active alerts in the selected window.
+                    </div>
+                  )}
+
+                  {currentAlerts.map((alert) => {
+                    const severity = mapSeverity(alert.alert_type);
+                    return (
+                      <div key={alert.id} className={`rounded-xl border border-l-4 border-slate-200 p-3 ${alertCue(severity)}`}>
+                        <div className="flex items-center justify-between gap-3">
+                          <SeverityPill severity={severity} />
+                          <span className="text-[11px] text-slate-500">{formatDate(alert.triggered_at)}</span>
+                        </div>
+                        <p className="mt-2 text-sm leading-relaxed text-slate-700">{alert.message}</p>
+                      </div>
+                    );
+                  })}
+                </div>
+              </Card>
+            </aside>
           </div>
         </main>
       </div>

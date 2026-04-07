@@ -378,7 +378,15 @@ export default function Dashboard() {
             <div className="flex items-center gap-2">
               <IconShieldAlert className="w-5 h-5 text-rose-500" />
               <div className="leading-tight">
-                <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Mission Briefing</p>
+                <div className="flex items-center gap-2">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.2em] text-slate-500">Mission Briefing</p>
+                  {liveMode && (
+                    <span className="flex items-center gap-1 rounded-full border border-emerald-700/40 bg-emerald-900/30 px-2 py-0.5 text-[9px] font-bold uppercase tracking-wider text-emerald-400">
+                      <span className="h-1.5 w-1.5 animate-pulse rounded-full bg-emerald-400 shadow-[0_0_6px_rgba(16,185,129,0.6)]" />
+                      Live
+                    </span>
+                  )}
+                </div>
                 <h1 className="text-sm font-black tracking-tighter text-slate-100">Threat Intelligence Dashboard</h1>
               </div>
             </div>

@@ -1,11 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import Sidebar from "@/components/Sidebar";
-import MetricsView from "@/components/MetricsView";
 import { useKeyword } from "@/contexts/KeywordContext";
 import { useTalkData } from "@/hooks/useTalkData";
-import { useMetricsAnalyst } from "@/hooks/useMetricsAnalyst";
 import type { TalkItem } from "@/lib/talkApi";
 import type { SentimentLabel } from "@/lib/sentiment";
 
@@ -283,14 +281,10 @@ function EmptyState({ hasSearched }: { hasSearched: boolean }) {
 
 /* ─── Main Page ───────────────────────────────────────────────────────────── */
 
-type TalkTab = "talk" | "metrics";
-
 export default function TalkPage() {
   const router = useRouter();
   const shared = useKeyword();
   const talk = useTalkData(shared.activeKeyword);
-  const metricsAnalyst = useMetricsAnalyst();
-  const [activeTab, setActiveTab] = useState<TalkTab>("talk");
 
   // Pick up keyword from URL query param (overrides shared context)
   useEffect(() => {
@@ -302,13 +296,6 @@ export default function TalkPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.query.q]);
 
-  // Pick up tab from URL query param
-  useEffect(() => {
-    if (router.query.tab === "metrics") {
-      setActiveTab("metrics");
-    }
-  }, [router.query.tab]);
-
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
     talk.search();
@@ -319,14 +306,6 @@ export default function TalkPage() {
   function handleTextSearch(e: React.FormEvent) {
     e.preventDefault();
     talk.refresh();
-  }
-
-  // Fetch metrics when switching to Metrics tab
-  function handleTabChange(tab: TalkTab) {
-    setActiveTab(tab);
-    if (tab === "metrics" && talk.keyword.trim()) {
-      metricsAnalyst.fetchMetrics(talk.keyword.trim());
-    }
   }
 
   const totalSentiment =
@@ -380,19 +359,13 @@ export default function TalkPage() {
               {/* Refresh button */}
               {talk.hasSearched && (
                 <button
-                  onClick={() => {
-                    if (activeTab === "metrics") {
-                      metricsAnalyst.fetchMetrics(talk.keyword.trim());
-                    } else {
-                      talk.refresh();
-                    }
-                  }}
-                  disabled={talk.isLoading || metricsAnalyst.isLoading}
+                  onClick={talk.refresh}
+                  disabled={talk.isLoading}
                   className="flex items-center gap-1.5 rounded-xl border border-slate-700/60 bg-slate-800/40 px-3 py-2 text-xs text-slate-400 hover:text-slate-200 hover:border-slate-600 transition-colors disabled:opacity-40"
                   title="Refresh"
                 >
                   <svg
-                    className={talk.isLoading || metricsAnalyst.isLoading ? "animate-spin" : ""}
+                    className={talk.isLoading ? "animate-spin" : ""}
                     width="14"
                     height="14"
                     viewBox="0 0 24 24"
@@ -410,51 +383,10 @@ export default function TalkPage() {
             </div>
           </header>
 
-          {/* ── Tab Bar ──────────────────────────────────────── */}
-          <div className="border-b border-slate-800/60 px-6">
-            <div className="flex gap-0">
-              <button
-                onClick={() => handleTabChange("talk")}
-                className={`px-4 py-3 text-sm font-medium transition-colors relative ${
-                  activeTab === "talk"
-                    ? "text-rose-400"
-                    : "text-slate-500 hover:text-slate-300"
-                }`}
-              >
-                💬 Talk
-                {activeTab === "talk" && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-500 rounded-t-full" />
-                )}
-              </button>
-              <button
-                onClick={() => handleTabChange("metrics")}
-                className={`px-4 py-3 text-sm font-medium transition-colors relative ${
-                  activeTab === "metrics"
-                    ? "text-rose-400"
-                    : "text-slate-500 hover:text-slate-300"
-                }`}
-              >
-                📊 Metrics
-                {activeTab === "metrics" && (
-                  <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-rose-500 rounded-t-full" />
-                )}
-              </button>
-            </div>
-          </div>
-
           {/* ── Content ────────────────────────────────────────── */}
           <div className="px-6 py-6 max-w-6xl mx-auto">
-            {activeTab === "metrics" ? (
-              <MetricsView
-                data={metricsAnalyst.data}
-                isLoading={metricsAnalyst.isLoading}
-                error={metricsAnalyst.error}
-                hasLoaded={metricsAnalyst.hasLoaded}
-              />
-            ) : (
-              <>
-                {/* Error banner */}
-                {talk.error && (
+            {/* Error banner */}
+            {talk.error && (
               <div className="mb-4 rounded-xl border border-amber-500/30 bg-amber-500/10 px-4 py-3 text-sm text-amber-300">
                 ⚠️ {talk.error}
               </div>
@@ -543,8 +475,6 @@ export default function TalkPage() {
                   onPageChange={talk.goToPage}
                 />
               </>
-            )}
-            </>
             )}
           </div>
         </main>

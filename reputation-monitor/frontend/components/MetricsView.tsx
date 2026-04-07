@@ -210,8 +210,8 @@ function MetricsEmpty() {
         Reputation Metrics
       </h3>
       <p className="text-sm text-slate-500 text-center max-w-md">
-        Search a keyword on the Talk tab first, then switch to Metrics to see
-        the full reputation health index with evidence-based scoring.
+        Enter a keyword above to compute the full reputation health index
+        with evidence-based scoring across all available data.
       </p>
     </div>
   );

@@ -45,9 +45,9 @@ const EMPTY_KPIS: MetricsKPI = {
 // Hook
 // ---------------------------------------------------------------------------
 
-export function useDashboardData(): DashboardData {
-  const [keyword, setKeyword] = useState("");
-  const [activeKeyword, setActiveKeyword] = useState("");
+export function useDashboardData(initialKeyword?: string): DashboardData {
+  const [keyword, setKeyword] = useState(initialKeyword ?? "");
+  const [activeKeyword, setActiveKeyword] = useState(initialKeyword ?? "");
   const [videos, setVideos] = useState<YouTubeVideo[]>([]);
   const [kpis, setKpis] = useState<MetricsKPI>(EMPTY_KPIS);
   const [channelBreakdown, setChannelBreakdown] = useState<ChannelBreakdown[]>([]);
@@ -57,6 +57,20 @@ export function useDashboardData(): DashboardData {
   const [hasSearched, setHasSearched] = useState(false);
   const [fetchKey, setFetchKey] = useState(0);
   const isFetching = useRef(false);
+  const prevInitial = useRef(initialKeyword);
+
+  // Sync when the shared keyword changes (e.g. hydration from sessionStorage)
+  useEffect(() => {
+    if (initialKeyword && initialKeyword !== prevInitial.current) {
+      prevInitial.current = initialKeyword;
+      if (!activeKeyword) {
+        setKeyword(initialKeyword);
+        setActiveKeyword(initialKeyword);
+        isFetching.current = false;
+        setFetchKey((k) => k + 1);
+      }
+    }
+  }, [initialKeyword, activeKeyword]);
 
   const loadData = useCallback(async () => {
     if (isFetching.current || !activeKeyword.trim()) return;

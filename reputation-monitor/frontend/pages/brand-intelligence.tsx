@@ -2,13 +2,15 @@ import { useState, useEffect, useCallback } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import Sidebar from "@/components/Sidebar";
+import { useKeyword } from "@/contexts/KeywordContext";
 import LiveFeed from "@/components/brand/LiveFeed";
 import type { YouTubeVideo } from "./api/youtube";
 
 export default function BrandIntelligencePage() {
   const router = useRouter();
-  const [keyword, setKeyword] = useState("");
-  const [activeKeyword, setActiveKeyword] = useState("");
+  const shared = useKeyword();
+  const [keyword, setKeyword] = useState(shared.activeKeyword ?? "");
+  const [activeKeyword, setActiveKeyword] = useState(shared.activeKeyword ?? "");
   const [videos, setVideos] = useState<YouTubeVideo[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -48,6 +50,9 @@ export default function BrandIntelligencePage() {
     e.preventDefault();
     if (!keyword.trim()) return;
     setActiveKeyword(keyword.trim());
+    // Persist to shared context
+    shared.setKeyword(keyword.trim());
+    shared.commitKeyword();
     // Update URL without full navigation
     router.replace(`/brand-intelligence?q=${encodeURIComponent(keyword.trim())}`, undefined, { shallow: true });
   }

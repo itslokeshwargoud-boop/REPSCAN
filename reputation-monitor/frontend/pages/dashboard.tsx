@@ -12,6 +12,7 @@ import {
   YAxis,
 } from "recharts";
 import { useDashboardData } from "@/hooks/useDashboardData";
+import { useKeyword } from "@/contexts/KeywordContext";
 import Sidebar from "@/components/Sidebar";
 import type { YouTubeVideo } from "./api/youtube";
 
@@ -102,6 +103,7 @@ function VideoCard({ video }: { video: YouTubeVideo }) {
 /* ═══════════════════════════════════════════════════════════════════════════ */
 
 export default function Dashboard() {
+  const shared = useKeyword();
   const {
     keyword,
     setKeyword,
@@ -114,7 +116,7 @@ export default function Dashboard() {
     error,
     hasSearched,
     refresh,
-  } = useDashboardData();
+  } = useDashboardData(shared.activeKeyword);
 
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
 
@@ -122,6 +124,9 @@ export default function Dashboard() {
     e.preventDefault();
     if (!keyword.trim()) return;
     search();
+    // Persist keyword to shared context
+    shared.setKeyword(keyword.trim());
+    shared.commitKeyword();
     setRecentSearches((prev) => {
       const filtered = prev.filter((s) => s !== keyword.trim());
       return [keyword.trim(), ...filtered].slice(0, 5);

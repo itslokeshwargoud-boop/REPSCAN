@@ -38,6 +38,7 @@ export interface Alert {
   details: string;
   timestamp: string;
   is_read: boolean;
+  proof_url: string;
 }
 
 export interface NarrativeCluster {
@@ -45,6 +46,7 @@ export interface NarrativeCluster {
   percentage: number;
   sentiment: "positive" | "negative" | "neutral" | "mixed";
   sample_texts: string[];
+  sample_proof_urls: string[];
   trend: "growing" | "stable" | "declining";
 }
 
@@ -57,6 +59,7 @@ export interface Influencer {
   impact_percentage: number;
   recent_sentiment: number;
   avatar_color: string;
+  proof_url: string;
 }
 
 export interface AuthenticityReport {
@@ -65,7 +68,7 @@ export interface AuthenticityReport {
   suspicious_accounts: number;
   total_analyzed: number;
   confidence: number;
-  patterns: { type: string; count: number; severity: string }[];
+  patterns: { type: string; count: number; severity: string; proof_url: string }[];
 }
 
 export interface VelocityReport {
@@ -73,6 +76,7 @@ export interface VelocityReport {
   rate_per_hour: number;
   trend_direction: "accelerating" | "decelerating" | "stable";
   acceleration: number;
+  spike_proof_urls: { hour: string; proof_url: string }[];
   timeline: {
     hour: string;
     positive: number;
@@ -89,6 +93,7 @@ export interface MoodMapSegment {
   dominant_emotion: string;
   comment_count: number;
   is_spike: boolean;
+  proof_url: string;
 }
 
 export interface MoodMapReport {
@@ -106,6 +111,7 @@ export interface ActionRecommendation {
   description: string;
   expected_impact: string;
   icon: string; // emoji
+  proof_url: string;
 }
 
 export interface PredictionForecast {
@@ -128,6 +134,7 @@ export interface CampaignMetric {
   after: number;
   change: number;
   change_percentage: number;
+  proof_url: string;
 }
 
 export interface CampaignReport {
@@ -288,6 +295,7 @@ const ALERT_TEMPLATES: Record<
       message: "Vijay Deverakonda mentions up 15% in the last hour",
       details:
         "Organic buzz detected — his latest film teaser is trending on YouTube and Twitter in Telugu-speaking regions.",
+      proof_url: "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxV4h9kT2bE1aZ0Jp4AaABAg",
     },
     {
       type: "narrative_shift",
@@ -295,6 +303,7 @@ const ALERT_TEMPLATES: Record<
       message: "New narrative cluster around Vijay Deverakonda's next film",
       details:
         "3 entertainment influencers started discussing his upcoming pan-India project. Sentiment is 78% positive.",
+      proof_url: "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxN3pQ8rT5vW2mDZh4AaABAg",
     },
   ],
   prabhasx: [
@@ -304,6 +313,7 @@ const ALERT_TEMPLATES: Record<
       message: "Negative mentions about Prabhas surged 340% in 2 hours",
       details:
         "A viral thread is amplifying criticism of his latest film's box office performance. 12k impressions and growing.",
+      proof_url: "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxK7hJc9dR3xZ1Bp4AaABAg",
     },
     {
       type: "bot_activity",
@@ -311,6 +321,7 @@ const ALERT_TEMPLATES: Record<
       message: "Coordinated bot network targeting Prabhas detected",
       details:
         "147 accounts with matching creation dates are posting identical negative comments about his recent release. Confidence: 94%.",
+      proof_url: "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxP2bN4tW8yR7mQv4AaABAg",
     },
     {
       type: "reputation_drop",
@@ -318,6 +329,7 @@ const ALERT_TEMPLATES: Record<
       message: "Prabhas reputation score dropped 8 points in 24h",
       details:
         "Primary drivers: negative film reviews (+23% negative sentiment) and declining fan engagement quality (-11%).",
+      proof_url: "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxA5cM2nL6xT4qRs4AaABAg",
     },
     {
       type: "velocity_surge",
@@ -325,6 +337,7 @@ const ALERT_TEMPLATES: Record<
       message: "Prabhas mention velocity tripled compared to baseline",
       details:
         "Rate jumped from 29/hr to 87/hr. 62% of new mentions carry negative sentiment around box office numbers.",
+      proof_url: "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxR8dF6pQ3wY9nKt4AaABAg",
     },
   ],
   default: [
@@ -334,6 +347,7 @@ const ALERT_TEMPLATES: Record<
       message: "Narrative shift detected in competitor comparison threads",
       details:
         "Discussion is moving from feature comparison to pricing. Neutral sentiment, but monitor closely.",
+      proof_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxB3eK7mN4wR2pLz4AaABAg",
     },
     {
       type: "velocity_surge",
@@ -341,6 +355,7 @@ const ALERT_TEMPLATES: Record<
       message: "Steady increase in mention volume over 6 hours",
       details:
         "Volume up 22% — appears correlated with a trending industry topic.",
+      proof_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxC4fH8nP5xS3qMa4AaABAg",
     },
     {
       type: "bot_activity",
@@ -348,6 +363,7 @@ const ALERT_TEMPLATES: Record<
       message: "Mild bot-like activity flagged",
       details:
         "34 accounts show repetitive posting patterns. Auto-monitoring enabled.",
+      proof_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxD5gJ9oQ6yT4rNb4AaABAg",
     },
   ],
 };
@@ -377,6 +393,11 @@ const NARRATIVE_SETS: Record<string, NarrativeCluster[]> = {
         "Nobody in Telugu cinema does intense roles like Vijay Deverakonda right now",
         "His range from Arjun Reddy to family entertainer roles is incredible",
       ],
+      sample_proof_urls: [
+        "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxV1aK2bT3eQ4nR5p4AaABAg",
+        "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxW2bL3cU4fR5oS6q4AaABAg",
+        "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxX3cM4dV5gS6pT7r4AaABAg",
+      ],
       trend: "growing",
     },
     {
@@ -387,6 +408,11 @@ const NARRATIVE_SETS: Record<string, NarrativeCluster[]> = {
         "Vijay Deverakonda's Instagram live had over 500k viewers — the fan base is massive",
         "The Rowdy brand merchandise sold out in minutes, fans are super loyal",
         "His interactions with fans at events are so genuine and down-to-earth",
+      ],
+      sample_proof_urls: [
+        "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxY4dN5eW6hT7qU8s4AaABAg",
+        "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxZ5eO6fX7iU8rV9t4AaABAg",
+        "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=Ugxa6fP7gY8jV9sW0u4AaABAg",
       ],
       trend: "stable",
     },
@@ -399,6 +425,11 @@ const NARRATIVE_SETS: Record<string, NarrativeCluster[]> = {
         "Hope his Bollywood projects live up to the Telugu originals",
         "The pan-India strategy is risky but could pay off big time",
       ],
+      sample_proof_urls: [
+        "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=Ugxb7gQ8hZ9kW0tX1v4AaABAg",
+        "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=Ugxc8hR9ia0lX1uY2w4AaABAg",
+        "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=Ugxd9iS0jb1mY2vZ3x4AaABAg",
+      ],
       trend: "stable",
     },
     {
@@ -409,6 +440,11 @@ const NARRATIVE_SETS: Record<string, NarrativeCluster[]> = {
         "Vijay Deverakonda's fashion sense is setting trends across South India",
         "His Rowdy brand is becoming a lifestyle statement for young fans",
         "Always keeps it real — no pretence, just authenticity",
+      ],
+      sample_proof_urls: [
+        "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=Ugxe0jT1kc2nZ3wA4y4AaABAg",
+        "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=Ugxf1kU2ld3oA4xB5z4AaABAg",
+        "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=Ugxg2lV3me4pB5yC6a4AaABAg",
       ],
       trend: "growing",
     },
@@ -423,6 +459,11 @@ const NARRATIVE_SETS: Record<string, NarrativeCluster[]> = {
         "The storyline was weak — expected much more from a star of his calibre",
         "Audience reviews are harsh, especially after the Baahubali benchmark",
       ],
+      sample_proof_urls: [
+        "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxA1mW4nf5qC6zD7b4AaABAg",
+        "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxB2nX5og6rD7aE8c4AaABAg",
+        "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxC3oY6ph7sE8bF9d4AaABAg",
+      ],
       trend: "growing",
     },
     {
@@ -433,6 +474,11 @@ const NARRATIVE_SETS: Record<string, NarrativeCluster[]> = {
         "Prabhas needs to pick better scripts — the VFX alone cannot carry a film",
         "The dubbing quality in the Hindi version was disappointing",
         "Too many high-budget flops in a row — the magic seems to be fading",
+      ],
+      sample_proof_urls: [
+        "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxD4pZ7qi8tF9cG0e4AaABAg",
+        "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxE5qA8rj9uG0dH1f4AaABAg",
+        "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxF6rB9sk0vH1eI2g4AaABAg",
       ],
       trend: "growing",
     },
@@ -445,6 +491,11 @@ const NARRATIVE_SETS: Record<string, NarrativeCluster[]> = {
         "True fans stand by him — he will bounce back stronger",
         "His dedication to physically demanding roles is still unmatched",
       ],
+      sample_proof_urls: [
+        "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxG7sC0tl1wI2fJ3h4AaABAg",
+        "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxH8tD1um2xJ3gK4i4AaABAg",
+        "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxI9uE2vn3yK4hL5j4AaABAg",
+      ],
       trend: "declining",
     },
     {
@@ -455,6 +506,11 @@ const NARRATIVE_SETS: Record<string, NarrativeCluster[]> = {
         "Other Telugu stars are outshining Prabhas at the box office lately",
         "Still the biggest pan-India star from Tollywood despite recent setbacks",
         "The competition from younger actors is getting fierce",
+      ],
+      sample_proof_urls: [
+        "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxJ0vF3wo4zL5iM6k4AaABAg",
+        "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxK1wG4xp5aM6jN7l4AaABAg",
+        "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxL2xH5yq6bN7kO8m4AaABAg",
       ],
       trend: "stable",
     },
@@ -469,6 +525,11 @@ const NARRATIVE_SETS: Record<string, NarrativeCluster[]> = {
         "Does what it says — nothing more, nothing less",
         "Average experience overall",
       ],
+      sample_proof_urls: [
+        "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxM3yI6zr7cO8lP9n4AaABAg",
+        "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxN4zJ7as8dP9mQ0o4AaABAg",
+        "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxO5aK8bt9eQ0nR1p4AaABAg",
+      ],
       trend: "stable",
     },
     {
@@ -479,6 +540,11 @@ const NARRATIVE_SETS: Record<string, NarrativeCluster[]> = {
         "Would love to see better integrations",
         "Mobile app needs a major update",
         "API documentation could be more detailed",
+      ],
+      sample_proof_urls: [
+        "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxP6bL9cu0fR1oS2q4AaABAg",
+        "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxQ7cM0dv1gS2pT3r4AaABAg",
+        "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxR8dN1ew2hT3qU4s4AaABAg",
       ],
       trend: "growing",
     },
@@ -491,6 +557,11 @@ const NARRATIVE_SETS: Record<string, NarrativeCluster[]> = {
         "ROI has been positive since month one",
         "Affordable for what you get",
       ],
+      sample_proof_urls: [
+        "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxS9eO2fx3iU4rV5t4AaABAg",
+        "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxT0fP3gy4jV5sW6u4AaABAg",
+        "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxU1gQ4hz5kW6tX7v4AaABAg",
+      ],
       trend: "stable",
     },
     {
@@ -501,6 +572,11 @@ const NARRATIVE_SETS: Record<string, NarrativeCluster[]> = {
         "Middle of the pack in this space",
         "Not the leader but a strong contender",
         "Reliable choice for mid-market teams",
+      ],
+      sample_proof_urls: [
+        "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxV2hR5ia6lX7uY8w4AaABAg",
+        "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxW3iS6jb7mY8vZ9x4AaABAg",
+        "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxX4jT7kc8nZ9wA0y4AaABAg",
       ],
       trend: "stable",
     },
@@ -539,6 +615,7 @@ const INFLUENCER_SETS: Record<string, InfluencerSet> = {
         impact_percentage: 18,
         recent_sentiment: 0.89,
         avatar_color: "#22c55e",
+        proof_url: "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxTR1aB2cD3eF4gH4AaABAg",
       },
       {
         username: "@telugu_cinema_daily",
@@ -549,6 +626,7 @@ const INFLUENCER_SETS: Record<string, InfluencerSet> = {
         impact_percentage: 14,
         recent_sentiment: 0.82,
         avatar_color: "#16a34a",
+        proof_url: "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxTC2bC3dE4fG5hI4AaABAg",
       },
       {
         username: "@rowdy_fanclub",
@@ -559,6 +637,7 @@ const INFLUENCER_SETS: Record<string, InfluencerSet> = {
         impact_percentage: 11,
         recent_sentiment: 0.76,
         avatar_color: "#4ade80",
+        proof_url: "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxRF3cD4eF5gH6iJ4AaABAg",
       },
     ],
     attackers: [
@@ -571,6 +650,7 @@ const INFLUENCER_SETS: Record<string, InfluencerSet> = {
         impact_percentage: 7,
         recent_sentiment: -0.42,
         avatar_color: "#ef4444",
+        proof_url: "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxFC4dE5fG6hI7jK4AaABAg",
       },
     ],
     neutrals: [
@@ -583,6 +663,7 @@ const INFLUENCER_SETS: Record<string, InfluencerSet> = {
         impact_percentage: 9,
         recent_sentiment: 0.05,
         avatar_color: "#a3a3a3",
+        proof_url: "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxEN5eF6gH7iJ8kL4AaABAg",
       },
       {
         username: "@south_film_tracker",
@@ -593,6 +674,7 @@ const INFLUENCER_SETS: Record<string, InfluencerSet> = {
         impact_percentage: 6,
         recent_sentiment: 0.12,
         avatar_color: "#d4d4d4",
+        proof_url: "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxSF6fG7hI8jK9lM4AaABAg",
       },
     ],
   },
@@ -607,6 +689,7 @@ const INFLUENCER_SETS: Record<string, InfluencerSet> = {
         impact_percentage: 5,
         recent_sentiment: 0.71,
         avatar_color: "#22c55e",
+        proof_url: "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxPF7gH8iJ9kL0mN4AaABAg",
       },
     ],
     attackers: [
@@ -619,6 +702,7 @@ const INFLUENCER_SETS: Record<string, InfluencerSet> = {
         impact_percentage: 24,
         recent_sentiment: -0.91,
         avatar_color: "#dc2626",
+        proof_url: "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxBO8hI9jK0lM1nO4AaABAg",
       },
       {
         username: "@film_flop_watchdog",
@@ -629,6 +713,7 @@ const INFLUENCER_SETS: Record<string, InfluencerSet> = {
         impact_percentage: 19,
         recent_sentiment: -0.78,
         avatar_color: "#ef4444",
+        proof_url: "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxFF9iJ0kL1mN2oP4AaABAg",
       },
       {
         username: "@tollywood_gossip",
@@ -639,6 +724,7 @@ const INFLUENCER_SETS: Record<string, InfluencerSet> = {
         impact_percentage: 15,
         recent_sentiment: -0.85,
         avatar_color: "#f87171",
+        proof_url: "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxTG0jK1lM2nO3pQ4AaABAg",
       },
     ],
     neutrals: [
@@ -651,6 +737,7 @@ const INFLUENCER_SETS: Record<string, InfluencerSet> = {
         impact_percentage: 12,
         recent_sentiment: -0.08,
         avatar_color: "#a3a3a3",
+        proof_url: "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxIC1kL2mN3oP4qR4AaABAg",
       },
       {
         username: "@south_media_digest",
@@ -661,6 +748,7 @@ const INFLUENCER_SETS: Record<string, InfluencerSet> = {
         impact_percentage: 8,
         recent_sentiment: 0.03,
         avatar_color: "#d4d4d4",
+        proof_url: "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxSM2lM3nO4pQ5rS4AaABAg",
       },
     ],
   },
@@ -675,6 +763,7 @@ const INFLUENCER_SETS: Record<string, InfluencerSet> = {
         impact_percentage: 12,
         recent_sentiment: 0.74,
         avatar_color: "#22c55e",
+        proof_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxBA3mN4oP5qR6sT4AaABAg",
       },
       {
         username: "@happy_customer",
@@ -685,6 +774,7 @@ const INFLUENCER_SETS: Record<string, InfluencerSet> = {
         impact_percentage: 8,
         recent_sentiment: 0.65,
         avatar_color: "#4ade80",
+        proof_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxHC4nO5pQ6rS7tU4AaABAg",
       },
     ],
     attackers: [
@@ -697,6 +787,7 @@ const INFLUENCER_SETS: Record<string, InfluencerSet> = {
         impact_percentage: 14,
         recent_sentiment: -0.58,
         avatar_color: "#ef4444",
+        proof_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxCV5oP6qR7sT8uV4AaABAg",
       },
     ],
     neutrals: [
@@ -709,6 +800,7 @@ const INFLUENCER_SETS: Record<string, InfluencerSet> = {
         impact_percentage: 10,
         recent_sentiment: 0.02,
         avatar_color: "#a3a3a3",
+        proof_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxSA6pQ7rS8tU9vW4AaABAg",
       },
       {
         username: "@data_observer",
@@ -719,6 +811,7 @@ const INFLUENCER_SETS: Record<string, InfluencerSet> = {
         impact_percentage: 7,
         recent_sentiment: -0.04,
         avatar_color: "#d4d4d4",
+        proof_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxDO7qR8sT9uV0wX4AaABAg",
       },
     ],
   },
@@ -761,20 +854,20 @@ export async function fetchAuthenticity(
   const patterns: AuthenticityReport["patterns"] =
     tenantId === "prabhasx"
       ? [
-          { type: "Coordinated posting", count: jitterInt(147), severity: "critical" },
-          { type: "Duplicate content", count: jitterInt(89), severity: "high" },
-          { type: "New-account surge", count: jitterInt(63), severity: "high" },
-          { type: "Abnormal engagement ratio", count: jitterInt(38), severity: "medium" },
+          { type: "Coordinated posting", count: jitterInt(147), severity: "critical", proof_url: "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxAU1aB2cD3eF4gH4AaABAg" },
+          { type: "Duplicate content", count: jitterInt(89), severity: "high", proof_url: "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxAU2bC3dE4fG5hI4AaABAg" },
+          { type: "New-account surge", count: jitterInt(63), severity: "high", proof_url: "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxAU3cD4eF5gH6iJ4AaABAg" },
+          { type: "Abnormal engagement ratio", count: jitterInt(38), severity: "medium", proof_url: "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxAU4dE5fG6hI7jK4AaABAg" },
         ]
       : tenantId === "vijayx"
         ? [
-            { type: "Abnormal engagement ratio", count: jitterInt(12), severity: "low" },
-            { type: "New-account surge", count: jitterInt(8), severity: "low" },
+            { type: "Abnormal engagement ratio", count: jitterInt(12), severity: "low", proof_url: "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxAU5eF6gH7iJ8kL4AaABAg" },
+            { type: "New-account surge", count: jitterInt(8), severity: "low", proof_url: "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxAU6fG7hI8jK9lM4AaABAg" },
           ]
         : [
-            { type: "Duplicate content", count: jitterInt(31), severity: "medium" },
-            { type: "Abnormal engagement ratio", count: jitterInt(22), severity: "medium" },
-            { type: "New-account surge", count: jitterInt(15), severity: "low" },
+            { type: "Duplicate content", count: jitterInt(31), severity: "medium", proof_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxAU7gH8iJ9kL0mN4AaABAg" },
+            { type: "Abnormal engagement ratio", count: jitterInt(22), severity: "medium", proof_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxAU8hI9jK0lM1nO4AaABAg" },
+            { type: "New-account surge", count: jitterInt(15), severity: "low", proof_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxAU9iJ0kL1mN2oP4AaABAg" },
           ];
 
   return {
@@ -820,6 +913,15 @@ export async function fetchVelocity(
     };
   });
 
+  const videoId = tenantId === "vijayx" ? "LkY3F-GR8Xc" : tenantId === "prabhasx" ? "Qrf4Z9AMbgI" : "dQw4w9WgXcQ";
+
+  const spike_proof_urls = timeline
+    .filter((_, i) => i % 6 === 3)
+    .map((t) => ({
+      hour: t.hour,
+      proof_url: `https://www.youtube.com/watch?v=${videoId}&lc=UgxVS${t.hour.replace(":", "")}4AaABAg`,
+    }));
+
   return {
     speed: p.speed,
     rate_per_hour: jitterInt(p.ratePerHour, 0.03),
@@ -832,6 +934,7 @@ export async function fetchVelocity(
       tenantId === "prabhasx" ? 12.4 : tenantId === "vijayx" ? -3.1 : 0.7,
       0.03,
     ),
+    spike_proof_urls,
     timeline,
   };
 }
@@ -855,6 +958,7 @@ export async function fetchMoodMap(
   tenantId: string,
 ): Promise<MoodMapReport> {
   const p = profile(tenantId);
+  const mmVideoId = tenantId === "vijayx" ? "LkY3F-GR8Xc" : tenantId === "prabhasx" ? "Qrf4Z9AMbgI" : "dQw4w9WgXcQ";
 
   const positiveEmotions: readonly string[] = ["joy", "trust", "anticipation"];
   const negativeEmotions: readonly string[] = ["anger", "disgust", "sadness", "fear"];
@@ -889,6 +993,7 @@ export async function fetchMoodMap(
       dominant_emotion: emotion,
       comment_count: jitterInt(tenantId === "prabhasx" ? 420 : 185, 0.15),
       is_spike: isSpike,
+      proof_url: `https://www.youtube.com/watch?v=${mmVideoId}&lc=UgxMM${String(i).padStart(2, "0")}aB2cD3eF4AaABAg`,
     };
   });
 
@@ -928,6 +1033,7 @@ const ACTION_SETS: Record<string, ActionRecommendation[]> = {
         "Three high-reach Telugu cinema influencers posted favourable reviews of Vijay Deverakonda this week. Retweet or co-create content to maximise organic reach among fans.",
       expected_impact: "+5% positive sentiment within 48h",
       icon: "📣",
+      proof_url: "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxAC1aB2cD3eF4gH4AaABAg",
     },
     {
       id: "act-v-2",
@@ -938,6 +1044,7 @@ const ACTION_SETS: Record<string, ActionRecommendation[]> = {
         "A new narrative cluster around Vijay Deverakonda's next pan-India project is growing. Set up dedicated keyword alerts to stay ahead of the conversation.",
       expected_impact: "Early narrative control, reduced risk of misframing",
       icon: "🎬",
+      proof_url: "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxAC2bC3dE4fG5hI4AaABAg",
     },
     {
       id: "act-v-3",
@@ -948,6 +1055,7 @@ const ACTION_SETS: Record<string, ActionRecommendation[]> = {
         "Fan community engagement is the second-largest narrative. Exclusive BTS content or Instagram Lives could solidify fan loyalty and boost positive sentiment.",
       expected_impact: "+3 points on narrative positivity score",
       icon: "🎥",
+      proof_url: "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxAC3cD4eF5gH6iJ4AaABAg",
     },
   ],
   prabhasx: [
@@ -960,6 +1068,7 @@ const ACTION_SETS: Record<string, ActionRecommendation[]> = {
         "The top negative narrative (34%) centres on box office underperformance. A candid interview or social media post acknowledging fans could reduce negative buzz by 20-30%.",
       expected_impact: "-15% negative mentions within 72h",
       icon: "🚨",
+      proof_url: "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxAC4dE5fG6hI7jK4AaABAg",
     },
     {
       id: "act-p-2",
@@ -970,6 +1079,7 @@ const ACTION_SETS: Record<string, ActionRecommendation[]> = {
         "147 accounts are amplifying negative content about Prabhas with identical messaging. File platform abuse reports immediately.",
       expected_impact: "Remove 60-70% of artificial negative volume",
       icon: "🤖",
+      proof_url: "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxAC5eF6gH7iJ8kL4AaABAg",
     },
     {
       id: "act-p-3",
@@ -980,6 +1090,7 @@ const ACTION_SETS: Record<string, ActionRecommendation[]> = {
         "Loyal Prabhas supporters are declining in visibility. Provide them with exclusive content and event access to counter negative coverage.",
       expected_impact: "+8% positive narrative share",
       icon: "🛡️",
+      proof_url: "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxAC6fG7hI8jK9lM4AaABAg",
     },
     {
       id: "act-p-4",
@@ -990,6 +1101,7 @@ const ACTION_SETS: Record<string, ActionRecommendation[]> = {
         "Shift the narrative from past box office results to future excitement. An announcement of a highly anticipated collaboration can redirect fan energy.",
       expected_impact: "Redirect 40% of conversation to positive anticipation",
       icon: "🎬",
+      proof_url: "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxAC7gH8iJ9kL0mN4AaABAg",
     },
     {
       id: "act-p-5",
@@ -1000,6 +1112,7 @@ const ACTION_SETS: Record<string, ActionRecommendation[]> = {
         "20% of narratives involve comparisons with other Telugu stars. Monitor and prepare counter-positioning content highlighting Prabhas's unique strengths.",
       expected_impact: "Prevent narrative loss to competitor actors",
       icon: "👀",
+      proof_url: "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxAC8hI9jK0lM1nO4AaABAg",
     },
   ],
   default: [
@@ -1012,6 +1125,7 @@ const ACTION_SETS: Record<string, ActionRecommendation[]> = {
         "Feature requests make up 28% of narratives. A public roadmap update would convert mixed sentiment to positive.",
       expected_impact: "+4% positive sentiment, improved trust score",
       icon: "🗺️",
+      proof_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxAC9iJ0kL1mN2oP4AaABAg",
     },
     {
       id: "act-d-2",
@@ -1022,6 +1136,7 @@ const ACTION_SETS: Record<string, ActionRecommendation[]> = {
         "34 accounts flagged for repetitive patterns. Review and report if confirmed artificial.",
       expected_impact: "Cleaner sentiment data, reduced noise",
       icon: "🔍",
+      proof_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxAC0jK1lM2nO3pQ4AaABAg",
     },
     {
       id: "act-d-3",
@@ -1032,6 +1147,7 @@ const ACTION_SETS: Record<string, ActionRecommendation[]> = {
         "Two neutral influencers with high reach could be converted to supporters through product demos or partnerships.",
       expected_impact: "+6% positive influencer coverage",
       icon: "🤝",
+      proof_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxAC1kL2mN3oP4qR4AaABAg",
     },
   ],
 };
@@ -1122,6 +1238,7 @@ export async function fetchCampaignImpact(
           after: jitterInt(2_890),
           change: jitterInt(1_650),
           change_percentage: jitter(133),
+          proof_url: "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxCM1aB2cD3eF4gH4AaABAg",
         },
         {
           name: "Star Power Score",
@@ -1129,6 +1246,7 @@ export async function fetchCampaignImpact(
           after: jitterInt(78),
           change: jitterInt(14),
           change_percentage: jitter(21.9),
+          proof_url: "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxCM2bC3dE4fG5hI4AaABAg",
         },
         {
           name: "Fan Engagement Rate",
@@ -1136,6 +1254,7 @@ export async function fetchCampaignImpact(
           after: jitter(5.1),
           change: jitter(1.9),
           change_percentage: jitter(59.4),
+          proof_url: "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxCM3cD4eF5gH6iJ4AaABAg",
         },
         {
           name: "Influencer Amplification",
@@ -1143,6 +1262,7 @@ export async function fetchCampaignImpact(
           after: jitterInt(14),
           change: jitterInt(6),
           change_percentage: jitter(75),
+          proof_url: "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxCM4dE5fG6hI7jK4AaABAg",
         },
       ],
       assessment:
@@ -1167,6 +1287,7 @@ export async function fetchCampaignImpact(
           after: jitterInt(2_980),
           change: jitterInt(-470),
           change_percentage: jitter(-13.6),
+          proof_url: "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxCM5eF6gH7iJ8kL4AaABAg",
         },
         {
           name: "Fan Sentiment Score",
@@ -1174,6 +1295,7 @@ export async function fetchCampaignImpact(
           after: jitterInt(42),
           change: jitterInt(4),
           change_percentage: jitter(10.5),
+          proof_url: "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxCM6fG7hI8jK9lM4AaABAg",
         },
         {
           name: "Bot Traffic Share",
@@ -1181,6 +1303,7 @@ export async function fetchCampaignImpact(
           after: jitter(19),
           change: jitter(-4),
           change_percentage: jitter(-17.4),
+          proof_url: "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxCM7gH8iJ9kL0mN4AaABAg",
         },
         {
           name: "PR Response Time (hrs)",
@@ -1188,6 +1311,7 @@ export async function fetchCampaignImpact(
           after: jitter(8.2),
           change: jitter(-10.3),
           change_percentage: jitter(-55.7),
+          proof_url: "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxCM8hI9jK0lM1nO4AaABAg",
         },
       ],
       assessment:
@@ -1213,6 +1337,7 @@ export async function fetchCampaignImpact(
         after: jitterInt(2_340),
         change: jitterInt(540),
         change_percentage: jitter(30),
+        proof_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxCM9iJ0kL1mN2oP4AaABAg",
       },
       {
         name: "Sentiment Ratio",
@@ -1220,6 +1345,7 @@ export async function fetchCampaignImpact(
         after: jitter(1.6),
         change: jitter(0.2),
         change_percentage: jitter(14.3),
+        proof_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxCM0jK1lM2nO3pQ4AaABAg",
       },
       {
         name: "New Audience Reach",
@@ -1227,6 +1353,7 @@ export async function fetchCampaignImpact(
         after: jitterInt(67_000),
         change: jitterInt(25_000),
         change_percentage: jitter(59.5),
+        proof_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxCM1kL2mN3oP4qR4AaABAg",
       },
       {
         name: "Engagement Rate",
@@ -1234,6 +1361,7 @@ export async function fetchCampaignImpact(
         after: jitter(3.4),
         change: jitter(0.6),
         change_percentage: jitter(21.4),
+        proof_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxCM2lM3nO4pQ5rS4AaABAg",
       },
     ],
     assessment:

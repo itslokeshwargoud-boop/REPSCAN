@@ -23,7 +23,7 @@ import {
   useAlerts,
   useCurrentScore,
 } from "@/hooks/useKeywordData";
-import type { Keyword } from "@/lib/api";
+import { SUPPORTED_PLATFORMS, type Keyword } from "@/lib/api";
 
 function formatDate(iso: string): string {
   try {
@@ -41,6 +41,11 @@ function scoreBarWidth(score: number): number {
 function percentageDelta(current: number, previous: number): number {
   if (previous <= 0) return current > 0 ? 100 : 0;
   return ((current - previous) / previous) * 100;
+}
+
+function parseDateOrZero(iso: string): number {
+  const timestamp = new Date(iso).getTime();
+  return Number.isFinite(timestamp) ? timestamp : 0;
 }
 
 function scoreTone(score: number): { track: string; fill: string; text: string; label: SeverityLevel } {
@@ -68,11 +73,33 @@ function scoreTone(score: number): { track: string; fill: string; text: string; 
   };
 }
 
-function platformsForKeyword(keyword: string): string[] {
-  const all = ["twitter", "youtube", "instagram"];
-  const hash = keyword.split("").reduce((acc, letter) => acc + letter.charCodeAt(0), 0);
-  const count = (hash % 3) + 1;
-  return all.slice(0, count);
+function bucketTimestamps(timestamps: string[], days: number, bins = 7): number[] {
+  const now = Date.now();
+  const totalMs = days * 24 * 60 * 60 * 1000;
+  const start = now - totalMs;
+  const bucketMs = totalMs / bins;
+  const counts = Array.from({ length: bins }, () => 0);
+
+  timestamps.forEach((timestamp) => {
+    const value = parseDateOrZero(timestamp);
+    if (value < start || value > now) return;
+    const index = Math.min(bins - 1, Math.floor((value - start) / bucketMs));
+    counts[Math.max(0, index)] += 1;
+  });
+
+  return counts;
+}
+
+function inferPlatform(message: string): (typeof SUPPORTED_PLATFORMS)[number] | null {
+  const text = message.toLowerCase();
+  if (text.includes("twitter") || text.includes("tweet")) return "twitter";
+  if (text.includes("youtube") || text.includes("video")) return "youtube";
+  if (text.includes("instagram") || text.includes("insta")) return "instagram";
+  return null;
+}
+
+function isClusterAlert(alertType: string, message: string): boolean {
+  return alertType === "attack_detected" || message.toLowerCase().includes("cluster");
 }
 
 function mapSeverity(alertType: string): SeverityLevel {
@@ -121,62 +148,108 @@ export default function Dashboard() {
   const keywords: Keyword[] = keywordsData?.items ?? [];
   const alerts = alertsData.data?.items ?? [];
   const unreadAlerts = alerts.filter((alert) => !alert.is_read);
+  const rangeDays = range === "7d" ? 7 : range === "30d" ? 30 : 90;
+  const now = Date.now();
+  const periodMs = rangeDays * 24 * 60 * 60 * 1000;
+  const currentStart = now - periodMs;
+  const previousStart = now - periodMs * 2;
+
+  const currentKeywords = keywords.filter((keyword) => parseDateOrZero(keyword.created_at) >= currentStart);
+  const previousKeywords = keywords.filter((keyword) => {
+    const created = parseDateOrZero(keyword.created_at);
+    return created >= previousStart && created < currentStart;
+  });
+  const currentAlerts = alerts.filter((alert) => parseDateOrZero(alert.triggered_at) >= currentStart);
+  const previousAlerts = alerts.filter((alert) => {
+    const triggered = parseDateOrZero(alert.triggered_at);
+    return triggered >= previousStart && triggered < currentStart;
+  });
 
   const suspiciousAuthors = useMemo(
-    () => alerts.filter((alert) => alert.alert_type === "high_risk_author_active").length,
-    [alerts]
+    () => currentAlerts.filter((alert) => alert.alert_type === "high_risk_author_active").length,
+    [currentAlerts]
+  );
+  const previousSuspiciousAuthors = useMemo(
+    () => previousAlerts.filter((alert) => alert.alert_type === "high_risk_author_active").length,
+    [previousAlerts]
   );
   const attackClusters = useMemo(
-    () => alerts.filter((alert) => alert.alert_type === "attack_detected" || alert.message.toLowerCase().includes("cluster")).length,
-    [alerts]
+    () => currentAlerts.filter((alert) => isClusterAlert(alert.alert_type, alert.message)).length,
+    [currentAlerts]
+  );
+  const previousAttackClusters = useMemo(
+    () => previousAlerts.filter((alert) => isClusterAlert(alert.alert_type, alert.message)).length,
+    [previousAlerts]
   );
 
   const metrics = [
     {
       title: "Monitored Keywords",
       value: keywords.length,
-      delta: percentageDelta(keywords.length, Math.max(1, keywords.length - 2)),
-      sparkline: [14, 18, 22, 24, 28, 30, 35],
+      delta: percentageDelta(currentKeywords.length, previousKeywords.length),
+      sparkline: bucketTimestamps(keywords.map((keyword) => keyword.created_at), rangeDays),
       positiveIsGood: true,
     },
     {
       title: "Active Threat Alerts",
-      value: unreadAlerts.length,
-      delta: percentageDelta(unreadAlerts.length, Math.max(1, unreadAlerts.length + 2)),
-      sparkline: [8, 10, 9, 13, 12, 15, 14],
+      value: unreadAlerts.filter((alert) => parseDateOrZero(alert.triggered_at) >= currentStart).length,
+      delta: percentageDelta(currentAlerts.length, previousAlerts.length),
+      sparkline: bucketTimestamps(currentAlerts.map((alert) => alert.triggered_at), rangeDays),
       positiveIsGood: false,
     },
     {
       title: "Suspicious Authors",
       value: suspiciousAuthors,
-      delta: percentageDelta(suspiciousAuthors, Math.max(1, suspiciousAuthors - 1)),
-      sparkline: [3, 4, 6, 7, 7, 9, 11],
+      delta: percentageDelta(suspiciousAuthors, previousSuspiciousAuthors),
+      sparkline: bucketTimestamps(
+        currentAlerts
+          .filter((alert) => alert.alert_type === "high_risk_author_active")
+          .map((alert) => alert.triggered_at),
+        rangeDays
+      ),
       positiveIsGood: false,
     },
     {
       title: "Attack Clusters",
       value: attackClusters,
-      delta: percentageDelta(attackClusters, Math.max(1, attackClusters - 1)),
-      sparkline: [2, 3, 3, 4, 5, 7, 8],
+      delta: percentageDelta(attackClusters, previousAttackClusters),
+      sparkline: bucketTimestamps(
+        currentAlerts
+          .filter((alert) => isClusterAlert(alert.alert_type, alert.message))
+          .map((alert) => alert.triggered_at),
+        rangeDays
+      ),
       positiveIsGood: false,
     },
   ];
 
+  const platformCounts = { twitter: 0, youtube: 0, instagram: 0 };
+  currentAlerts.forEach((alert) => {
+    const platform = inferPlatform(alert.message);
+    if (platform) {
+      platformCounts[platform] += 1;
+    }
+  });
+  const hasPlatformMixData = platformCounts.twitter + platformCounts.youtube + platformCounts.instagram > 0;
+
   const platformMix = [
-    { name: "Twitter/X", value: 42, color: "#FB7185" },
-    { name: "YouTube", value: 33, color: "#FDBA74" },
-    { name: "Instagram", value: 25, color: "#CBD5E1" },
+    { name: "Twitter/X", value: platformCounts.twitter, color: "#FB7185" },
+    { name: "YouTube", value: platformCounts.youtube, color: "#FDBA74" },
+    { name: "Instagram", value: platformCounts.instagram, color: "#CBD5E1" },
   ];
 
-  const clusterFormation = [
-    { label: "W1", clusters: 2 },
-    { label: "W2", clusters: 4 },
-    { label: "W3", clusters: 5 },
-    { label: "W4", clusters: 7 },
-    { label: "W5", clusters: 6 },
-  ];
+  const clusterFormation = bucketTimestamps(
+    currentAlerts
+      .filter((alert) => isClusterAlert(alert.alert_type, alert.message))
+      .map((alert) => alert.triggered_at),
+    rangeDays,
+    5
+  ).map((clusters, index) => ({ label: `T${index + 1}`, clusters }));
+  const clusterAlerts = currentAlerts.filter((alert) => isClusterAlert(alert.alert_type, alert.message));
+  const distinctClusterPlatforms = new Set(clusterAlerts.map((alert) => inferPlatform(alert.message)).filter(Boolean));
+  const multiPlatformClusters = distinctClusterPlatforms.size > 1 ? attackClusters : 0;
 
-  const severitySummary = alerts.reduce(
+  const severitySummary = currentAlerts.reduce(
     (acc, alert) => {
       const severity = mapSeverity(alert.alert_type);
       acc[severity] += 1;
@@ -281,23 +354,29 @@ export default function Dashboard() {
 
             <Card title="Platform Mentions Mix" subtitle="Source channel distribution">
               <div className="h-[170px] px-5 pb-5 pt-3">
-                <ResponsiveContainer width="100%" height="100%">
-                  <PieChart>
-                    <Tooltip
-                      contentStyle={{
-                        borderRadius: 12,
-                        border: "1px solid #E2E8F0",
-                        backgroundColor: "#FFFFFF",
-                        fontSize: 12,
-                      }}
-                    />
-                    <Pie data={platformMix} dataKey="value" innerRadius={42} outerRadius={62} paddingAngle={3}>
-                      {platformMix.map((entry) => (
-                        <Cell key={entry.name} fill={entry.color} />
-                      ))}
-                    </Pie>
-                  </PieChart>
-                </ResponsiveContainer>
+                {hasPlatformMixData ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <PieChart>
+                      <Tooltip
+                        contentStyle={{
+                          borderRadius: 12,
+                          border: "1px solid #E2E8F0",
+                          backgroundColor: "#FFFFFF",
+                          fontSize: 12,
+                        }}
+                      />
+                      <Pie data={platformMix} dataKey="value" innerRadius={42} outerRadius={62} paddingAngle={3}>
+                        {platformMix.map((entry) => (
+                          <Cell key={entry.name} fill={entry.color} />
+                        ))}
+                      </Pie>
+                    </PieChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="flex h-full items-center justify-center rounded-xl border border-slate-200 bg-slate-50 text-sm text-slate-500">
+                    No platform mentions in range
+                  </div>
+                )}
               </div>
             </Card>
 
@@ -326,16 +405,16 @@ export default function Dashboard() {
               <div className="grid grid-cols-1 gap-4 px-5 pb-5 pt-4 lg:grid-cols-3">
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Coordinated Signals</p>
-                  <p className="mt-2 text-2xl font-bold text-slate-900">{alerts.length}</p>
+                  <p className="mt-2 text-2xl font-bold text-slate-900">{currentAlerts.length}</p>
                   <p className="mt-1 text-sm text-slate-600">Cross-platform synchronized activity in current watch window.</p>
                 </div>
 
                 <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
                   <p className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">Cluster Highlights</p>
                   <ul className="mt-3 space-y-2 text-sm text-slate-700">
-                    <li className="flex items-center justify-between"><span>Emerging clusters</span><strong>{Math.max(attackClusters, 1)}</strong></li>
-                    <li className="flex items-center justify-between"><span>Multi-platform clusters</span><strong>{Math.max(Math.floor(attackClusters / 2), 1)}</strong></li>
-                    <li className="flex items-center justify-between"><span>Escalating clusters</span><strong>{Math.max(unreadAlerts.length - 1, 0)}</strong></li>
+                    <li className="flex items-center justify-between"><span>Emerging clusters</span><strong>{attackClusters}</strong></li>
+                    <li className="flex items-center justify-between"><span>Multi-platform clusters</span><strong>{multiPlatformClusters}</strong></li>
+                    <li className="flex items-center justify-between"><span>Escalating clusters</span><strong>{currentAlerts.filter((alert) => mapSeverity(alert.alert_type) === "high").length}</strong></li>
                   </ul>
                 </div>
 
@@ -412,14 +491,14 @@ export default function Dashboard() {
                         </tr>
                       )}
 
-                      {keywords.map((kw, idx) => (
-                        <tr key={kw.id} className={`border-b border-slate-100 transition-colors hover:bg-slate-50/70 ${idx % 2 === 0 ? "bg-white" : "bg-slate-50/30"}`}>
+                      {keywords.map((kw) => (
+                        <tr key={kw.id} className="border-b border-slate-100 bg-white transition-colors hover:bg-slate-50/70">
                           <td className="px-3 py-4 font-semibold text-slate-900">{kw.keyword}</td>
                           <td className="px-3 py-4">
                             <KeywordRiskScoreCell keyword={kw.keyword} />
                           </td>
                           <td className="px-3 py-4">
-                            <PlatformBadges platforms={platformsForKeyword(kw.keyword)} />
+                            <PlatformBadges platforms={[...SUPPORTED_PLATFORMS]} />
                           </td>
                           <td className="px-3 py-4">
                             <span
@@ -464,13 +543,13 @@ export default function Dashboard() {
             <aside>
               <Card title="Alerts Panel" subtitle="Recent alerts by severity">
                 <div className="space-y-3 px-5 pb-5 pt-4">
-                  {alerts.length === 0 && (
+                  {currentAlerts.length === 0 && (
                     <div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-500">
                       No active alerts in the selected window.
                     </div>
                   )}
 
-                  {alerts.map((alert) => {
+                  {currentAlerts.map((alert) => {
                     const severity = mapSeverity(alert.alert_type);
                     return (
                       <div key={alert.id} className={`rounded-xl border border-l-4 border-slate-200 p-3 ${alertCue(severity)}`}>

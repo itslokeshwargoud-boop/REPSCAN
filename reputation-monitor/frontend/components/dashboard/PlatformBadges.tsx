@@ -18,7 +18,7 @@ export default function PlatformBadges({ platforms }: PlatformBadgesProps) {
           tone: "bg-slate-100 text-slate-600",
         };
         return (
-          <span key={`${platform}-${cfg.label}`} className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium ${cfg.tone}`}>
+          <span key={platform} className={`inline-flex items-center gap-1 rounded-full px-2 py-1 text-[11px] font-medium ${cfg.tone}`}>
             <span>{cfg.icon}</span>
             <span>{cfg.label}</span>
           </span>

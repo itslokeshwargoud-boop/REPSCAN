@@ -125,8 +125,7 @@ export default function Dashboard() {
     if (!keyword.trim()) return;
     search();
     // Persist keyword to shared context
-    shared.setKeyword(keyword.trim());
-    shared.commitKeyword();
+    shared.commitKeyword(keyword.trim());
     setRecentSearches((prev) => {
       const filtered = prev.filter((s) => s !== keyword.trim());
       return [keyword.trim(), ...filtered].slice(0, 5);

@@ -51,8 +51,7 @@ export default function BrandIntelligencePage() {
     if (!keyword.trim()) return;
     setActiveKeyword(keyword.trim());
     // Persist to shared context
-    shared.setKeyword(keyword.trim());
-    shared.commitKeyword();
+    shared.commitKeyword(keyword.trim());
     // Update URL without full navigation
     router.replace(`/brand-intelligence?q=${encodeURIComponent(keyword.trim())}`, undefined, { shallow: true });
   }

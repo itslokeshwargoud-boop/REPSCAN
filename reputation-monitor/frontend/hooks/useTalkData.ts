@@ -85,14 +85,12 @@ export function useTalkData(initialKeyword?: string): TalkData {
   useEffect(() => {
     if (initialKeyword && initialKeyword !== prevInitial.current) {
       prevInitial.current = initialKeyword;
-      if (!activeKeyword) {
-        setKeyword(initialKeyword);
-        setActiveKeyword(initialKeyword);
-        isFetching.current = false;
-        setFetchKey((k) => k + 1);
-      }
+      setKeyword(initialKeyword);
+      setActiveKeyword(initialKeyword);
+      isFetching.current = false;
+      setFetchKey((k) => k + 1);
     }
-  }, [initialKeyword, activeKeyword]);
+  }, [initialKeyword]);
 
   const loadData = useCallback(async () => {
     if (isFetching.current || !activeKeyword.trim()) return;

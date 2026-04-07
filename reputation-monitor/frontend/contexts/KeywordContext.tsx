@@ -23,8 +23,8 @@ interface KeywordContextValue {
   setKeyword: (kw: string) => void;
   /** The keyword that was last submitted / searched. */
   activeKeyword: string;
-  /** Commit the current keyword as the active search term. */
-  commitKeyword: () => void;
+  /** Commit the current keyword (or a provided keyword) as the active search term. */
+  commitKeyword: (kw?: string) => void;
 }
 
 const KeywordContext = createContext<KeywordContextValue>({
@@ -57,9 +57,10 @@ export function KeywordProvider({ children }: { children: ReactNode }) {
     setKeywordRaw(kw);
   }, []);
 
-  const commitKeyword = useCallback(() => {
-    const trimmed = keyword.trim();
+  const commitKeyword = useCallback((kw?: string) => {
+    const trimmed = (kw ?? keyword).trim();
     if (!trimmed) return;
+    setKeywordRaw(trimmed);
     setActiveKeyword(trimmed);
     try {
       sessionStorage.setItem(STORAGE_KEY, trimmed);

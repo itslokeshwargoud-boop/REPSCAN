@@ -290,6 +290,8 @@ export default function TalkPage() {
   useEffect(() => {
     if (router.query.q && typeof router.query.q === "string") {
       talk.setKeyword(router.query.q);
+      // Also persist to shared context
+      shared.commitKeyword(router.query.q);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.query.q]);
@@ -298,8 +300,7 @@ export default function TalkPage() {
     e.preventDefault();
     talk.search();
     // Persist to shared context
-    shared.setKeyword(talk.keyword.trim());
-    shared.commitKeyword();
+    shared.commitKeyword(talk.keyword.trim());
   }
 
   function handleTextSearch(e: React.FormEvent) {

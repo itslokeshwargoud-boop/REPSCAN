@@ -53,40 +53,44 @@ function buildResponse(
   return res.status(statusCode).json({ ...legacy, ...structured });
 }
 
-export default async function handler(
-  req: NextApiRequest,
-  res: NextApiResponse
-) {
-  const query = typeof req.query.q === "string" ? req.query.q : "";
+// ---------------------------------------------------------------------------
+// Core YouTube fetch logic — shared between /api/youtube and /api/metrics
+// ---------------------------------------------------------------------------
 
-  if (!query) {
-    return buildResponse(res, 400, {
-      status: "error",
-      videos: [],
-      totalResults: 0,
-      reason: "Missing query parameter",
-      query,
-    });
-  }
+export interface YouTubeSearchResult {
+  videos: YouTubeVideo[];
+  totalResults: number;
+  error?: string;
+}
 
+/**
+ * Fetch YouTube videos for a query string.
+ * Reads YOUTUBE_API_KEY from process.env. Never throws.
+ */
+export async function fetchYouTubeVideos(query: string): Promise<YouTubeSearchResult> {
   const apiKey = process.env.YOUTUBE_API_KEY;
   if (!apiKey) {
-    return buildResponse(res, 500, {
-      status: "error",
-      videos: [],
-      totalResults: 0,
-      reason: "YouTube API key not configured",
-      query,
-    });
+    return { videos: [], totalResults: 0, error: "YouTube API key not configured" };
+  }
+
+  if (!query.trim()) {
+    return { videos: [], totalResults: 0, error: "Missing query" };
   }
 
   try {
-    // Step 1: Search for videos
-    const searchUrl =
-      `https://www.googleapis.com/youtube/v3/search` +
-      `?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=10&key=${apiKey}`;
+    // 15-second timeout for all YouTube API calls
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
 
-    const searchRes = await fetch(searchUrl);
+    // Step 1: Search for videos (max 12 results)
+    const searchUrl = new URL("https://www.googleapis.com/youtube/v3/search");
+    searchUrl.searchParams.set("part", "snippet");
+    searchUrl.searchParams.set("q", query);
+    searchUrl.searchParams.set("type", "video");
+    searchUrl.searchParams.set("maxResults", "12");
+    searchUrl.searchParams.set("key", apiKey);
+
+    const searchRes = await fetch(searchUrl.toString(), { signal: controller.signal });
     const searchData = await searchRes.json() as {
       items?: Array<{
         id: { videoId: string };
@@ -106,13 +110,12 @@ export default async function handler(
     };
 
     if (!searchRes.ok || !searchData.items) {
-      return buildResponse(res, 200, {
-        status: "error",
+      clearTimeout(timeout);
+      return {
         videos: [],
         totalResults: 0,
-        reason: searchData.error?.message ?? "YouTube search failed",
-        query,
-      });
+        error: searchData.error?.message ?? "YouTube search failed",
+      };
     }
 
     const validItems = searchData.items.filter((item) => !!item.id?.videoId);
@@ -120,15 +123,18 @@ export default async function handler(
     const totalResults = searchData.pageInfo?.totalResults ?? 0;
 
     if (videoIds.length === 0) {
-      return buildResponse(res, 200, { status: "ok", videos: [], totalResults: 0, query });
+      clearTimeout(timeout);
+      return { videos: [], totalResults: 0 };
     }
 
     // Step 2: Fetch statistics for each video
-    const statsUrl =
-      `https://www.googleapis.com/youtube/v3/videos` +
-      `?part=statistics&id=${videoIds.join(",")}&key=${apiKey}`;
+    const statsUrl = new URL("https://www.googleapis.com/youtube/v3/videos");
+    statsUrl.searchParams.set("part", "statistics");
+    statsUrl.searchParams.set("id", videoIds.join(","));
+    statsUrl.searchParams.set("key", apiKey);
 
-    const statsRes = await fetch(statsUrl);
+    const statsRes = await fetch(statsUrl.toString(), { signal: controller.signal });
+    clearTimeout(timeout);
     const statsData = await statsRes.json() as {
       items?: Array<{
         id: string;
@@ -168,14 +174,51 @@ export default async function handler(
       };
     });
 
-    return buildResponse(res, 200, { status: "ok", videos, totalResults, query });
+    return { videos, totalResults };
   } catch (err) {
-    return buildResponse(res, 200, {
+    const message = err instanceof Error
+      ? (err.name === "AbortError" ? "Request timed out" : err.message)
+      : "Unknown error";
+    return { videos: [], totalResults: 0, error: message };
+  }
+}
+
+// ---------------------------------------------------------------------------
+// API Route Handler
+// ---------------------------------------------------------------------------
+
+export default async function handler(
+  req: NextApiRequest,
+  res: NextApiResponse
+) {
+  const query = typeof req.query.q === "string" ? req.query.q : "";
+
+  if (!query) {
+    return buildResponse(res, 400, {
       status: "error",
       videos: [],
       totalResults: 0,
-      reason: err instanceof Error ? err.message : "Unknown error",
+      reason: "Missing query parameter",
       query,
     });
   }
+
+  const result = await fetchYouTubeVideos(query);
+
+  if (result.error) {
+    return buildResponse(res, 200, {
+      status: "error",
+      videos: result.videos,
+      totalResults: result.totalResults,
+      reason: result.error,
+      query,
+    });
+  }
+
+  return buildResponse(res, 200, {
+    status: "ok",
+    videos: result.videos,
+    totalResults: result.totalResults,
+    query,
+  });
 }

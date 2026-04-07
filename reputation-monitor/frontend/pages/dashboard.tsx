@@ -131,9 +131,6 @@ export default function Dashboard() {
 
   function handleQuickSearch(kw: string) {
     setKeyword(kw);
-    setTimeout(() => {
-      // Allow state to update, then trigger search
-    }, 0);
   }
 
   const channelPieData = channelBreakdown.slice(0, 6).map((ch, i) => ({

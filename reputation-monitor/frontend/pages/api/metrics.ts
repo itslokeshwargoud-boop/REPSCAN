@@ -1,5 +1,6 @@
 import type { NextApiRequest, NextApiResponse } from "next";
 import type { YouTubeVideo } from "./youtube";
+import { fetchYouTubeVideos } from "./youtube";
 
 // ---------------------------------------------------------------------------
 // Types
@@ -132,30 +133,8 @@ export default async function handler(
   res.setHeader("Cache-Control", "public, s-maxage=60, stale-while-revalidate=120");
 
   try {
-    // Build the internal YouTube API URL
-    const protocol = req.headers["x-forwarded-proto"] || "http";
-    const host = req.headers.host || "localhost:3000";
-    const baseUrl = `${protocol}://${host}`;
-
-    const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 15000);
-
-    const ytRes = await fetch(
-      `${baseUrl}/api/youtube?q=${encodeURIComponent(keyword)}`,
-      { signal: controller.signal }
-    );
-    clearTimeout(timeout);
-
-    const ytData = await ytRes.json() as {
-      success?: boolean;
-      data?: YouTubeVideo[];
-      videos?: YouTubeVideo[];
-      error?: string;
-      reason?: string;
-    };
-
-    // Support both structured (data) and legacy (videos) response shapes
-    const videos: YouTubeVideo[] = ytData.data ?? ytData.videos ?? [];
+    const result = await fetchYouTubeVideos(keyword);
+    const videos: YouTubeVideo[] = result.videos;
 
     if (!videos || videos.length === 0) {
       return res.status(200).json({
@@ -165,7 +144,7 @@ export default async function handler(
         kpis: { totalVideos: 0, totalViews: 0, totalLikes: 0, totalComments: 0, avgViewsPerVideo: 0, avgLikesPerVideo: 0, engagementRate: 0 },
         channelBreakdown: [],
         trend: [],
-        error: ytData.error ?? ytData.reason ?? undefined,
+        error: result.error ?? undefined,
       });
     }
 

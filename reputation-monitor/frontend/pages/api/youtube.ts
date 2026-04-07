@@ -81,12 +81,16 @@ export default async function handler(
   }
 
   try {
-    // Step 1: Search for videos
+    // 15-second timeout for all YouTube API calls
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 15000);
+
+    // Step 1: Search for videos (max 12 results)
     const searchUrl =
       `https://www.googleapis.com/youtube/v3/search` +
-      `?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=10&key=${apiKey}`;
+      `?part=snippet&q=${encodeURIComponent(query)}&type=video&maxResults=12&key=${apiKey}`;
 
-    const searchRes = await fetch(searchUrl);
+    const searchRes = await fetch(searchUrl, { signal: controller.signal });
     const searchData = await searchRes.json() as {
       items?: Array<{
         id: { videoId: string };
@@ -128,7 +132,8 @@ export default async function handler(
       `https://www.googleapis.com/youtube/v3/videos` +
       `?part=statistics&id=${videoIds.join(",")}&key=${apiKey}`;
 
-    const statsRes = await fetch(statsUrl);
+    const statsRes = await fetch(statsUrl, { signal: controller.signal });
+    clearTimeout(timeout);
     const statsData = await statsRes.json() as {
       items?: Array<{
         id: string;
@@ -170,11 +175,14 @@ export default async function handler(
 
     return buildResponse(res, 200, { status: "ok", videos, totalResults, query });
   } catch (err) {
+    const message = err instanceof Error
+      ? (err.name === "AbortError" ? "Request timed out" : err.message)
+      : "Unknown error";
     return buildResponse(res, 200, {
       status: "error",
       videos: [],
       totalResults: 0,
-      reason: err instanceof Error ? err.message : "Unknown error",
+      reason: message,
       query,
     });
   }

@@ -48,7 +48,10 @@ export interface VideoFetchStatus {
 let _db: Database.Database | null = null;
 
 function getDbPath(): string {
-  const dataDir = path.join(process.cwd(), "data");
+  // On serverless platforms (e.g. Vercel) the project directory is read-only.
+  // Fall back to /tmp which is always writable.
+  const baseDir = process.env.VERCEL ? "/tmp" : process.cwd();
+  const dataDir = path.join(baseDir, "data");
   if (!fs.existsSync(dataDir)) {
     fs.mkdirSync(dataDir, { recursive: true });
   }

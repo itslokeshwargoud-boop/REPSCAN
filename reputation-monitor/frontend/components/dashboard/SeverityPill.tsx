@@ -6,9 +6,9 @@ interface SeverityPillProps {
 
 export default function SeverityPill({ severity }: SeverityPillProps) {
   const tone: Record<SeverityLevel, string> = {
-    high: "border-rose-200 bg-rose-50 text-rose-700",
-    medium: "border-amber-200 bg-amber-50 text-amber-700",
-    low: "border-slate-200 bg-slate-100 text-slate-600",
+    high: "border-rose-700/40 bg-rose-900/30 text-rose-400 shadow-[0_0_6px_rgba(244,63,94,0.2)]",
+    medium: "border-orange-700/40 bg-orange-900/30 text-orange-400",
+    low: "border-slate-700/40 bg-slate-800/40 text-slate-400",
   };
 
   return (

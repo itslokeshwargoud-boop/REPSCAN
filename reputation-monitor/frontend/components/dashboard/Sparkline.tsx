@@ -5,7 +5,7 @@ interface SparklineProps {
   stroke?: string;
 }
 
-export default function Sparkline({ values, stroke = "#F97360" }: SparklineProps) {
+export default function Sparkline({ values, stroke = "#f43f5e" }: SparklineProps) {
   const data = values.map((value, idx) => ({ idx, value }));
 
   return (
@@ -16,10 +16,10 @@ export default function Sparkline({ values, stroke = "#F97360" }: SparklineProps
             cursor={false}
             contentStyle={{
               borderRadius: 12,
-              border: "1px solid #E2E8F0",
-              backgroundColor: "#FFFFFF",
+              border: "1px solid #334155",
+              backgroundColor: "#0f172a",
               fontSize: 12,
-              color: "#334155",
+              color: "#e2e8f0",
             }}
             labelStyle={{ display: "none" }}
           />

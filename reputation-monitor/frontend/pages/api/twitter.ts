@@ -21,14 +21,46 @@ export interface TwitterApiResponse {
   query: string;
 }
 
+/** Structured JSON envelope required by the dashboard contract */
+interface StructuredResponse {
+  success: boolean;
+  data: Tweet[];
+  error?: string;
+  resultCount: number;
+  query: string;
+}
+
+/** Build both legacy and structured response from shared fields */
+function buildResponse(
+  res: NextApiResponse,
+  statusCode: number,
+  fields: { status: TwitterApiResponse["status"]; tweets: Tweet[]; resultCount: number; reason?: string; query: string }
+) {
+  const legacy: TwitterApiResponse = {
+    status: fields.status,
+    tweets: fields.tweets,
+    resultCount: fields.resultCount,
+    reason: fields.reason,
+    query: fields.query,
+  };
+  const structured: StructuredResponse = {
+    success: fields.status !== "error",
+    data: fields.tweets,
+    error: fields.reason,
+    resultCount: fields.resultCount,
+    query: fields.query,
+  };
+  return res.status(statusCode).json({ ...legacy, ...structured });
+}
+
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<TwitterApiResponse>
+  res: NextApiResponse
 ) {
   const query = typeof req.query.q === "string" ? req.query.q : "";
 
   if (!query) {
-    return res.status(400).json({
+    return buildResponse(res, 400, {
       status: "error",
       tweets: [],
       resultCount: 0,
@@ -39,7 +71,7 @@ export default async function handler(
 
   const bearerToken = process.env.TWITTER_BEARER_TOKEN;
   if (!bearerToken) {
-    return res.status(500).json({
+    return buildResponse(res, 500, {
       status: "error",
       tweets: [],
       resultCount: 0,
@@ -85,7 +117,7 @@ export default async function handler(
         data.detail ??
         data.errors?.[0]?.message ??
         `Twitter API error (${response.status})`;
-      return res.json({
+      return buildResponse(res, 200, {
         status: "error",
         tweets: [],
         resultCount: 0,
@@ -95,7 +127,7 @@ export default async function handler(
     }
 
     if (!data.data || data.data.length === 0) {
-      return res.json({ status: "ok", tweets: [], resultCount: 0, query });
+      return buildResponse(res, 200, { status: "ok", tweets: [], resultCount: 0, query });
     }
 
     // Only include tweets that have an ID (guarantees a proof URL)
@@ -114,14 +146,14 @@ export default async function handler(
         proofUrl: `https://x.com/i/web/status/${t.id}`,
       }));
 
-    return res.json({
+    return buildResponse(res, 200, {
       status: "ok",
       tweets,
       resultCount: data.meta?.result_count ?? tweets.length,
       query,
     });
   } catch (err) {
-    return res.json({
+    return buildResponse(res, 200, {
       status: "error",
       tweets: [],
       resultCount: 0,

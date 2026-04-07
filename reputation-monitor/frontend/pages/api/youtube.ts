@@ -21,14 +21,46 @@ export interface YouTubeApiResponse {
   query: string;
 }
 
+/** Structured JSON envelope required by the dashboard contract */
+interface StructuredResponse {
+  success: boolean;
+  data: YouTubeVideo[];
+  error?: string;
+  totalResults: number;
+  query: string;
+}
+
+/** Build both legacy and structured response from shared fields */
+function buildResponse(
+  res: NextApiResponse,
+  statusCode: number,
+  fields: { status: YouTubeApiResponse["status"]; videos: YouTubeVideo[]; totalResults: number; reason?: string; query: string }
+) {
+  const legacy: YouTubeApiResponse = {
+    status: fields.status,
+    videos: fields.videos,
+    totalResults: fields.totalResults,
+    reason: fields.reason,
+    query: fields.query,
+  };
+  const structured: StructuredResponse = {
+    success: fields.status !== "error",
+    data: fields.videos,
+    error: fields.reason,
+    totalResults: fields.totalResults,
+    query: fields.query,
+  };
+  return res.status(statusCode).json({ ...legacy, ...structured });
+}
+
 export default async function handler(
   req: NextApiRequest,
-  res: NextApiResponse<YouTubeApiResponse>
+  res: NextApiResponse
 ) {
   const query = typeof req.query.q === "string" ? req.query.q : "";
 
   if (!query) {
-    return res.status(400).json({
+    return buildResponse(res, 400, {
       status: "error",
       videos: [],
       totalResults: 0,
@@ -39,7 +71,7 @@ export default async function handler(
 
   const apiKey = process.env.YOUTUBE_API_KEY;
   if (!apiKey) {
-    return res.status(500).json({
+    return buildResponse(res, 500, {
       status: "error",
       videos: [],
       totalResults: 0,
@@ -74,7 +106,7 @@ export default async function handler(
     };
 
     if (!searchRes.ok || !searchData.items) {
-      return res.json({
+      return buildResponse(res, 200, {
         status: "error",
         videos: [],
         totalResults: 0,
@@ -88,7 +120,7 @@ export default async function handler(
     const totalResults = searchData.pageInfo?.totalResults ?? 0;
 
     if (videoIds.length === 0) {
-      return res.json({ status: "ok", videos: [], totalResults: 0, query });
+      return buildResponse(res, 200, { status: "ok", videos: [], totalResults: 0, query });
     }
 
     // Step 2: Fetch statistics for each video
@@ -136,9 +168,9 @@ export default async function handler(
       };
     });
 
-    return res.json({ status: "ok", videos, totalResults, query });
+    return buildResponse(res, 200, { status: "ok", videos, totalResults, query });
   } catch (err) {
-    return res.json({
+    return buildResponse(res, 200, {
       status: "error",
       videos: [],
       totalResults: 0,

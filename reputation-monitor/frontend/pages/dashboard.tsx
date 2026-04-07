@@ -12,6 +12,7 @@ import {
   YAxis,
 } from "recharts";
 import { useDashboardData } from "@/hooks/useDashboardData";
+import Sidebar from "@/components/Sidebar";
 import type { YouTubeVideo } from "./api/youtube";
 
 /* ─── Helpers ─────────────────────────────────────────────────────────────── */
@@ -145,8 +146,9 @@ export default function Dashboard() {
       </Head>
 
       <div className="min-h-screen bg-[#030712] text-slate-200">
+        <Sidebar />
         {/* ── HEADER ──────────────────────────────────────────────────────── */}
-        <header className="sticky top-0 z-30 border-b border-slate-800/60 bg-[#030712]/80 backdrop-blur-sm">
+        <header className="sticky top-0 z-30 border-b border-slate-800/60 bg-[#030712]/80 backdrop-blur-sm ml-16">
           <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex h-16 items-center justify-between gap-4">
               {/* Logo */}
@@ -195,7 +197,7 @@ export default function Dashboard() {
           </div>
         </header>
 
-        <main className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        <main className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6 ml-16">
           {/* ── RECENT SEARCHES ────────────────────────────────────────────── */}
           {recentSearches.length > 0 && !hasSearched && (
             <div className="flex items-center gap-2 flex-wrap">

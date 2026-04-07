@@ -24,6 +24,7 @@ import ROLayout from "@/components/reputation-os/ROLayout";
 import ROCard from "@/components/reputation-os/ROCard";
 import ROBadge from "@/components/reputation-os/ROBadge";
 import ROMetricCard from "@/components/reputation-os/ROMetricCard";
+import ROProofLink from "@/components/reputation-os/ROProofLink";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -259,6 +260,20 @@ function VelocityContent() {
               {insightText}
             </p>
           </div>
+          {data.spike_proof_urls && data.spike_proof_urls.length > 0 && (
+            <div className="mt-4 pt-4 border-t border-slate-800/40">
+              <p className="text-xs text-slate-500 mb-2">Spike Evidence</p>
+              <div className="flex flex-wrap gap-3">
+                {data.spike_proof_urls.map((s) => (
+                  <ROProofLink
+                    key={s.hour}
+                    href={s.proof_url}
+                    label={`Spike at ${s.hour}`}
+                  />
+                ))}
+              </div>
+            </div>
+          )}
         </ROCard>
       )}
     </div>

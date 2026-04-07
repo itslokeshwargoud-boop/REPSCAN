@@ -394,8 +394,8 @@ const NARRATIVE_SETS: Record<string, NarrativeCluster[]> = {
         "His range from Arjun Reddy to family entertainer roles is incredible",
       ],
       sample_proof_urls: [
-        "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxV1aK2bT3eQ4nR5p4AaABAg",
-        "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxW2bL3cU4fR5oS6q4AaABAg",
+        "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxV1aK2bT3eR6nR5p4AaABAg",
+        "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxW2bL3cU4fR5oS6r4AaABAg",
         "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxX3cM4dV5gS6pT7r4AaABAg",
       ],
       trend: "growing",

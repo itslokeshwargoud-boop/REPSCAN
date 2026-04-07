@@ -25,6 +25,7 @@ import ROCard from "@/components/reputation-os/ROCard";
 import ROBadge from "@/components/reputation-os/ROBadge";
 import ROScoreGauge from "@/components/reputation-os/ROScoreGauge";
 import ROMetricCard from "@/components/reputation-os/ROMetricCard";
+import ROProofLink from "@/components/reputation-os/ROProofLink";
 
 // ---------------------------------------------------------------------------
 // Skeleton helpers
@@ -303,6 +304,7 @@ function OverviewContent() {
                     </span>
                   </div>
                   <p className="text-xs text-slate-300">{a.message}</p>
+                  <ROProofLink href={a.proof_url} className="mt-1" />
                 </li>
               ))}
             </ul>
@@ -355,6 +357,9 @@ function OverviewContent() {
                   <span className="text-[10px] text-slate-500">
                     {n.percentage.toFixed(1)}% of conversation
                   </span>
+                  {n.sample_proof_urls?.[0] && (
+                    <ROProofLink href={n.sample_proof_urls[0]} label="View source" className="ml-2" />
+                  )}
                 </li>
               ))}
             </ul>
@@ -393,6 +398,7 @@ function OverviewContent() {
                       </ROBadge>
                     </div>
                     <p className="text-xs text-slate-400">{act.description}</p>
+                    <ROProofLink href={act.proof_url} className="mt-1" />
                   </div>
                 </li>
               ))}

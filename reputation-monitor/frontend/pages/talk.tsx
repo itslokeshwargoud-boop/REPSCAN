@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import Head from "next/head";
 import { useRouter } from "next/router";
 import Sidebar from "@/components/Sidebar";
+import { useKeyword } from "@/contexts/KeywordContext";
 import { useTalkData } from "@/hooks/useTalkData";
 import type { TalkItem } from "@/lib/talkApi";
 import type { SentimentLabel } from "@/lib/sentiment";
@@ -110,12 +111,12 @@ function SentimentSummary({
 
 function TalkCard({ item }: { item: TalkItem }) {
   return (
-    <div className="glass-card rounded-xl p-4 hover:border-slate-600/60 transition-all duration-200">
+    <div className="glass-card rounded-xl p-3 hover:border-slate-600/60 transition-all duration-200">
       {/* Header row */}
-      <div className="flex items-start justify-between gap-3 mb-2">
+      <div className="flex items-start justify-between gap-3 mb-1.5">
         <div className="flex items-center gap-2 min-w-0 flex-1">
           {/* Author avatar placeholder */}
-          <div className="h-8 w-8 rounded-full bg-slate-700 flex items-center justify-center text-xs text-slate-300 font-semibold flex-shrink-0">
+          <div className="h-7 w-7 rounded-full bg-slate-700 flex items-center justify-center text-xs text-slate-300 font-semibold flex-shrink-0">
             {item.author ? item.author.charAt(0).toUpperCase() : "?"}
           </div>
           <div className="min-w-0">
@@ -128,7 +129,7 @@ function TalkCard({ item }: { item: TalkItem }) {
 
         {/* Sentiment badge */}
         <span
-          className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium ${sentimentBg(
+          className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium ${sentimentBg(
             item.sentiment
           )} ${sentimentColor(item.sentiment)}`}
         >
@@ -136,13 +137,13 @@ function TalkCard({ item }: { item: TalkItem }) {
         </span>
       </div>
 
-      {/* Text content */}
-      <p className="text-sm text-slate-300 leading-relaxed mb-3 whitespace-pre-wrap break-words">
+      {/* Text content — compact, max 3 lines */}
+      <p className="text-sm text-slate-300 leading-snug mb-2 line-clamp-3 break-words">
         {item.text}
       </p>
 
       {/* Footer: video info + proof link */}
-      <div className="flex items-center justify-between gap-2 pt-2 border-t border-slate-800/60">
+      <div className="flex items-center justify-between gap-2 pt-1.5 border-t border-slate-800/60">
         <div className="text-xs text-slate-500 truncate flex-1" title={item.videoTitle}>
           <span className="text-slate-600">on</span>{" "}
           <span className="text-slate-400">{item.videoTitle || "Unknown video"}</span>
@@ -282,12 +283,15 @@ function EmptyState({ hasSearched }: { hasSearched: boolean }) {
 
 export default function TalkPage() {
   const router = useRouter();
-  const talk = useTalkData();
+  const shared = useKeyword();
+  const talk = useTalkData(shared.activeKeyword);
 
-  // Pick up keyword from URL query param
+  // Pick up keyword from URL query param (overrides shared context)
   useEffect(() => {
     if (router.query.q && typeof router.query.q === "string") {
       talk.setKeyword(router.query.q);
+      // Also persist to shared context
+      shared.commitKeyword(router.query.q);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [router.query.q]);
@@ -295,6 +299,8 @@ export default function TalkPage() {
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
     talk.search();
+    // Persist to shared context
+    shared.commitKeyword(talk.keyword.trim());
   }
 
   function handleTextSearch(e: React.FormEvent) {

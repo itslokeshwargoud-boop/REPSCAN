@@ -52,9 +52,9 @@ export interface TalkData {
 // Hook
 // ---------------------------------------------------------------------------
 
-export function useTalkData(): TalkData {
-  const [keyword, setKeyword] = useState("");
-  const [activeKeyword, setActiveKeyword] = useState("");
+export function useTalkData(initialKeyword?: string): TalkData {
+  const [keyword, setKeyword] = useState(initialKeyword ?? "");
+  const [activeKeyword, setActiveKeyword] = useState(initialKeyword ?? "");
 
   const [items, setItems] = useState<TalkItem[]>([]);
   const [total, setTotal] = useState(0);
@@ -79,6 +79,18 @@ export function useTalkData(): TalkData {
 
   const [fetchKey, setFetchKey] = useState(0);
   const isFetching = useRef(false);
+  const prevInitial = useRef(initialKeyword);
+
+  // Sync when the shared keyword changes (e.g. hydration from sessionStorage)
+  useEffect(() => {
+    if (initialKeyword && initialKeyword !== prevInitial.current) {
+      prevInitial.current = initialKeyword;
+      setKeyword(initialKeyword);
+      setActiveKeyword(initialKeyword);
+      isFetching.current = false;
+      setFetchKey((k) => k + 1);
+    }
+  }, [initialKeyword]);
 
   const loadData = useCallback(async () => {
     if (isFetching.current || !activeKeyword.trim()) return;

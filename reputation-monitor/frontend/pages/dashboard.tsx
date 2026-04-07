@@ -20,13 +20,7 @@ import DataTableShell from "@/components/dashboard/DataTableShell";
 import MetricCard from "@/components/dashboard/MetricCard";
 import PlatformBadges from "@/components/dashboard/PlatformBadges";
 import SeverityPill, { type SeverityLevel } from "@/components/dashboard/SeverityPill";
-import {
-  useKeywords,
-  useCreateKeyword,
-  useDeleteKeyword,
-  useAlerts,
-  useCurrentScore,
-} from "@/hooks/useKeywordData";
+import { useDashboardData } from "@/hooks/useDashboardData";
 import { SUPPORTED_PLATFORMS, type Keyword } from "@/lib/api";
 
 /* ─── Lucide-style inline SVG icons ───────────────────────────────────────── */
@@ -162,9 +156,8 @@ function alertCue(severity: SeverityLevel): string {
 
 /* ─── Risk Score Cell ─────────────────────────────────────────────────────── */
 
-function KeywordRiskScoreCell({ keyword }: { keyword: string }) {
-  const { data } = useCurrentScore(keyword);
-  const score = data?.score ?? 0;
+function KeywordRiskScoreCell({ keyword, score: scoreProp }: { keyword: string; score?: number }) {
+  const score = scoreProp ?? 0;
   const tone = scoreTone(score);
   const width = scoreBarWidth(score);
   const scoreLabel = `${score > 0 ? "+" : ""}${score.toFixed(1)}`;
@@ -212,13 +205,15 @@ export default function Dashboard() {
   const [range, setRange] = useState("7d");
   const [liveMode, setLiveMode] = useState(true);
 
-  const { data: keywordsData, isLoading } = useKeywords(1, 50);
-  const alertsData = useAlerts(1, 8);
-  const createKeyword = useCreateKeyword();
-  const deleteKeyword = useDeleteKeyword();
+  const {
+    keywords,
+    alerts,
+    isLoading,
+    error: dataError,
+    platformCounts: realPlatformCounts,
+    rhiScore,
+  } = useDashboardData();
 
-  const keywords: Keyword[] = keywordsData?.items ?? [];
-  const alerts = alertsData.data?.items ?? [];
   const unreadAlerts = alerts.filter((alert) => !alert.is_read);
   const rangeDays = range === "7d" ? 7 : range === "30d" ? 30 : 90;
   const now = Date.now();
@@ -295,10 +290,13 @@ export default function Dashboard() {
     },
   ];
 
-  const platformCounts = { twitter: 0, youtube: 0, instagram: 0 };
+  // Use real platform counts from the API data (not inferred from alert text)
+  const platformCounts = { ...realPlatformCounts };
+  // Also augment with inferred platforms from alert messages for any remaining
   currentAlerts.forEach((alert) => {
     const platform = inferPlatform(alert.message);
-    if (platform) {
+    // Counts are already set from API data; inferPlatform is a fallback
+    if (platform && !alert.id.startsWith("tw-") && !alert.id.startsWith("yt-")) {
       platformCounts[platform] += 1;
     }
   });
@@ -344,17 +342,14 @@ export default function Dashboard() {
     const trimmed = newKeyword.trim();
     if (!trimmed) return;
     setAddError("");
-    try {
-      await createKeyword.mutateAsync(trimmed);
-      setNewKeyword("");
-      router.push(`/keyword/${encodeURIComponent(trimmed)}`);
-    } catch {
-      setAddError("Failed to add keyword. Check API connection.");
-    }
+    // Navigate to the brand intelligence page with the keyword context
+    setNewKeyword("");
+    router.push(`/brand-intelligence`);
   }
 
-  async function handleDelete(id: string) {
-    await deleteKeyword.mutateAsync(id);
+  async function handleDelete(_id: string) {
+    // Keywords are derived from client search queries and cannot be deleted
+    // This is a no-op in the real-API mode
   }
 
   function handleRefresh() {
@@ -558,10 +553,10 @@ export default function Dashboard() {
                 />
                 <button
                   type="submit"
-                  disabled={createKeyword.isPending || !newKeyword.trim()}
+                  disabled={!newKeyword.trim()}
                   className="h-10 rounded-xl bg-rose-500 px-4 text-sm font-semibold text-white transition hover:bg-rose-600 hover:shadow-[0_0_12px_rgba(244,63,94,0.3)] disabled:cursor-not-allowed disabled:opacity-40"
                 >
-                  {createKeyword.isPending ? "Adding…" : "Add keyword"}
+                  Add keyword
                 </button>
               </form>
 
@@ -609,7 +604,7 @@ export default function Dashboard() {
                       >
                         <td className="px-3 py-4 font-semibold text-slate-200">{kw.keyword}</td>
                         <td className="px-3 py-4">
-                          <KeywordRiskScoreCell keyword={kw.keyword} />
+                          <KeywordRiskScoreCell keyword={kw.keyword} score={rhiScore} />
                         </td>
                         <td className="px-3 py-4">
                           <PlatformBadges platforms={[...SUPPORTED_PLATFORMS]} />

@@ -424,7 +424,7 @@ export function extractKeyMoments(
       type: "peak",
       score: s.score,
       emotion: s.emotion,
-      description: `Positive peak (${s.emotion}) — score ${+s.score.toFixed(2)}`,
+      description: `Positive peak (${s.emotion}) — score ${s.score.toFixed(2)}`,
     });
   }
 
@@ -509,7 +509,7 @@ export function generateMoodMapReport(input: MoodMapInput): MoodMapReport {
   }
   if (durationSeconds === 0 && hasComments) {
     // Estimate: ~10 seconds per comment
-    durationSeconds = (input.comments!.length) * segmentSize;
+    durationSeconds = input.comments!.length * segmentSize;
   }
   if (durationSeconds === 0) {
     durationSeconds = segmentSize; // Minimum one segment

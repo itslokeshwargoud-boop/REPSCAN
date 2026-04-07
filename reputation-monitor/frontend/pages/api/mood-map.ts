@@ -44,9 +44,11 @@ export function extractVideoId(url: string): string | null {
   try {
     const parsed = new URL(url);
 
-    // youtube.com/watch?v=xxx
+    // Strict hostname check to prevent substring bypass (e.g. notyoutube.com)
+    const validHosts = ["www.youtube.com", "youtube.com", "m.youtube.com"];
+
     if (
-      parsed.hostname.includes("youtube.com") &&
+      validHosts.includes(parsed.hostname) &&
       parsed.searchParams.has("v")
     ) {
       return parsed.searchParams.get("v");
@@ -58,7 +60,10 @@ export function extractVideoId(url: string): string | null {
     }
 
     // youtube.com/embed/xxx
-    if (parsed.pathname.startsWith("/embed/")) {
+    if (
+      validHosts.includes(parsed.hostname) &&
+      parsed.pathname.startsWith("/embed/")
+    ) {
       return parsed.pathname.split("/")[2] || null;
     }
   } catch {

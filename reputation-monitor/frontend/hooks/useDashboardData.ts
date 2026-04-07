@@ -29,6 +29,7 @@ export interface DashboardData {
   totalMentions: number;
   rhiScore: number;
   apiResponse: RealApiResponse | null;
+  refresh: () => void;
 }
 
 const CLIENT_IDS: ClientId[] = ["rana", "kims", "peddi"];
@@ -46,11 +47,12 @@ export function useDashboardData(): DashboardData {
   const [totalMentions, setTotalMentions] = useState(0);
   const [rhiScore, setRhiScore] = useState(0);
   const [apiResponse, setApiResponse] = useState<RealApiResponse | null>(null);
-  const hasFetched = useRef(false);
+  const [fetchKey, setFetchKey] = useState(0);
+  const isFetching = useRef(false);
 
   const loadData = useCallback(async () => {
-    if (hasFetched.current) return;
-    hasFetched.current = true;
+    if (isFetching.current) return;
+    isFetching.current = true;
     setIsLoading(true);
     setError(null);
 
@@ -75,10 +77,14 @@ export function useDashboardData(): DashboardData {
       let twitterCount = 0;
       let youtubeCount = 0;
       let totalScore = 0;
+      let lastSuccessfulResponse: RealApiResponse | null = null;
 
       for (const { id, result } of results) {
         const clientName = CLIENT_NAMES[id];
-        setApiResponse(result); // keep last response available
+
+        if (result.status !== "error") {
+          lastSuccessfulResponse = result;
+        }
 
         if (result.data) {
           totalScore += result.data.rhi.score;
@@ -120,6 +126,7 @@ export function useDashboardData(): DashboardData {
       setPlatformCounts({ twitter: twitterCount, youtube: youtubeCount, instagram: 0 });
       setTotalMentions(twitterCount + youtubeCount);
       setRhiScore(results.length > 0 ? totalScore / results.length : 0);
+      setApiResponse(lastSuccessfulResponse);
 
       // Set error if all APIs failed
       const allFailed = results.every((r) => r.result.status === "error");
@@ -130,12 +137,18 @@ export function useDashboardData(): DashboardData {
       setError(err instanceof Error ? err.message : "Failed to load dashboard data");
     } finally {
       setIsLoading(false);
+      isFetching.current = false;
     }
-  }, []);
+  }, [fetchKey]);
 
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  const refresh = useCallback(() => {
+    isFetching.current = false;
+    setFetchKey((k) => k + 1);
+  }, []);
 
   return {
     keywords,
@@ -146,5 +159,6 @@ export function useDashboardData(): DashboardData {
     totalMentions,
     rhiScore,
     apiResponse,
+    refresh,
   };
 }

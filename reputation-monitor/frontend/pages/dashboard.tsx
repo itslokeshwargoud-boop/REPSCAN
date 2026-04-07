@@ -212,6 +212,7 @@ export default function Dashboard() {
     error: dataError,
     platformCounts: realPlatformCounts,
     rhiScore,
+    refresh,
   } = useDashboardData();
 
   const unreadAlerts = alerts.filter((alert) => !alert.is_read);
@@ -290,16 +291,8 @@ export default function Dashboard() {
     },
   ];
 
-  // Use real platform counts from the API data (not inferred from alert text)
+  // Use real platform counts from the API data
   const platformCounts = { ...realPlatformCounts };
-  // Also augment with inferred platforms from alert messages for any remaining
-  currentAlerts.forEach((alert) => {
-    const platform = inferPlatform(alert.message);
-    // Counts are already set from API data; inferPlatform is a fallback
-    if (platform && !alert.id.startsWith("tw-") && !alert.id.startsWith("yt-")) {
-      platformCounts[platform] += 1;
-    }
-  });
   const hasPlatformMixData = platformCounts.twitter + platformCounts.youtube + platformCounts.instagram > 0;
 
   const platformMix = [
@@ -342,18 +335,17 @@ export default function Dashboard() {
     const trimmed = newKeyword.trim();
     if (!trimmed) return;
     setAddError("");
-    // Navigate to the brand intelligence page with the keyword context
     setNewKeyword("");
-    router.push(`/brand-intelligence`);
+    router.push(`/brand-intelligence?q=${encodeURIComponent(trimmed)}`);
   }
 
   async function handleDelete(_id: string) {
-    // Keywords are derived from client search queries and cannot be deleted
-    // This is a no-op in the real-API mode
+    // Keywords are derived from live API search queries and cannot be individually removed
+    setAddError("Keywords are sourced from live API data and cannot be removed from this view.");
   }
 
   function handleRefresh() {
-    router.replace(router.asPath);
+    refresh();
   }
 
   /* ═══════════════════════════════════════════════════════════════════════ */

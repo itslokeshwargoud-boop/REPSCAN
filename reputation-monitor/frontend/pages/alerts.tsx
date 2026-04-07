@@ -180,7 +180,7 @@ export default function Alerts() {
     <div className="flex min-h-screen bg-slate-950">
       <Sidebar />
 
-      <div className="flex-1 ml-64 flex flex-col min-h-screen">
+      <div className="flex-1 ml-16 flex flex-col min-h-screen">
         {/* Header */}
         <header className="sticky top-0 z-30 flex h-16 items-center justify-between gap-4 border-b border-slate-700/50 bg-slate-950/90 backdrop-blur px-8">
           <div className="flex items-center gap-3">

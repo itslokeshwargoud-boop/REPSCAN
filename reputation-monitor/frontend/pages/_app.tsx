@@ -39,8 +39,8 @@ export default function App({ Component, pageProps }: AppProps) {
 
   if (!authReady) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-slate-950">
-        <div className="text-slate-400 text-sm animate-pulse">Connecting…</div>
+      <div className="flex min-h-screen items-center justify-center bg-[#030712]">
+        <div className="text-slate-500 text-sm animate-pulse">Connecting…</div>
       </div>
     );
   }

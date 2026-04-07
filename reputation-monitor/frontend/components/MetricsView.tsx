@@ -1,5 +1,5 @@
 /**
- * MetricsView — UI component for the Talk → Metrics dashboard.
+ * MetricsView — UI component for the Metrics dashboard.
  *
  * Displays:
  *  - Overall reputation score with grade badge

@@ -74,6 +74,7 @@ _route_modules = [
     ("api.routes.clusters", "clusters"),
     ("api.routes.scores", "scores"),
     ("api.routes.alerts", "alerts"),
+    ("api.routes.reputation_os", "reputation_os"),
 ]
 
 for module_path, name in _route_modules:

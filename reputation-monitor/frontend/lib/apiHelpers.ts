@@ -46,10 +46,17 @@ export function assertMethod(
 
 /**
  * Sanitize user-provided text: strip HTML tags, trim whitespace, limit length.
+ * Uses repeated passes to handle nested tag injection (e.g. `<scr<script>ipt>`).
  */
 export function sanitizeText(text: string, maxLength = 5000): string {
-  return text
-    .replace(/<[^>]*>/g, "") // strip HTML tags
+  // Repeatedly strip HTML tags until none remain (prevents nested injection)
+  let result = text;
+  let prev = "";
+  while (result !== prev) {
+    prev = result;
+    result = result.replace(/<[^>]*>/g, "");
+  }
+  return result
     .replace(/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/g, "") // strip control chars except \n, \r, \t
     .trim()
     .slice(0, maxLength);

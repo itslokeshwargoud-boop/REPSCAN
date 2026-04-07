@@ -18,6 +18,10 @@ import { upsertSentimentBatch } from "@/lib/db/reviews";
 
 // ---------------------------------------------------------------------------
 // In-memory cache: text hash → sentiment result
+// NOTE: This cache lives in the Node.js process memory. It will be cleared on
+// server restart or cold start in serverless environments. Sentiment results
+// are also persisted to SQLite for durability. For high-traffic production use,
+// consider adding Redis as a shared cache layer.
 // ---------------------------------------------------------------------------
 
 const MAX_CACHE_SIZE = 10_000;

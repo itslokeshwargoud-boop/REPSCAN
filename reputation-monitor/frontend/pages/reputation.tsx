@@ -147,8 +147,10 @@ export default function ReputationDashboard() {
   // Compute derived stats
   const stats = useMemo(() => {
     const now = new Date();
-    const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    const twentyFourHoursAgo = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+    const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+    const TWENTY_FOUR_HOURS_MS = 24 * 60 * 60 * 1000;
+    const thirtyDaysAgo = new Date(now.getTime() - THIRTY_DAYS_MS);
+    const twentyFourHoursAgo = new Date(now.getTime() - TWENTY_FOUR_HOURS_MS);
 
     const recent30d = (reviews ?? []).filter(
       (r) => new Date(r.createdAt) >= thirtyDaysAgo

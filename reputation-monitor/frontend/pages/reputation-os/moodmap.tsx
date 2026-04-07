@@ -175,7 +175,7 @@ function MoodMapContent() {
                   borderRadius: 8,
                   color: "#e2e8f0",
                 }}
-                formatter={(value: number) => [value.toFixed(2), "Score"]}
+                formatter={(value) => [Number(value).toFixed(2), "Score"]}
               />
               <ReferenceLine y={0} stroke="#475569" strokeDasharray="3 3" />
               <Bar dataKey="score" radius={[4, 4, 0, 0]}>

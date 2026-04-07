@@ -209,9 +209,9 @@ function PredictionsContent() {
                   borderRadius: 8,
                   color: "#e2e8f0",
                 }}
-                formatter={(value: number | null, name: string) => {
-                  if (value === null) return ["-", name];
-                  return [value.toFixed(1), name];
+                formatter={(value, name) => {
+                  if (value == null) return ["-", String(name)];
+                  return [Number(value).toFixed(1), String(name)];
                 }}
               />
               {/* Confidence band */}

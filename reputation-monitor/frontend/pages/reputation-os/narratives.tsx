@@ -119,25 +119,26 @@ function NarrativeCard({
 
       {/* Sample texts */}
       <div className="space-y-2">
-        {visibleTexts.map((t, i) => (
-          <div
-            key={i}
-            className="rounded-lg bg-slate-800/50 px-3 py-2"
-          >
-            <p className="text-xs text-slate-300">
-              &ldquo;{t}&rdquo;
-            </p>
-            {narrative.sample_proof_urls?.[
-              expanded ? i : i
-            ] && (
-              <ROProofLink
-                href={narrative.sample_proof_urls[expanded ? i : i]}
-                label="View source comment"
-                className="mt-1"
-              />
-            )}
-          </div>
-        ))}
+        {visibleTexts.map((t, i) => {
+          const proofIndex = expanded ? i : i;
+          return (
+            <div
+              key={i}
+              className="rounded-lg bg-slate-800/50 px-3 py-2"
+            >
+              <p className="text-xs text-slate-300">
+                &ldquo;{t}&rdquo;
+              </p>
+              {narrative.sample_proof_urls?.[proofIndex] && (
+                <ROProofLink
+                  href={narrative.sample_proof_urls[proofIndex]}
+                  label="View source comment"
+                  className="mt-1"
+                />
+              )}
+            </div>
+          );
+        })}
       </div>
 
       {narrative.sample_texts.length > 2 && (

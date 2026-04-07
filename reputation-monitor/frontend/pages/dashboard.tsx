@@ -3,8 +3,6 @@ import Head from "next/head";
 import {
   Area,
   AreaChart,
-  Bar,
-  BarChart,
   Cell,
   Pie,
   PieChart,

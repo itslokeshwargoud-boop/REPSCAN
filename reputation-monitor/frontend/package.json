@@ -41,6 +41,7 @@
   "devDependencies": {
     "@types/better-sqlite3": "^7.6.13",
     "eslint": "8.57.0",
-    "eslint-config-next": "14.2.35"
+    "eslint-config-next": "14.2.35",
+    "vitest": "^3.0.5"
   }
 }

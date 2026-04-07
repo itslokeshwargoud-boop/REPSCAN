@@ -19,14 +19,14 @@ interface TenantContextValue {
 }
 
 const TENANTS: Tenant[] = [
-  { id: "vijayx", name: "VijayX" },
-  { id: "prabhasx", name: "PrabhasX" },
+  { id: "vijayx", name: "Vijay Deverakonda" },
+  { id: "prabhasx", name: "Prabhas" },
 ];
 
 const TenantContext = createContext<TenantContextValue>({
   tenantId: "vijayx",
   setTenantId: () => {},
-  tenantName: "VijayX",
+  tenantName: "Vijay Deverakonda",
   tenants: TENANTS,
 });
 

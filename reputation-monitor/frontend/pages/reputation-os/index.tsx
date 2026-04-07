@@ -171,20 +171,44 @@ function OverviewContent() {
               <ROMetricCard
                 label="Engagement Quality"
                 value={`${score.data?.breakdown.engagement_quality ?? 0}%`}
-                trend="stable"
+                trend={
+                  (score.data?.breakdown.engagement_quality ?? 0) >= 70
+                    ? "up"
+                    : (score.data?.breakdown.engagement_quality ?? 0) >= 55
+                      ? "stable"
+                      : "down"
+                }
                 icon={<BarChart3 size={16} />}
               />
               <ROMetricCard
-                label="Bot Score"
+                label="Bot Safety"
                 value={`${score.data?.breakdown.bot_detection ?? 0}%`}
-                trend="up"
-                trendValue="safe"
+                trend={
+                  (score.data?.breakdown.bot_detection ?? 0) >= 85
+                    ? "up"
+                    : (score.data?.breakdown.bot_detection ?? 0) >= 70
+                      ? "stable"
+                      : "down"
+                }
+                trendValue={
+                  (score.data?.breakdown.bot_detection ?? 0) >= 85
+                    ? "safe"
+                    : (score.data?.breakdown.bot_detection ?? 0) >= 70
+                      ? "moderate"
+                      : "at risk"
+                }
                 icon={<Bot size={16} />}
               />
               <ROMetricCard
-                label="Velocity"
+                label="Trend Stability"
                 value={`${score.data?.breakdown.trend_stability ?? 0}%`}
-                trend="stable"
+                trend={
+                  (score.data?.trend_delta ?? 0) > 2
+                    ? "up"
+                    : (score.data?.trend_delta ?? 0) < -2
+                      ? "down"
+                      : "stable"
+                }
                 icon={<Zap size={16} />}
               />
             </>

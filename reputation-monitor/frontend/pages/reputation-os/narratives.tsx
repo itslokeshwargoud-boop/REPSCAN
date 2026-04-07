@@ -277,7 +277,7 @@ function NarrativesContent() {
         {/* Key Insight */}
         <ROCard
           title="Key Insight"
-          subtitle="AI-generated summary"
+          subtitle="Computed from narrative data"
           icon={<Lightbulb size={16} />}
           className="lg:col-span-1"
         >

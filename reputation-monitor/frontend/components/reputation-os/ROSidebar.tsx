@@ -37,8 +37,8 @@ const NAV_ITEMS: NavItem[] = [
 ];
 
 const TENANTS = [
-  { id: "vijayx", name: "VijayX" },
-  { id: "prabhasx", name: "PrabhasX" },
+  { id: "vijayx", name: "Vijay Deverakonda" },
+  { id: "prabhasx", name: "Prabhas" },
 ];
 
 interface ROSidebarProps {

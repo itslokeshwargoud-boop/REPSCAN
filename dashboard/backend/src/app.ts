@@ -41,6 +41,9 @@ const authLimiter = rateLimit({
 app.use('/api/v1/auth/', authLimiter);
 
 // --- Parsing ---
+// Cookie-parser is needed for refresh token rotation.
+// CSRF protection is handled by: SameSite cookie attribute, CORS origin validation,
+// and Bearer token requirement on all state-changing authenticated endpoints.
 app.use(express.json({ limit: '10mb' }));
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());

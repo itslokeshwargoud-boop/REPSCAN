@@ -17,3 +17,9 @@ node_modules/
 dist/
 *.tsbuildinfo
 package-lock.json
+
+# SQLite data
+reputation-monitor/frontend/data/
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm

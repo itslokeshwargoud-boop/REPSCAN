@@ -28,6 +28,10 @@ import {
   type TalkQueryResult,
 } from "@/lib/db/talkCache";
 import { analyzeSentimentBatch, type SentimentLabel } from "@/lib/sentiment";
+import {
+  validateYouTubeCommentProofUrl,
+  logProofRejection,
+} from "@/lib/proofValidation";
 
 // ---------------------------------------------------------------------------
 // YouTube Comment Thread fetching
@@ -231,6 +235,14 @@ async function aggregateTalkItems(
         const c = batch[j];
         // Build proof URL: direct link to comment on YouTube
         const proofUrl = `https://www.youtube.com/watch?v=${c.videoId}&lc=${c.commentId}`;
+
+        // Validate proof URL at ingestion time
+        const proofResult = validateYouTubeCommentProofUrl(proofUrl);
+        if (proofResult.status === "invalid") {
+          logProofRejection("talk-api-ingest", proofUrl, proofResult);
+          // Skip invalid proofs to prevent bad data from entering the cache
+          continue;
+        }
 
         talkRows.push({
           commentId: c.commentId,

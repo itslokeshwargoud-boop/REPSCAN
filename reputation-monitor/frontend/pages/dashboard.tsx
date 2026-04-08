@@ -15,6 +15,11 @@ import { useDashboardData } from "@/hooks/useDashboardData";
 import { useKeyword } from "@/contexts/KeywordContext";
 import Sidebar from "@/components/Sidebar";
 import type { YouTubeVideo } from "./api/youtube";
+import {
+  isProofUrlSafe,
+  validateProofUrl,
+  logProofRejection,
+} from "@/lib/proofValidation";
 
 /* ─── Helpers ─────────────────────────────────────────────────────────────── */
 
@@ -63,11 +68,24 @@ function KPICard({ label, value, icon }: { label: string; value: string | number
 /* ─── Video Card ──────────────────────────────────────────────────────────── */
 
 function VideoCard({ video }: { video: YouTubeVideo }) {
+  const proofValid = isProofUrlSafe(video.proofUrl);
+
+  if (!proofValid) {
+    logProofRejection("VideoCard", video.proofUrl, validateProofUrl(video.proofUrl));
+  }
+
+  const Wrapper = proofValid ? "a" : "div";
+  const wrapperProps = proofValid
+    ? {
+        href: video.proofUrl,
+        target: "_blank" as const,
+        rel: "noreferrer noopener",
+      }
+    : {};
+
   return (
-    <a
-      href={video.proofUrl}
-      target="_blank"
-      rel="noopener noreferrer"
+    <Wrapper
+      {...wrapperProps}
       className="flex gap-3 p-3 rounded-xl border border-slate-800/60 bg-[#0F172A]/60 hover:border-rose-500/30 transition-all group"
     >
       {video.thumbnailUrl ? (
@@ -88,13 +106,20 @@ function VideoCard({ video }: { video: YouTubeVideo }) {
           <span className="text-[11px] text-slate-400">💬 {formatNumber(video.commentCount)}</span>
           <span className="text-[11px] text-slate-600">{timeAgo(video.publishedAt)}</span>
         </div>
+        {!proofValid && (
+          <span className="inline-flex items-center gap-1 mt-1 text-[10px] text-amber-400 bg-amber-400/10 px-1.5 py-0.5 rounded">
+            ⚠ Invalid proof
+          </span>
+        )}
       </div>
-      <div className="shrink-0 self-start opacity-0 group-hover:opacity-100 transition-opacity mt-0.5">
-        <svg className="w-3.5 h-3.5 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
-        </svg>
-      </div>
-    </a>
+      {proofValid && (
+        <div className="shrink-0 self-start opacity-0 group-hover:opacity-100 transition-opacity mt-0.5">
+          <svg className="w-3.5 h-3.5 text-rose-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+          </svg>
+        </div>
+      )}
+    </Wrapper>
   );
 }
 
@@ -402,14 +427,23 @@ export default function Dashboard() {
                             <td className="px-4 py-3 tabular-nums text-slate-300">{formatNumber(v.commentCount)}</td>
                             <td className="px-4 py-3 text-slate-500 whitespace-nowrap">{timeAgo(v.publishedAt)}</td>
                             <td className="px-4 py-3">
-                              <a
-                                href={v.proofUrl}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="text-rose-400 hover:text-rose-300 text-xs font-semibold"
-                              >
-                                Open →
-                              </a>
+                              {isProofUrlSafe(v.proofUrl) ? (
+                                <a
+                                  href={v.proofUrl}
+                                  target="_blank"
+                                  rel="noreferrer noopener"
+                                  className="text-rose-400 hover:text-rose-300 text-xs font-semibold"
+                                >
+                                  Open →
+                                </a>
+                              ) : (
+                                <span
+                                  className="text-amber-400 text-xs font-semibold"
+                                  title={validateProofUrl(v.proofUrl).reason}
+                                >
+                                  ⚠ Invalid proof
+                                </span>
+                              )}
                             </td>
                           </tr>
                         ))}

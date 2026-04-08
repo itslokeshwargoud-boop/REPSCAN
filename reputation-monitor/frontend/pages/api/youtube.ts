@@ -1,4 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from "next";
+import {
+  validateYouTubeProofUrl,
+  logProofRejection,
+} from "@/lib/proofValidation";
 
 export interface YouTubeVideo {
   id: string;
@@ -154,25 +158,35 @@ export async function fetchYouTubeVideos(query: string): Promise<YouTubeSearchRe
     }
 
     // Build response — only include items with a valid videoId (ensures a proof URL exists)
-    const videos: YouTubeVideo[] = validItems.map((item) => {
-      const videoId = item.id.videoId;
-      const stats = statsMap[videoId] ?? {};
-      return {
-        id: videoId,
-        title: item.snippet.title,
-        channelTitle: item.snippet.channelTitle,
-        publishedAt: item.snippet.publishedAt,
-        thumbnailUrl:
-          item.snippet.thumbnails?.medium?.url ??
-          item.snippet.thumbnails?.default?.url ??
-          "",
-        description: item.snippet.description,
-        proofUrl: `https://www.youtube.com/watch?v=${videoId}`,
-        viewCount: parseInt(stats.viewCount ?? "0", 10),
-        likeCount: parseInt(stats.likeCount ?? "0", 10),
-        commentCount: parseInt(stats.commentCount ?? "0", 10),
-      };
-    });
+    const videos: YouTubeVideo[] = validItems
+      .map((item) => {
+        const videoId = item.id.videoId;
+        const stats = statsMap[videoId] ?? {};
+        const proofUrl = `https://www.youtube.com/watch?v=${videoId}`;
+        return {
+          id: videoId,
+          title: item.snippet.title,
+          channelTitle: item.snippet.channelTitle,
+          publishedAt: item.snippet.publishedAt,
+          thumbnailUrl:
+            item.snippet.thumbnails?.medium?.url ??
+            item.snippet.thumbnails?.default?.url ??
+            "",
+          description: item.snippet.description,
+          proofUrl,
+          viewCount: parseInt(stats.viewCount ?? "0", 10),
+          likeCount: parseInt(stats.likeCount ?? "0", 10),
+          commentCount: parseInt(stats.commentCount ?? "0", 10),
+        };
+      })
+      .filter((v) => {
+        const result = validateYouTubeProofUrl(v.proofUrl);
+        if (result.status === "invalid") {
+          logProofRejection("youtube-api", v.proofUrl, result);
+          return false;
+        }
+        return true;
+      });
 
     return { videos, totalResults };
   } catch (err) {

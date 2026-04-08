@@ -121,14 +121,13 @@ describe("Proof link source-level enforcement", () => {
     });
   }
 
-  it("talk.tsx IS allowed to use proof links (but uses direct <a> tags)", () => {
+  it("talk.tsx uses ROProofLink with talk_comment context for proof links", () => {
     const filePath = path.join(PAGES_DIR, "talk.tsx");
     if (!fs.existsSync(filePath)) return;
     const source: string = fs.readFileSync(filePath, "utf-8");
-    // Talk should have proof links (via isProofUrlSafe or ROProofLink)
-    const hasProofHandling =
-      source.includes("isProofUrlSafe") || source.includes("ROProofLink");
-    expect(hasProofHandling).toBe(true);
+    // Talk should use ROProofLink with context="talk_comment"
+    expect(source).toContain("ROProofLink");
+    expect(source).toContain('context="talk_comment"');
   });
 });
 

@@ -6,6 +6,7 @@
  * Overview channel contexts).
  */
 
+import { useId } from "react";
 import {
   Area,
   AreaChart,
@@ -97,6 +98,10 @@ export default function KeywordInsightsPanels({
   trend,
   channelBreakdown,
 }: KeywordInsightsPanelsProps) {
+  const uid = useId();
+  const viewGradId = `feedViewGrad-${uid}`;
+  const likeGradId = `feedLikeGrad-${uid}`;
+
   const channelPieData = channelBreakdown.slice(0, 6).map((ch, i) => ({
     name: ch.channel,
     value: ch.totalViews,
@@ -130,11 +135,11 @@ export default function KeywordInsightsPanels({
                   margin={{ top: 10, right: 10, left: -10, bottom: 0 }}
                 >
                   <defs>
-                    <linearGradient id="feedViewGrad" x1="0" y1="0" x2="0" y2="1">
+                    <linearGradient id={viewGradId} x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="#3B82F6" stopOpacity={0.4} />
                       <stop offset="95%" stopColor="#3B82F6" stopOpacity={0} />
                     </linearGradient>
-                    <linearGradient id="feedLikeGrad" x1="0" y1="0" x2="0" y2="1">
+                    <linearGradient id={likeGradId} x1="0" y1="0" x2="0" y2="1">
                       <stop offset="0%" stopColor="#10B981" stopOpacity={0.4} />
                       <stop offset="95%" stopColor="#10B981" stopOpacity={0} />
                     </linearGradient>
@@ -156,7 +161,7 @@ export default function KeywordInsightsPanels({
                     dataKey="views"
                     stroke="#3B82F6"
                     strokeWidth={2}
-                    fill="url(#feedViewGrad)"
+                    fill={`url(#${viewGradId})`}
                     name="Views"
                   />
                   <Area
@@ -164,7 +169,7 @@ export default function KeywordInsightsPanels({
                     dataKey="likes"
                     stroke="#10B981"
                     strokeWidth={2}
-                    fill="url(#feedLikeGrad)"
+                    fill={`url(#${likeGradId})`}
                     name="Likes"
                   />
                 </AreaChart>

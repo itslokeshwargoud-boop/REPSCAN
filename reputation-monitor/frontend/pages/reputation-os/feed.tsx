@@ -5,7 +5,7 @@
  * Users can search YouTube keywords within the Reputation OS context.
  */
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { TenantProvider, useTenant } from "@/contexts/TenantContext";
 import { useKeyword } from "@/contexts/KeywordContext";
 import { useDashboardData } from "@/hooks/useDashboardData";
@@ -48,6 +48,16 @@ function FeedContent() {
 
   const [recentSearches, setRecentSearches] = useState<string[]>([]);
 
+  // Hydrate recent searches from sessionStorage
+  useEffect(() => {
+    try {
+      const stored = sessionStorage.getItem("repscan_recent_searches");
+      if (stored) setRecentSearches(JSON.parse(stored));
+    } catch {
+      // ignore
+    }
+  }, []);
+
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
     if (!keyword.trim()) return;
@@ -55,7 +65,13 @@ function FeedContent() {
     shared.commitKeyword(keyword.trim());
     setRecentSearches((prev) => {
       const filtered = prev.filter((s) => s !== keyword.trim());
-      return [keyword.trim(), ...filtered].slice(0, 5);
+      const next = [keyword.trim(), ...filtered].slice(0, 5);
+      try {
+        sessionStorage.setItem("repscan_recent_searches", JSON.stringify(next));
+      } catch {
+        // ignore
+      }
+      return next;
     });
   }
 

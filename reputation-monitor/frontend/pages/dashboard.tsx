@@ -120,8 +120,6 @@ function VideoCard({ video }: { video: YouTubeVideo }) {
         </div>
       )}
     </Wrapper>
-      </div>
-    </a>
   );
 }
 

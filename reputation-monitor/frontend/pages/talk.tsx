@@ -9,7 +9,6 @@ import type { SentimentLabel } from "@/lib/sentiment";
 import {
   isProofUrlSafe,
   validateProofUrl,
-  logProofRejection,
 } from "@/lib/proofValidation";
 
 /* ─── Helpers ─────────────────────────────────────────────────────────────── */

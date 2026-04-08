@@ -119,9 +119,7 @@ function NarrativeCard({
 
       {/* Sample texts */}
       <div className="space-y-2">
-        {visibleTexts.map((t, i) => {
-          const proofIndex = expanded ? i : i;
-          return (
+        {visibleTexts.map((t, i) => (
             <div
               key={i}
               className="rounded-lg bg-slate-800/50 px-3 py-2"
@@ -130,8 +128,7 @@ function NarrativeCard({
                 &ldquo;{t}&rdquo;
               </p>
             </div>
-          );
-        })}
+        ))}
       </div>
 
       {narrative.sample_texts.length > 2 && (

@@ -9,6 +9,8 @@ interface ROLayoutProps {
 
 const MODULE_TITLES: Record<string, string> = {
   overview: "Overview",
+  talk: "Talk",
+  feed: "Feed",
   alerts: "Alerts",
   narratives: "Narratives",
   influencers: "Influencers",

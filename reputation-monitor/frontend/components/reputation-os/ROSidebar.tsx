@@ -15,6 +15,8 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
+  Rss,
+  MessagesSquare,
 } from "lucide-react";
 
 interface NavItem {
@@ -25,6 +27,8 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { icon: LayoutDashboard, label: "Overview", href: "/reputation-os" },
+  { icon: MessagesSquare, label: "Talk", href: "/reputation-os/talk" },
+  { icon: Rss, label: "Feed", href: "/reputation-os/feed" },
   { icon: Bell, label: "Alerts", href: "/reputation-os/alerts" },
   { icon: MessageSquare, label: "Narratives", href: "/reputation-os/narratives" },
   { icon: Users, label: "Influencers", href: "/reputation-os/influencers" },

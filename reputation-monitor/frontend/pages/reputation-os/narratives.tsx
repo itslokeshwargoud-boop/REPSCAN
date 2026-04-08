@@ -20,7 +20,7 @@ import { useReputationOs, type NarrativeCluster } from "@/hooks/useReputationOs"
 import ROLayout from "@/components/reputation-os/ROLayout";
 import ROCard from "@/components/reputation-os/ROCard";
 import ROBadge from "@/components/reputation-os/ROBadge";
-import ROProofLink from "@/components/reputation-os/ROProofLink";
+
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -129,13 +129,6 @@ function NarrativeCard({
               <p className="text-xs text-slate-300">
                 &ldquo;{t}&rdquo;
               </p>
-              {narrative.sample_proof_urls?.[proofIndex] && (
-                <ROProofLink
-                  href={narrative.sample_proof_urls[proofIndex]}
-                  label="View source comment"
-                  className="mt-1"
-                />
-              )}
             </div>
           );
         })}

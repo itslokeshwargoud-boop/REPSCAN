@@ -24,7 +24,7 @@ import { useReputationOs, type Alert } from "@/hooks/useReputationOs";
 import ROLayout from "@/components/reputation-os/ROLayout";
 import ROCard from "@/components/reputation-os/ROCard";
 import ROBadge from "@/components/reputation-os/ROBadge";
-import ROProofLink from "@/components/reputation-os/ROProofLink";
+
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -231,10 +231,7 @@ function AlertsContent() {
                 <p className="mb-2 text-xs text-slate-400">{a.details}</p>
                 <div className="flex items-center justify-between text-[10px] text-slate-500">
                   <span>{TYPE_LABEL[a.type]}</span>
-                  <div className="flex items-center gap-3">
-                    <ROProofLink href={a.proof_url} />
-                    <span>{timeAgo(a.timestamp)}</span>
-                  </div>
+                  <span>{timeAgo(a.timestamp)}</span>
                 </div>
               </div>
             ))

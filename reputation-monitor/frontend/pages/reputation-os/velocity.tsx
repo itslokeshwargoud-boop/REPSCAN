@@ -24,7 +24,7 @@ import ROLayout from "@/components/reputation-os/ROLayout";
 import ROCard from "@/components/reputation-os/ROCard";
 import ROBadge from "@/components/reputation-os/ROBadge";
 import ROMetricCard from "@/components/reputation-os/ROMetricCard";
-import ROProofLink from "@/components/reputation-os/ROProofLink";
+
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -265,11 +265,12 @@ function VelocityContent() {
               <p className="text-xs text-slate-500 mb-2">Spike Evidence</p>
               <div className="flex flex-wrap gap-3">
                 {data.spike_proof_urls.map((s) => (
-                  <ROProofLink
+                  <span
                     key={s.hour}
-                    href={s.proof_url}
-                    label={`Spike at ${s.hour}`}
-                  />
+                    className="text-[10px] text-slate-400"
+                  >
+                    Spike at {s.hour}
+                  </span>
                 ))}
               </div>
             </div>

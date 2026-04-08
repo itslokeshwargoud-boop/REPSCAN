@@ -1,10 +1,9 @@
 /**
  * FeedResults — Video / search results aggregation panel.
  *
- * Displays YouTube video results from keyword search.
- * No proof links are rendered — links are plain text here.
- * (Proof links are only allowed in Talk comments and
- * Overview channel contexts.)
+ * Displays YouTube video results from keyword search as cards,
+ * plus a "Detailed Video Data" table with columns for Title,
+ * Channel, Views, Likes, Comments, Published, and Proof.
  */
 
 import type { YouTubeVideo } from "@/pages/api/youtube";
@@ -74,6 +73,97 @@ function VideoCard({ video }: { video: YouTubeVideo }) {
 }
 
 // ---------------------------------------------------------------------------
+// Detailed Video Data table
+// ---------------------------------------------------------------------------
+
+function DetailedVideoTable({ videos }: { videos: YouTubeVideo[] }) {
+  return (
+    <div className="mt-6 rounded-xl border border-slate-800/60 bg-slate-900/50 backdrop-blur overflow-hidden">
+      <div className="px-4 py-3 border-b border-slate-800/60">
+        <h3 className="text-[11px] font-bold uppercase tracking-wider text-slate-400">
+          🎬 Detailed Video Data
+        </h3>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm text-left">
+          <thead>
+            <tr className="border-b border-slate-800/60">
+              <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                Title
+              </th>
+              <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                Channel
+              </th>
+              <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500 text-right">
+                Views
+              </th>
+              <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500 text-right">
+                Likes
+              </th>
+              <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500 text-right">
+                Comments
+              </th>
+              <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                Published
+              </th>
+              <th className="px-4 py-3 text-[11px] font-semibold uppercase tracking-wider text-slate-500">
+                Proof
+              </th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-800/40">
+            {videos.map((video) => (
+              <tr
+                key={video.id}
+                className="hover:bg-slate-800/30 transition-colors"
+              >
+                <td className="px-4 py-3 max-w-[280px]">
+                  <span
+                    className="text-sm text-rose-400 font-medium truncate block"
+                    title={video.title}
+                  >
+                    {video.title}
+                  </span>
+                </td>
+                <td className="px-4 py-3 text-sm text-blue-400 whitespace-nowrap">
+                  {video.channelTitle}
+                </td>
+                <td className="px-4 py-3 text-sm text-slate-300 text-right whitespace-nowrap">
+                  {formatNumber(video.viewCount)}
+                </td>
+                <td className="px-4 py-3 text-sm text-slate-300 text-right whitespace-nowrap">
+                  {formatNumber(video.likeCount)}
+                </td>
+                <td className="px-4 py-3 text-sm text-slate-300 text-right whitespace-nowrap">
+                  {formatNumber(video.commentCount)}
+                </td>
+                <td className="px-4 py-3 text-sm text-slate-400 whitespace-nowrap">
+                  {timeAgo(video.publishedAt)}
+                </td>
+                <td className="px-4 py-3 whitespace-nowrap">
+                  {video.proofUrl ? (
+                    <a
+                      href={video.proofUrl}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm font-medium text-rose-400 hover:text-rose-300 transition-colors"
+                    >
+                      Open →
+                    </a>
+                  ) : (
+                    <span className="text-sm text-slate-600">—</span>
+                  )}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+// ---------------------------------------------------------------------------
 // Component
 // ---------------------------------------------------------------------------
 
@@ -103,6 +193,7 @@ export default function FeedResults({ videos }: FeedResultsProps) {
           <VideoCard key={video.id} video={video} />
         ))}
       </div>
+      <DetailedVideoTable videos={videos} />
     </div>
   );
 }

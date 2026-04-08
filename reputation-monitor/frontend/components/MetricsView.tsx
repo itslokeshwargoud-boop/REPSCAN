@@ -14,6 +14,10 @@ import type {
   Grade,
   EntityType,
 } from "@/lib/metricsAnalyst";
+import {
+  validateProofUrl,
+  logProofRejection,
+} from "@/lib/proofValidation";
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -162,17 +166,32 @@ function MetricCard({ metric }: { metric: MetricResult }) {
           {b.evidence_text}
           {b.related_urls.length > 0 && (
             <span className="ml-1">
-              {b.related_urls.slice(0, 2).map((url, j) => (
-                <a
-                  key={j}
-                  href={url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-rose-400 hover:text-rose-300 ml-1 underline"
-                >
-                  [source {j + 1}]
-                </a>
-              ))}
+              {b.related_urls.slice(0, 2).map((url, j) => {
+                const validation = validateProofUrl(url);
+                if (validation.status === "invalid") {
+                  logProofRejection("MetricsView", url, validation);
+                  return (
+                    <span
+                      key={j}
+                      className="text-slate-600 ml-1"
+                      title={`Invalid proof: ${validation.reason}`}
+                    >
+                      [invalid source {j + 1}]
+                    </span>
+                  );
+                }
+                return (
+                  <a
+                    key={j}
+                    href={url}
+                    target="_blank"
+                    rel="noreferrer noopener"
+                    className="text-rose-400 hover:text-rose-300 ml-1 underline"
+                  >
+                    [source {j + 1}]
+                  </a>
+                );
+              })}
             </span>
           )}
         </div>

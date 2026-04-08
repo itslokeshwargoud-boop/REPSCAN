@@ -1,11 +1,14 @@
 /**
- * ROProofLink — A consistent "Proof" link button used across all
- * Reputation OS modules to link every data point to its YouTube source.
+ * ROProofLink — Context-aware "Proof" link component.
  *
- * Validates proof URLs before rendering. Invalid proofs are shown as
- * non-clickable badges with a reason.
+ * Proof links are ONLY rendered in two allowed contexts:
+ *   - "talk_comment"     → comment-level proof in the Talk feature
+ *   - "overview_channel"  → YouTube channel links on the Overview page
  *
- * Matches the rose-400 link style used in Dashboard and Talk pages.
+ * In every other context the component renders nothing.
+ * This centralises the proof-link allowlist so it is impossible to
+ * accidentally show proof links in Alerts, Narratives, Influencers,
+ * Authenticity, Velocity, MoodMap, Actions, Predictions, or Campaigns.
  */
 
 import {
@@ -14,17 +17,46 @@ import {
   type ProofValidationResult,
 } from "@/lib/proofValidation";
 
+// ---------------------------------------------------------------------------
+// Allowed proof-link contexts
+// ---------------------------------------------------------------------------
+
+export type ProofLinkContext = "talk_comment" | "overview_channel";
+
+const ALLOWED_CONTEXTS: ReadonlySet<ProofLinkContext> = new Set([
+  "talk_comment",
+  "overview_channel",
+]);
+
+/**
+ * Utility: returns true when proof links should be rendered for `ctx`.
+ * Useful for tests and programmatic checks.
+ */
+export function isProofLinkAllowed(ctx: string): ctx is ProofLinkContext {
+  return ALLOWED_CONTEXTS.has(ctx as ProofLinkContext);
+}
+
+// ---------------------------------------------------------------------------
+// Component
+// ---------------------------------------------------------------------------
+
 interface ROProofLinkProps {
   href: string;
   label?: string;
   className?: string;
+  /** Context in which the link is rendered. If omitted or not in the
+   *  allowlist the component renders nothing. */
+  context?: string;
 }
 
 export default function ROProofLink({
   href,
   label = "Proof",
   className = "",
+  context,
 }: ROProofLinkProps) {
+  // Gate: only render in explicitly allowed contexts
+  if (!context || !isProofLinkAllowed(context)) return null;
   if (!href) return null;
 
   const validation: ProofValidationResult = validateProofUrl(href);

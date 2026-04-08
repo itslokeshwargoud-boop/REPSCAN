@@ -6,7 +6,7 @@ import ROLayout from "@/components/reputation-os/ROLayout";
 import ROCard from "@/components/reputation-os/ROCard";
 import ROBadge from "@/components/reputation-os/ROBadge";
 import ROMetricCard from "@/components/reputation-os/ROMetricCard";
-import ROProofLink from "@/components/reputation-os/ROProofLink";
+
 
 // ---------------------------------------------------------------------------
 // Constants
@@ -126,10 +126,6 @@ function InfluencerCard({ inf }: { inf: Influencer }) {
         </div>
       </div>
 
-      {/* Proof link */}
-      <div className="mt-3 pt-3 border-t border-slate-800/40">
-        <ROProofLink href={inf.proof_url} label="View recent activity" />
-      </div>
     </div>
   );
 }

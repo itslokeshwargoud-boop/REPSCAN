@@ -26,7 +26,7 @@ import ROLayout from "@/components/reputation-os/ROLayout";
 import ROCard from "@/components/reputation-os/ROCard";
 import ROBadge from "@/components/reputation-os/ROBadge";
 import ROScoreGauge from "@/components/reputation-os/ROScoreGauge";
-import ROProofLink from "@/components/reputation-os/ROProofLink";
+
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -153,9 +153,6 @@ function CampaignsContent() {
                       {metric.change}
                     </p>
                   </div>
-                </div>
-                <div className="mt-3 pt-3 border-t border-slate-800/40">
-                  <ROProofLink href={metric.proof_url} label="View metric evidence" />
                 </div>
               </div>
             );

@@ -58,9 +58,7 @@ export function TenantProvider({ children }: { children: ReactNode }) {
     clientTenant,
   );
   const [isLoading, setIsLoading] = useState(!clientTenant);
-  const [error, setError] = useState<string | null>(
-    clientTenant ? null : null,
-  );
+  const [error, setError] = useState<string | null>(null);
 
   // Verify tenant from server on mount
   useEffect(() => {

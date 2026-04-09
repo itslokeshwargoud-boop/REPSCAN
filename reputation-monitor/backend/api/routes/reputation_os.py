@@ -1,7 +1,7 @@
 """
 REPUTATION OS — Unified API routes for the Reputation Operating System.
 
-Provides 10 multi-tenant endpoints that orchestrate all ML engines into a
+Provides 10 single-tenant endpoints that orchestrate all ML engines into a
 single coherent reputation intelligence layer.
 
 All routes are prefixed with ``/reputation-os/{tenant_id}/``.
@@ -11,10 +11,10 @@ import logging
 from datetime import datetime, timezone
 from typing import Any
 
-from fastapi import APIRouter, HTTPException, Path
+from fastapi import APIRouter, Path
 
+from api.constants import VIJAY_TENANT_ID
 from api.routes.reputation_os_data import (
-    SUPPORTED_TENANTS,
     get_bot_comments,
     get_campaign_data,
     get_influencer_users,
@@ -40,29 +40,6 @@ router = APIRouter(
     prefix="/reputation-os",
     tags=["reputation-os"],
 )
-
-
-# ---------------------------------------------------------------------------
-# Dependency: tenant validation
-# ---------------------------------------------------------------------------
-
-def validate_tenant(
-    tenant_id: str = Path(
-        ...,
-        description="Tenant identifier (e.g. 'vijayx', 'prabhasx', 'default')",
-        examples=["vijayx", "prabhasx", "default"],
-    ),
-) -> str:
-    """Validate that the tenant_id is recognised."""
-    if tenant_id not in SUPPORTED_TENANTS:
-        raise HTTPException(
-            status_code=404,
-            detail=(
-                f"Tenant '{tenant_id}' not found. "
-                f"Supported tenants: {', '.join(sorted(SUPPORTED_TENANTS))}"
-            ),
-        )
-    return tenant_id
 
 
 # ---------------------------------------------------------------------------
@@ -93,23 +70,18 @@ def _envelope(
 
 @router.get("/{tenant_id}/score", summary="Reputation Score")
 async def reputation_score(
-    tenant_id: str = Path(
-        ...,
-        description="Tenant identifier",
-        examples=["vijayx", "prabhasx", "default"],
-    ),
+    tenant_id: str = Path(..., description="Tenant identifier"),
 ) -> dict:
     """Composite reputation score combining all module outputs."""
-    tenant_id = validate_tenant(tenant_id)
-    logger.info("[%s] Computing reputation score", tenant_id)
+    logger.info("[%s] Computing reputation score", VIJAY_TENANT_ID)
 
-    inputs = get_reputation_inputs(tenant_id)
+    inputs = get_reputation_inputs()
     base = calculate_reputation_score(
         inputs["positive"], inputs["negative"], inputs["neutral"],
     )
 
     # Weighted adjustments from secondary signals
-    vel_data = get_velocity_data(tenant_id)
+    vel_data = get_velocity_data()
     vel = compute_velocity(vel_data)
     trend_modifier = 0.0
     if vel["trend_direction"] == "improving":
@@ -117,7 +89,7 @@ async def reputation_score(
     elif vel["trend_direction"] == "declining":
         trend_modifier = -5.0
 
-    bot_comments = get_bot_comments(tenant_id)
+    bot_comments = get_bot_comments()
     bot = analyze_authenticity(bot_comments)
     bot_penalty = -min(bot["bot_percentage"] * 0.3, 15.0)
 
@@ -172,7 +144,7 @@ async def reputation_score(
             "monitor closely."
         )
 
-    return _envelope(tenant_id, data, insights)
+    return _envelope(VIJAY_TENANT_ID, data, insights)
 
 
 # ---------------------------------------------------------------------------
@@ -181,22 +153,17 @@ async def reputation_score(
 
 @router.get("/{tenant_id}/alerts", summary="Early Warning System")
 async def early_warnings(
-    tenant_id: str = Path(
-        ...,
-        description="Tenant identifier",
-        examples=["vijayx", "prabhasx", "default"],
-    ),
+    tenant_id: str = Path(..., description="Tenant identifier"),
 ) -> dict:
     """Generate alerts based on sentiment drops, velocity spikes, and
     negative narrative increases."""
-    tenant_id = validate_tenant(tenant_id)
-    logger.info("[%s] Generating early warning alerts", tenant_id)
+    logger.info("[%s] Generating early warning alerts", VIJAY_TENANT_ID)
 
     now = _now_iso()
     alerts: list[dict] = []
 
     # Sentiment velocity check
-    vel_data = get_velocity_data(tenant_id)
+    vel_data = get_velocity_data()
     vel = compute_velocity(vel_data)
     if vel["velocity"] == "rapid" and vel["trend_direction"] == "declining":
         alerts.append({
@@ -220,7 +187,7 @@ async def early_warnings(
         })
 
     # Bot activity check
-    bot_comments = get_bot_comments(tenant_id)
+    bot_comments = get_bot_comments()
     bot = analyze_authenticity(bot_comments)
     if bot["bot_percentage"] >= 30:
         alerts.append({
@@ -244,7 +211,7 @@ async def early_warnings(
         })
 
     # Negative narrative check
-    texts = get_narrative_texts(tenant_id)
+    texts = get_narrative_texts()
     narratives = detect_narratives(texts, n_clusters=5)
     negative_narratives = [
         n for n in narratives if n.get("sentiment") == "negative"
@@ -272,7 +239,7 @@ async def early_warnings(
         })
 
     # Reputation score check
-    rep_inputs = get_reputation_inputs(tenant_id)
+    rep_inputs = get_reputation_inputs()
     rep = calculate_reputation_score(
         rep_inputs["positive"], rep_inputs["negative"], rep_inputs["neutral"],
     )
@@ -314,7 +281,7 @@ async def early_warnings(
         "alerts": alerts,
     }
 
-    insights = [f"{len(alerts)} alert(s) generated for tenant '{tenant_id}'."]
+    insights = [f"{len(alerts)} alert(s) generated."]
     critical = [a for a in alerts if a["severity"] == "critical"]
     if critical:
         insights.append(
@@ -323,7 +290,7 @@ async def early_warnings(
     else:
         insights.append("No critical alerts — situation is manageable.")
 
-    return _envelope(tenant_id, data, insights)
+    return _envelope(VIJAY_TENANT_ID, data, insights)
 
 
 # ---------------------------------------------------------------------------
@@ -332,17 +299,12 @@ async def early_warnings(
 
 @router.get("/{tenant_id}/narratives", summary="Narrative Detection")
 async def narrative_detection(
-    tenant_id: str = Path(
-        ...,
-        description="Tenant identifier",
-        examples=["vijayx", "prabhasx", "default"],
-    ),
+    tenant_id: str = Path(..., description="Tenant identifier"),
 ) -> dict:
     """Detect thematic narrative clusters from comment data."""
-    tenant_id = validate_tenant(tenant_id)
-    logger.info("[%s] Running narrative detection", tenant_id)
+    logger.info("[%s] Running narrative detection", VIJAY_TENANT_ID)
 
-    texts = get_narrative_texts(tenant_id)
+    texts = get_narrative_texts()
     clusters = detect_narratives(texts, n_clusters=5)
 
     data = {
@@ -367,7 +329,7 @@ async def narrative_detection(
             f"({top_neg['percentage']}%) — consider counter-messaging."
         )
 
-    return _envelope(tenant_id, data, insights)
+    return _envelope(VIJAY_TENANT_ID, data, insights)
 
 
 # ---------------------------------------------------------------------------
@@ -376,17 +338,12 @@ async def narrative_detection(
 
 @router.get("/{tenant_id}/influencers", summary="Influencer Analysis")
 async def influencer_analysis(
-    tenant_id: str = Path(
-        ...,
-        description="Tenant identifier",
-        examples=["vijayx", "prabhasx", "default"],
-    ),
+    tenant_id: str = Path(..., description="Tenant identifier"),
 ) -> dict:
     """Rank and classify users by influence and stance."""
-    tenant_id = validate_tenant(tenant_id)
-    logger.info("[%s] Analysing influencers", tenant_id)
+    logger.info("[%s] Analysing influencers", VIJAY_TENANT_ID)
 
-    users = get_influencer_users(tenant_id)
+    users = get_influencer_users()
     result = analyze_influencers(users)
 
     ranked = result["ranked_influencers"]
@@ -419,7 +376,7 @@ async def influencer_analysis(
             "consider engagement strategy."
         )
 
-    return _envelope(tenant_id, data, insights)
+    return _envelope(VIJAY_TENANT_ID, data, insights)
 
 
 # ---------------------------------------------------------------------------
@@ -428,17 +385,12 @@ async def influencer_analysis(
 
 @router.get("/{tenant_id}/authenticity", summary="Bot Detection")
 async def bot_detection(
-    tenant_id: str = Path(
-        ...,
-        description="Tenant identifier",
-        examples=["vijayx", "prabhasx", "default"],
-    ),
+    tenant_id: str = Path(..., description="Tenant identifier"),
 ) -> dict:
     """Analyse engagement authenticity and detect bot activity."""
-    tenant_id = validate_tenant(tenant_id)
-    logger.info("[%s] Running bot detection", tenant_id)
+    logger.info("[%s] Running bot detection", VIJAY_TENANT_ID)
 
-    comments = get_bot_comments(tenant_id)
+    comments = get_bot_comments()
     result = analyze_authenticity(comments)
 
     data = {
@@ -465,7 +417,7 @@ async def bot_detection(
             "including duplicate text and burst activity."
         )
 
-    return _envelope(tenant_id, data, insights)
+    return _envelope(VIJAY_TENANT_ID, data, insights)
 
 
 # ---------------------------------------------------------------------------
@@ -474,17 +426,12 @@ async def bot_detection(
 
 @router.get("/{tenant_id}/velocity", summary="Sentiment Velocity")
 async def sentiment_velocity(
-    tenant_id: str = Path(
-        ...,
-        description="Tenant identifier",
-        examples=["vijayx", "prabhasx", "default"],
-    ),
+    tenant_id: str = Path(..., description="Tenant identifier"),
 ) -> dict:
     """Measure the speed and direction of sentiment change."""
-    tenant_id = validate_tenant(tenant_id)
-    logger.info("[%s] Computing sentiment velocity", tenant_id)
+    logger.info("[%s] Computing sentiment velocity", VIJAY_TENANT_ID)
 
-    data_points = get_velocity_data(tenant_id)
+    data_points = get_velocity_data()
     result = compute_velocity(data_points)
 
     data = {
@@ -515,7 +462,7 @@ async def sentiment_velocity(
         f"{result['data_points_used']} data points."
     )
 
-    return _envelope(tenant_id, data, insights)
+    return _envelope(VIJAY_TENANT_ID, data, insights)
 
 
 # ---------------------------------------------------------------------------
@@ -524,17 +471,12 @@ async def sentiment_velocity(
 
 @router.get("/{tenant_id}/moodmap", summary="MoodMap")
 async def moodmap(
-    tenant_id: str = Path(
-        ...,
-        description="Tenant identifier",
-        examples=["vijayx", "prabhasx", "default"],
-    ),
+    tenant_id: str = Path(..., description="Tenant identifier"),
 ) -> dict:
     """Generate a timeline sentiment map from video comments."""
-    tenant_id = validate_tenant(tenant_id)
-    logger.info("[%s] Generating MoodMap", tenant_id)
+    logger.info("[%s] Generating MoodMap", VIJAY_TENANT_ID)
 
-    comments, duration = get_moodmap_data(tenant_id)
+    comments, duration = get_moodmap_data()
     result = generate_moodmap(comments, duration)
 
     data = {
@@ -562,7 +504,7 @@ async def moodmap(
     else:
         insights.append("No significant mood spikes detected.")
 
-    return _envelope(tenant_id, data, insights)
+    return _envelope(VIJAY_TENANT_ID, data, insights)
 
 
 # ---------------------------------------------------------------------------
@@ -571,35 +513,30 @@ async def moodmap(
 
 @router.get("/{tenant_id}/actions", summary="Action Recommendations")
 async def action_recommendations(
-    tenant_id: str = Path(
-        ...,
-        description="Tenant identifier",
-        examples=["vijayx", "prabhasx", "default"],
-    ),
+    tenant_id: str = Path(..., description="Tenant identifier"),
 ) -> dict:
     """Generate prioritised action recommendations from aggregated state."""
-    tenant_id = validate_tenant(tenant_id)
-    logger.info("[%s] Generating action recommendations", tenant_id)
+    logger.info("[%s] Generating action recommendations", VIJAY_TENANT_ID)
 
     # Aggregate system state from all modules
-    rep_inputs = get_reputation_inputs(tenant_id)
+    rep_inputs = get_reputation_inputs()
     rep = calculate_reputation_score(
         rep_inputs["positive"], rep_inputs["negative"], rep_inputs["neutral"],
     )
 
-    vel_data = get_velocity_data(tenant_id)
+    vel_data = get_velocity_data()
     vel = compute_velocity(vel_data)
 
-    bot_comments = get_bot_comments(tenant_id)
+    bot_comments = get_bot_comments()
     bot = analyze_authenticity(bot_comments)
 
-    texts = get_narrative_texts(tenant_id)
+    texts = get_narrative_texts()
     narratives = detect_narratives(texts, n_clusters=5)
 
-    users = get_influencer_users(tenant_id)
+    users = get_influencer_users()
     influencers = analyze_influencers(users)
 
-    history = get_prediction_history(tenant_id)
+    history = get_prediction_history()
     predictions = predict_sentiment(history)
 
     # Build alerts list for action engine
@@ -645,7 +582,7 @@ async def action_recommendations(
             f"{top['description'][:120]}"
         )
 
-    return _envelope(tenant_id, data, insights)
+    return _envelope(VIJAY_TENANT_ID, data, insights)
 
 
 # ---------------------------------------------------------------------------
@@ -654,17 +591,12 @@ async def action_recommendations(
 
 @router.get("/{tenant_id}/predictions", summary="Predictive Engine")
 async def predictive_engine(
-    tenant_id: str = Path(
-        ...,
-        description="Tenant identifier",
-        examples=["vijayx", "prabhasx", "default"],
-    ),
+    tenant_id: str = Path(..., description="Tenant identifier"),
 ) -> dict:
     """Forecast sentiment for the next 24-48 hours."""
-    tenant_id = validate_tenant(tenant_id)
-    logger.info("[%s] Running predictions", tenant_id)
+    logger.info("[%s] Running predictions", VIJAY_TENANT_ID)
 
-    history = get_prediction_history(tenant_id)
+    history = get_prediction_history()
     result = predict_sentiment(history, horizon_hours=48)
 
     data = {
@@ -700,7 +632,7 @@ async def predictive_engine(
             "Positive trajectory — maintain current strategy."
         )
 
-    return _envelope(tenant_id, data, insights)
+    return _envelope(VIJAY_TENANT_ID, data, insights)
 
 
 # ---------------------------------------------------------------------------
@@ -709,17 +641,12 @@ async def predictive_engine(
 
 @router.get("/{tenant_id}/campaigns", summary="Campaign Impact")
 async def campaign_impact(
-    tenant_id: str = Path(
-        ...,
-        description="Tenant identifier",
-        examples=["vijayx", "prabhasx", "default"],
-    ),
+    tenant_id: str = Path(..., description="Tenant identifier"),
 ) -> dict:
     """Measure before/after impact of reputation campaigns."""
-    tenant_id = validate_tenant(tenant_id)
-    logger.info("[%s] Tracking campaign impact", tenant_id)
+    logger.info("[%s] Tracking campaign impact", VIJAY_TENANT_ID)
 
-    before, after, campaign_name = get_campaign_data(tenant_id)
+    before, after, campaign_name = get_campaign_data()
     result = track_campaign_impact(before, after, campaign_name)
 
     improved = [m for m in result["metric_changes"] if m["direction"] == "improved"]
@@ -758,4 +685,4 @@ async def campaign_impact(
         f"Overall assessment: {result['impact_assessment'].replace('_', ' ')}."
     )
 
-    return _envelope(tenant_id, data, insights)
+    return _envelope(VIJAY_TENANT_ID, data, insights)

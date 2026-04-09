@@ -234,6 +234,9 @@ describe("Talk Cache Database", () => {
         proofUrl: "https://www.youtube.com/watch?v=video1&lc=c1",
         keyword: "test-keyword",
         fetchedAt: new Date().toISOString(),
+        botScore: 0,
+        botLabel: "human",
+        botReasons: "[]",
       },
       {
         commentId: "c2",
@@ -247,6 +250,9 @@ describe("Talk Cache Database", () => {
         proofUrl: "https://www.youtube.com/watch?v=video2&lc=c2",
         keyword: "test-keyword",
         fetchedAt: new Date().toISOString(),
+        botScore: 0,
+        botLabel: "human",
+        botReasons: "[]",
       },
       {
         commentId: "c3",
@@ -260,6 +266,9 @@ describe("Talk Cache Database", () => {
         proofUrl: "https://www.youtube.com/watch?v=video3&lc=c3",
         keyword: "test-keyword",
         fetchedAt: new Date().toISOString(),
+        botScore: 0,
+        botLabel: "human",
+        botReasons: "[]",
       },
     ];
 
@@ -321,6 +330,9 @@ describe("Talk Cache Database", () => {
         proofUrl: `https://www.youtube.com/watch?v=vid-${i % 3}&lc=page-test-${i}`,
         keyword: "pagination-test",
         fetchedAt: new Date().toISOString(),
+        botScore: 0,
+        botLabel: "human",
+        botReasons: "[]",
       });
     }
 

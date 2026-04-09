@@ -5,7 +5,7 @@
  * Proof links are allowed here (context: "talk_comment").
  */
 
-import { useEffect } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/router";
 import { TenantProvider, useTenant } from "@/contexts/TenantContext";
 import { useKeyword } from "@/contexts/KeywordContext";
@@ -68,6 +68,40 @@ function sentimentIcon(s: SentimentLabel): string {
 
 function capitalize(s: string): string {
   return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+// ---------------------------------------------------------------------------
+// Bot badge helpers
+// ---------------------------------------------------------------------------
+
+type BotLabel = "human" | "suspicious" | "bot";
+
+function botBadgeColor(label: BotLabel): string {
+  switch (label) {
+    case "human":
+      return "bg-emerald-500/15 border-emerald-500/30 text-emerald-400";
+    case "suspicious":
+      return "bg-amber-500/15 border-amber-500/30 text-amber-400";
+    case "bot":
+      return "bg-red-500/15 border-red-500/30 text-red-400";
+  }
+}
+
+function botIcon(label: BotLabel): string {
+  switch (label) {
+    case "human":
+      return "👤";
+    case "suspicious":
+      return "⚠️";
+    case "bot":
+      return "🤖";
+  }
+}
+
+function formatBotReason(reason: string): string {
+  return reason
+    .replace(/_/g, " ")
+    .replace(/\b\w/g, (c) => c.toUpperCase());
 }
 
 // ---------------------------------------------------------------------------
@@ -136,6 +170,34 @@ function SentimentSummary({
 // ---------------------------------------------------------------------------
 
 function TalkCard({ item }: { item: TalkItem }) {
+  const [showReasons, setShowReasons] = useState(false);
+  const popoverRef = useRef<HTMLDivElement>(null);
+  const botLabel = (item.botLabel ?? "human") as BotLabel;
+  const botReasons: string[] = Array.isArray(item.botReasons) ? item.botReasons : [];
+  const botScore = item.botScore ?? 0;
+
+  // Close popover on click outside or Escape key
+  const handleClickOutside = useCallback((e: MouseEvent) => {
+    if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
+      setShowReasons(false);
+    }
+  }, []);
+
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.key === "Escape") setShowReasons(false);
+  }, []);
+
+  useEffect(() => {
+    if (showReasons) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleKeyDown);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+        document.removeEventListener("keydown", handleKeyDown);
+      };
+    }
+  }, [showReasons, handleClickOutside, handleKeyDown]);
+
   return (
     <div className="rounded-xl border border-slate-800/60 bg-slate-900/50 p-3 hover:border-slate-600/60 transition-all duration-200 backdrop-blur">
       {/* Header row */}
@@ -153,13 +215,51 @@ function TalkCard({ item }: { item: TalkItem }) {
             </div>
           </div>
         </div>
-        <span
-          className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium ${sentimentBg(
-            item.sentiment
-          )} ${sentimentColor(item.sentiment)}`}
-        >
-          {sentimentIcon(item.sentiment)} {capitalize(item.sentiment)}
-        </span>
+        <div className="flex items-center gap-2 flex-shrink-0">
+          {/* Bot badge */}
+          <div className="relative" ref={popoverRef}>
+            <button
+              onClick={() => setShowReasons(!showReasons)}
+              className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium cursor-pointer transition-colors ${botBadgeColor(botLabel)}`}
+              title={`Bot score: ${botScore}/100. Click for details.`}
+            >
+              {botIcon(botLabel)} {capitalize(botLabel)}
+              {botScore > 0 && (
+                <span className="opacity-70 ml-0.5">{botScore}</span>
+              )}
+            </button>
+            {/* Reasons popover */}
+            {showReasons && botReasons.length > 0 && (
+              <div className="absolute right-0 top-full mt-1 z-50 w-56 rounded-lg border border-slate-700 bg-slate-800 p-3 shadow-xl">
+                <div className="text-xs font-semibold text-slate-300 mb-2">
+                  Bot Detection Reasons
+                </div>
+                <ul className="space-y-1">
+                  {botReasons.map((r, idx) => (
+                    <li
+                      key={idx}
+                      className="text-xs text-slate-400 flex items-center gap-1.5"
+                    >
+                      <span className="h-1.5 w-1.5 rounded-full bg-amber-400 flex-shrink-0" />
+                      {formatBotReason(r)}
+                    </li>
+                  ))}
+                </ul>
+                <div className="text-xs text-slate-500 mt-2 pt-2 border-t border-slate-700">
+                  Score: {botScore}/100
+                </div>
+              </div>
+            )}
+          </div>
+          {/* Sentiment badge */}
+          <span
+            className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium ${sentimentBg(
+              item.sentiment
+            )} ${sentimentColor(item.sentiment)}`}
+          >
+            {sentimentIcon(item.sentiment)} {capitalize(item.sentiment)}
+          </span>
+        </div>
       </div>
 
       {/* Text */}
@@ -436,6 +536,26 @@ function TalkContent() {
                 <span className="ml-1">×</span>
               </button>
             )}
+
+            {/* Bot filter chips */}
+            <div className="flex items-center gap-1.5">
+              {(["human", "suspicious", "bot"] as const).map((label) => {
+                const isActive = talk.botFilter === label;
+                return (
+                  <button
+                    key={label}
+                    onClick={() => talk.setBotFilter(isActive ? null : label)}
+                    className={`inline-flex items-center gap-1 rounded-full border px-2.5 py-0.5 text-xs font-medium transition-colors ${
+                      isActive
+                        ? botBadgeColor(label)
+                        : "border-slate-700/60 text-slate-500 hover:border-slate-600 hover:text-slate-400"
+                    }`}
+                  >
+                    {botIcon(label)} {capitalize(label)}
+                  </button>
+                );
+              })}
+            </div>
 
             <span className="text-xs text-slate-500 ml-auto">
               Showing {talk.items.length} of {talk.total.toLocaleString()}{" "}

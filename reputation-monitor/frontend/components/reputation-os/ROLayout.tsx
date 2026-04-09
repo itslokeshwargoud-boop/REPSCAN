@@ -16,8 +16,6 @@ const MODULE_TITLES: Record<string, string> = {
   narratives: "Narratives",
   influencers: "Influencers",
   authenticity: "Authenticity",
-  velocity: "Velocity",
-  moodmap: "MoodMap",
   actions: "Actions",
   predictions: "Predictions",
   campaigns: "Campaigns",

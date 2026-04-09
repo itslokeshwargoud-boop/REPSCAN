@@ -13,8 +13,6 @@ import {
   fetchNarratives,
   fetchInfluencers,
   fetchAuthenticity,
-  fetchVelocity,
-  fetchMoodMap,
   fetchActions,
   fetchPredictions,
   fetchCampaignImpact,
@@ -125,12 +123,6 @@ describe("Vijay Deverakonda data relevance", () => {
     expect(campaign.campaign_name.toLowerCase()).toContain("film");
   });
 
-  it("mood map summary references Vijay Deverakonda", async () => {
-    const mood = await fetchMoodMap();
-    expect(mood.summary.toLowerCase()).toContain("vijay deverakonda");
-    expect(mood.summary.toLowerCase()).not.toContain("product");
-  });
-
   it("predictions risk forecast references Vijay Deverakonda", async () => {
     const predictions = await fetchPredictions();
     expect(predictions.risk_forecast.toLowerCase()).toContain(
@@ -168,20 +160,6 @@ describe("Authenticity report data integrity", () => {
   });
 });
 
-describe("Velocity report data integrity", () => {
-  it("timeline has 24 hourly entries", async () => {
-    const vel = await fetchVelocity();
-    expect(vel.timeline).toHaveLength(24);
-    for (const entry of vel.timeline) {
-      expect(entry.positive).toBeGreaterThanOrEqual(0);
-      expect(entry.negative).toBeGreaterThanOrEqual(0);
-      expect(entry.neutral).toBeGreaterThanOrEqual(0);
-    }
-  });
-});
-
-// ── Single-tenant enforcement tests ─────────────────────────────────────────
-
 describe("Single-tenant enforcement (Vijay Deverakonda only)", () => {
   it("data functions accept no tenant parameter", () => {
     // All fetch functions should have zero required parameters.
@@ -192,8 +170,6 @@ describe("Single-tenant enforcement (Vijay Deverakonda only)", () => {
     expect(fetchNarratives.length).toBe(0);
     expect(fetchInfluencers.length).toBe(0);
     expect(fetchAuthenticity.length).toBe(0);
-    expect(fetchVelocity.length).toBe(0);
-    expect(fetchMoodMap.length).toBe(0);
     expect(fetchActions.length).toBe(0);
     expect(fetchPredictions.length).toBe(0);
     expect(fetchCampaignImpact.length).toBe(0);

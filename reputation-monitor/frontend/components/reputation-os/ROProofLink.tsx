@@ -8,7 +8,7 @@
  * In every other context the component renders nothing.
  * This centralises the proof-link allowlist so it is impossible to
  * accidentally show proof links in Alerts, Narratives, Influencers,
- * Authenticity, Velocity, MoodMap, Actions, Predictions, or Campaigns.
+ * Authenticity, Actions, Predictions, or Campaigns.
  */
 
 import {

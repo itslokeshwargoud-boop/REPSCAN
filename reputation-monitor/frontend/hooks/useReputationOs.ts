@@ -1,5 +1,5 @@
 /**
- * useReputationOs — React hook for all 10 REPUTATION OS modules.
+ * useReputationOs — React hook for all REPUTATION OS modules.
  * Uses @tanstack/react-query for caching, deduplication, and background refresh.
  *
  * Single-tenant: always uses Vijay Deverakonda data.
@@ -15,8 +15,6 @@ export type {
   NarrativeCluster,
   Influencer,
   AuthenticityReport,
-  VelocityReport,
-  MoodMapReport,
   ActionRecommendation,
   PredictionsReport,
   CampaignReport,
@@ -59,18 +57,6 @@ export function useReputationOs() {
     staleTime: STALE_TIME,
   });
 
-  const velocity = useQuery({
-    queryKey: ["rep-velocity"],
-    queryFn: () => api.fetchVelocity(),
-    staleTime: STALE_TIME,
-  });
-
-  const moodmap = useQuery({
-    queryKey: ["rep-moodmap"],
-    queryFn: () => api.fetchMoodMap(),
-    staleTime: STALE_TIME,
-  });
-
   const actions = useQuery({
     queryKey: ["rep-actions"],
     queryFn: () => api.fetchActions(),
@@ -95,8 +81,6 @@ export function useReputationOs() {
     narratives,
     influencers,
     authenticity,
-    velocity,
-    moodmap,
     actions,
     predictions,
     campaigns,

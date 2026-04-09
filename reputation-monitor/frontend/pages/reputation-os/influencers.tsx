@@ -50,6 +50,10 @@ function initials(name: string): string {
 // ---------------------------------------------------------------------------
 
 function InfluencerCard({ inf }: { inf: Influencer }) {
+  const hasChannelUrl =
+    inf.channel_url &&
+    inf.channel_url.startsWith("https://");
+
   return (
     <div className="rounded-xl border border-slate-800/60 bg-slate-900/50 p-5 backdrop-blur">
       {/* Header */}
@@ -62,9 +66,20 @@ function InfluencerCard({ inf }: { inf: Influencer }) {
           {initials(inf.username)}
         </div>
         <div className="min-w-0 flex-1">
-          <p className="truncate text-sm font-semibold text-white">
-            @{inf.username}
-          </p>
+          {hasChannelUrl ? (
+            <a
+              href={inf.channel_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="truncate text-sm font-semibold text-white hover:text-rose-400 transition-colors block"
+            >
+              @{inf.username}
+            </a>
+          ) : (
+            <p className="truncate text-sm font-semibold text-white">
+              @{inf.username}
+            </p>
+          )}
           <ROBadge variant={CLASS_BADGE[inf.classification]}>
             {inf.classification}
           </ROBadge>
@@ -126,6 +141,35 @@ function InfluencerCard({ inf }: { inf: Influencer }) {
         </div>
       </div>
 
+      {/* Channel link */}
+      <div className="mt-4 border-t border-slate-800/40 pt-3">
+        {hasChannelUrl ? (
+          <a
+            href={inf.channel_url}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-1.5 text-xs font-medium text-rose-400 hover:text-rose-300 transition-colors"
+          >
+            <svg
+              width="12"
+              height="12"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="2"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+              <polyline points="15 3 21 3 21 9" />
+              <line x1="10" y1="14" x2="21" y2="3" />
+            </svg>
+            Open channel
+          </a>
+        ) : (
+          <span className="text-xs text-slate-500">Link not available</span>
+        )}
+      </div>
     </div>
   );
 }

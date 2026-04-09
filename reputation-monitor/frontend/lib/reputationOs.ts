@@ -1,6 +1,6 @@
 /**
  * REPUTATION OS API client — generates realistic client-side dummy data
- * for all 10 REPUTATION OS modules.
+ * for all REPUTATION OS modules.
  *
  * Single-tenant: permanently scoped to Vijay Deverakonda.
  * No backend required. Each function returns deterministic data
@@ -63,6 +63,7 @@ export interface Influencer {
   recent_sentiment: number;
   avatar_color: string;
   proof_url: string;
+  channel_url: string;
 }
 
 export interface AuthenticityReport {
@@ -72,38 +73,6 @@ export interface AuthenticityReport {
   total_analyzed: number;
   confidence: number;
   patterns: { type: string; count: number; severity: string; proof_url: string }[];
-}
-
-export interface VelocityReport {
-  speed: "rapid" | "moderate" | "slow";
-  rate_per_hour: number;
-  trend_direction: "accelerating" | "decelerating" | "stable";
-  acceleration: number;
-  spike_proof_urls: { hour: string; proof_url: string }[];
-  timeline: {
-    hour: string;
-    positive: number;
-    negative: number;
-    neutral: number;
-  }[];
-}
-
-export interface MoodMapSegment {
-  segment_index: number;
-  start_time: string;
-  end_time: string;
-  sentiment_score: number;
-  dominant_emotion: string;
-  comment_count: number;
-  is_spike: boolean;
-  proof_url: string;
-}
-
-export interface MoodMapReport {
-  segments: MoodMapSegment[];
-  spikes: { time: string; emotion: string; intensity: number }[];
-  overall_mood: string;
-  summary: string;
 }
 
 export interface ActionRecommendation {
@@ -195,9 +164,6 @@ interface TenantProfile {
   botDetection: number;
   trendStability: number;
   botPct: number;
-  speed: VelocityReport["speed"];
-  ratePerHour: number;
-  overallMood: string;
 }
 
 const PROFILES: Record<string, TenantProfile> = {
@@ -213,9 +179,6 @@ const PROFILES: Record<string, TenantProfile> = {
     botDetection: 92,
     trendStability: 77,
     botPct: 8,
-    speed: "moderate",
-    ratePerHour: 34,
-    overallMood: "optimistic",
   },
 };
 
@@ -381,6 +344,7 @@ const INFLUENCER_DATA: InfluencerSet = {
       recent_sentiment: 0.89,
       avatar_color: "#22c55e",
       proof_url: "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxTR1aB2cD3eF4gH4AaABAg",
+      channel_url: "https://www.youtube.com/@TollywoodReviews",
     },
     {
       username: "@telugu_cinema_daily",
@@ -392,6 +356,7 @@ const INFLUENCER_DATA: InfluencerSet = {
       recent_sentiment: 0.82,
       avatar_color: "#16a34a",
       proof_url: "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxTC2bC3dE4fG5hI4AaABAg",
+      channel_url: "https://www.youtube.com/@TeluguCinemaDaily",
     },
     {
       username: "@rowdy_fanclub",
@@ -403,6 +368,7 @@ const INFLUENCER_DATA: InfluencerSet = {
       recent_sentiment: 0.76,
       avatar_color: "#4ade80",
       proof_url: "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxRF3cD4eF5gH6iJ4AaABAg",
+      channel_url: "https://www.youtube.com/@RowdyFanClub",
     },
   ],
   attackers: [
@@ -416,6 +382,7 @@ const INFLUENCER_DATA: InfluencerSet = {
       recent_sentiment: -0.42,
       avatar_color: "#ef4444",
       proof_url: "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxFC4dE5fG6hI7jK4AaABAg",
+      channel_url: "https://www.youtube.com/@FilmCriticHonest",
     },
   ],
   neutrals: [
@@ -429,6 +396,7 @@ const INFLUENCER_DATA: InfluencerSet = {
       recent_sentiment: 0.05,
       avatar_color: "#a3a3a3",
       proof_url: "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxEN5eF6gH7iJ8kL4AaABAg",
+      channel_url: "https://www.youtube.com/@EntertainmentNewsIndia",
     },
     {
       username: "@south_film_tracker",
@@ -440,6 +408,7 @@ const INFLUENCER_DATA: InfluencerSet = {
       recent_sentiment: 0.12,
       avatar_color: "#d4d4d4",
       proof_url: "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxSF6fG7hI8jK9lM4AaABAg",
+      channel_url: "https://www.youtube.com/@SouthFilmTracker",
     },
   ],
 };
@@ -488,111 +457,7 @@ export async function fetchAuthenticity(): Promise<AuthenticityReport> {
 }
 
 // ---------------------------------------------------------------------------
-// Module 6 — Velocity
-// ---------------------------------------------------------------------------
-
-export async function fetchVelocity(): Promise<VelocityReport> {
-  const p = profile();
-
-  const timeline = Array.from({ length: 24 }, (_, i) => {
-    const base = p.ratePerHour / 3;
-    const positiveBase = base * 1.8;
-    const negativeBase = base * 0.3;
-
-    return {
-      hour: `${String(i).padStart(2, "0")}:00`,
-      positive: Math.max(0, jitterInt(positiveBase, 0.1)),
-      negative: Math.max(0, jitterInt(negativeBase, 0.1)),
-      neutral: Math.max(0, jitterInt(base * 0.9, 0.1)),
-    };
-  });
-
-  const spike_proof_urls = timeline
-    .filter((_, i) => i % 6 === 3)
-    .map((t) => ({
-      hour: t.hour,
-      proof_url: `https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxVS${t.hour.replace(":", "")}4AaABAg`,
-    }));
-
-  return {
-    speed: p.speed,
-    rate_per_hour: jitterInt(p.ratePerHour, 0.03),
-    trend_direction: "decelerating",
-    acceleration: jitter(-3.1, 0.03),
-    spike_proof_urls,
-    timeline,
-  };
-}
-
-// ---------------------------------------------------------------------------
-// Module 7 — Mood Map
-// ---------------------------------------------------------------------------
-
-const EMOTIONS = [
-  "joy",
-  "trust",
-  "anticipation",
-  "surprise",
-  "anger",
-  "disgust",
-  "sadness",
-  "fear",
-] as const;
-
-export async function fetchMoodMap(): Promise<MoodMapReport> {
-  const p = profile();
-
-  const positiveEmotions: readonly string[] = ["joy", "trust", "anticipation"];
-  const negativeEmotions: readonly string[] = ["anger", "disgust", "sadness", "fear"];
-
-  const segments: MoodMapSegment[] = Array.from({ length: 12 }, (_, i) => {
-    const baseSentiment = 0.55 + Math.random() * 0.3;
-
-    const emotionPool =
-      baseSentiment > 0.3
-        ? positiveEmotions
-        : baseSentiment < -0.1
-          ? negativeEmotions
-          : EMOTIONS;
-
-    const emotion = emotionPool[Math.floor(Math.random() * emotionPool.length)];
-    const isSpike = Math.random() < 0.15;
-
-    return {
-      segment_index: i,
-      start_time: hoursAgo(24 - i * 2),
-      end_time: hoursAgo(22 - i * 2),
-      sentiment_score: clamp(
-        Math.round(baseSentiment * 100) / 100,
-        -1,
-        1,
-      ),
-      dominant_emotion: emotion,
-      comment_count: jitterInt(185, 0.15),
-      is_spike: isSpike,
-      proof_url: `https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxMM${String(i).padStart(2, "0")}aB2cD3eF4AaABAg`,
-    };
-  });
-
-  const spikes = segments
-    .filter((s) => s.is_spike)
-    .map((s) => ({
-      time: s.start_time,
-      emotion: s.dominant_emotion,
-      intensity: clamp(jitter(0.8, 0.1), 0, 1),
-    }));
-
-  return {
-    segments,
-    spikes,
-    overall_mood: p.overallMood,
-    summary:
-      "Fan sentiment for Vijay Deverakonda is predominantly positive with occasional spikes around film teasers and public appearances. Trust and joy are the dominant emotions across all segments.",
-  };
-}
-
-// ---------------------------------------------------------------------------
-// Module 8 — Action Recommendations
+// Module 6 — Action Recommendations
 // ---------------------------------------------------------------------------
 
 const ACTION_RECOMMENDATIONS: ActionRecommendation[] = [

@@ -24,7 +24,7 @@ const MODULE_TITLES: Record<string, string> = {
 };
 
 export default function ROLayout({ children, activeModule }: ROLayoutProps) {
-  const { tenantId, tenantName, tenantConfig, isLoading, error } = useTenant();
+  const { tenantId, tenantName, isLoading, error } = useTenant();
   const [collapsed, setCollapsed] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string>("");
 

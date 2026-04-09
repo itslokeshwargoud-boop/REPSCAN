@@ -179,3 +179,61 @@ describe("Velocity report data integrity", () => {
     }
   });
 });
+
+// ── Single-tenant enforcement tests ─────────────────────────────────────────
+
+describe("Single-tenant enforcement (Vijay Deverakonda only)", () => {
+  it("data functions accept no tenant parameter", () => {
+    // All fetch functions should have zero required parameters.
+    // If someone accidentally re-adds a tenantId param, TS will catch it
+    // at compile time, but this runtime check is a safety net.
+    expect(fetchReputationScore.length).toBe(0);
+    expect(fetchAlerts.length).toBe(0);
+    expect(fetchNarratives.length).toBe(0);
+    expect(fetchInfluencers.length).toBe(0);
+    expect(fetchAuthenticity.length).toBe(0);
+    expect(fetchVelocity.length).toBe(0);
+    expect(fetchMoodMap.length).toBe(0);
+    expect(fetchActions.length).toBe(0);
+    expect(fetchPredictions.length).toBe(0);
+    expect(fetchCampaignImpact.length).toBe(0);
+  });
+
+  it("score always returns low risk (Vijay profile)", async () => {
+    const score = await fetchReputationScore();
+    expect(score.risk_level).toBe("low");
+    expect(score.trend).toBe("improving");
+    expect(score.score).toBeGreaterThanOrEqual(70);
+  });
+
+  it("alerts are Vijay-specific (not Prabhas or default)", async () => {
+    const alerts = await fetchAlerts();
+    const text = allTexts(alerts);
+    // Vijay alerts should reference him
+    expect(text.toLowerCase()).toContain("vijay deverakonda");
+    // Should NOT contain Prabhas-specific content
+    expect(text.toLowerCase()).not.toContain("prabhas");
+  });
+
+  it("campaign is Film Teaser Launch (Vijay), not recovery or brand", async () => {
+    const campaign = await fetchCampaignImpact();
+    expect(campaign.campaign_name).toBe("Film Teaser Launch Campaign");
+    expect(campaign.status).toBe("positive");
+    // Must not be Prabhas recovery campaign
+    expect(campaign.campaign_name.toLowerCase()).not.toContain("recovery");
+  });
+
+  it("predictions risk forecast is low-risk Vijay profile", async () => {
+    const predictions = await fetchPredictions();
+    expect(predictions.risk_forecast.toLowerCase()).toContain("low risk");
+    expect(predictions.risk_forecast.toLowerCase()).toContain("vijay deverakonda");
+    expect(predictions.risk_forecast.toLowerCase()).not.toContain("prabhas");
+  });
+
+  it("constants module exports correct values", async () => {
+    const { VIJAY_TENANT_ID, VIJAY_DISPLAY_NAME, PAGE_TITLE } = await import("@/lib/constants");
+    expect(VIJAY_TENANT_ID).toBe("vijay_deverakonda");
+    expect(VIJAY_DISPLAY_NAME).toBe("Vijay Deverakonda");
+    expect(PAGE_TITLE).toContain("Vijay Deverakonda");
+  });
+});

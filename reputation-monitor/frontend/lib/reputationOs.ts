@@ -230,6 +230,22 @@ const PROFILES: Record<string, TenantProfile> = {
     ratePerHour: 87,
     overallMood: "tense",
   },
+  anilx: {
+    baseScore: 72,
+    riskLevel: "low",
+    trend: "stable",
+    trendDelta: 1.5,
+    sentiment: 74,
+    engagementQuality: 78,
+    narrativePositivity: 70,
+    influencerImpact: 68,
+    botDetection: 90,
+    trendStability: 73,
+    botPct: 6,
+    speed: "moderate",
+    ratePerHour: 41,
+    overallMood: "cheerful",
+  },
   default: {
     baseScore: 65,
     riskLevel: "medium",
@@ -338,6 +354,32 @@ const ALERT_TEMPLATES: Record<
       details:
         "Rate jumped from 29/hr to 87/hr. 62% of new mentions carry negative sentiment around box office numbers.",
       proof_url: "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxR8dF6pQ3wY9nKt4AaABAg",
+    },
+  ],
+  anilx: [
+    {
+      type: "velocity_surge",
+      severity: "low",
+      message: "Anil Ravipudi mentions up 12% after comedy film trailer release",
+      details:
+        "Organic buzz around Anil Ravipudi's upcoming comedy entertainer is trending across YouTube and Telugu film forums.",
+      proof_url: "https://www.youtube.com/watch?v=Xa3R5LmN7Wp&lc=UgxA1bC2dE3fG4hI5J4AaABAg",
+    },
+    {
+      type: "narrative_shift",
+      severity: "low",
+      message: "New narrative cluster praising Anil Ravipudi's directorial consistency",
+      details:
+        "Film journalists are highlighting Anil Ravipudi's track record of back-to-back blockbusters including F2, F3, and Sarileru Neekevvaru. Sentiment is 81% positive.",
+      proof_url: "https://www.youtube.com/watch?v=Xa3R5LmN7Wp&lc=UgxB2cD3eF4gH5iJ6K4AaABAg",
+    },
+    {
+      type: "velocity_surge",
+      severity: "low",
+      message: "Anil Ravipudi fan engagement surged after box office milestone announcement",
+      details:
+        "Mentions spiked 18% following reports of Anil Ravipudi's films crossing cumulative ₹500 crore at the box office.",
+      proof_url: "https://www.youtube.com/watch?v=Xa3R5LmN7Wp&lc=UgxC3dE4fG5hI6jK7L4AaABAg",
     },
   ],
   default: [
@@ -513,6 +555,72 @@ const NARRATIVE_SETS: Record<string, NarrativeCluster[]> = {
         "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxL2xH5yq6bN7kO8m4AaABAg",
       ],
       trend: "stable",
+    },
+  ],
+  anilx: [
+    {
+      label: "Directorial Style & Comedy",
+      percentage: 34,
+      sentiment: "positive",
+      sample_texts: [
+        "Anil Ravipudi is the comedy king of Telugu cinema — F2 and F3 had audiences rolling in the aisles",
+        "Nobody delivers family entertainers like Anil Ravipudi, his comic timing as a director is unmatched",
+        "Anil Ravipudi knows exactly what mass audiences want — clean comedy with perfect punchlines",
+      ],
+      sample_proof_urls: [
+        "https://www.youtube.com/watch?v=Xa3R5LmN7Wp&lc=UgxN1aK2bT3eR6nR5p4AaABAg",
+        "https://www.youtube.com/watch?v=Xa3R5LmN7Wp&lc=UgxN2bL3cU4fR5oS6r4AaABAg",
+        "https://www.youtube.com/watch?v=Xa3R5LmN7Wp&lc=UgxN3cM4dV5gS6pT7r4AaABAg",
+      ],
+      trend: "stable",
+    },
+    {
+      label: "Box Office Track Record",
+      percentage: 28,
+      sentiment: "positive",
+      sample_texts: [
+        "Anil Ravipudi has delivered consecutive blockbusters — Sarileru Neekevvaru crossed ₹250 crore worldwide",
+        "Every Anil Ravipudi film is a guaranteed commercial hit, producers line up to work with him",
+        "From F2 to Sarileru Neekevvaru, Anil Ravipudi's box office numbers speak for themselves",
+      ],
+      sample_proof_urls: [
+        "https://www.youtube.com/watch?v=Xa3R5LmN7Wp&lc=UgxN4dN5eW6hT7qU8s4AaABAg",
+        "https://www.youtube.com/watch?v=Xa3R5LmN7Wp&lc=UgxN5eO6fX7iU8rV9t4AaABAg",
+        "https://www.youtube.com/watch?v=Xa3R5LmN7Wp&lc=UgxN6fP7gY8jV9sW0u4AaABAg",
+      ],
+      trend: "growing",
+    },
+    {
+      label: "Fan Following & Mass Appeal",
+      percentage: 22,
+      sentiment: "positive",
+      sample_texts: [
+        "Anil Ravipudi films are a celebration in theatres — the mass audience connect is incredible",
+        "Family audiences trust Anil Ravipudi for a clean, fun movie experience every time",
+        "Anil Ravipudi has built a loyal fan base that shows up for every release, rain or shine",
+      ],
+      sample_proof_urls: [
+        "https://www.youtube.com/watch?v=Xa3R5LmN7Wp&lc=UgxN7gQ8hZ9kW0tX1v4AaABAg",
+        "https://www.youtube.com/watch?v=Xa3R5LmN7Wp&lc=UgxN8hR9ia0lX1uY2w4AaABAg",
+        "https://www.youtube.com/watch?v=Xa3R5LmN7Wp&lc=UgxN9iS0jb1mY2vZ3x4AaABAg",
+      ],
+      trend: "stable",
+    },
+    {
+      label: "Upcoming Projects",
+      percentage: 16,
+      sentiment: "mixed",
+      sample_texts: [
+        "Excited to see what Anil Ravipudi does next — rumours of a new comedy franchise are buzzing",
+        "Hope Anil Ravipudi experiments beyond comedy — he has the skill to direct different genres",
+        "Anil Ravipudi's next film announcement is the most anticipated update in Tollywood right now",
+      ],
+      sample_proof_urls: [
+        "https://www.youtube.com/watch?v=Xa3R5LmN7Wp&lc=UgxNA0jT1kc2nZ3wA4y4AaABAg",
+        "https://www.youtube.com/watch?v=Xa3R5LmN7Wp&lc=UgxNB1kU2ld3oA4xB5z4AaABAg",
+        "https://www.youtube.com/watch?v=Xa3R5LmN7Wp&lc=UgxNC2lV3me4pB5yC6a4AaABAg",
+      ],
+      trend: "growing",
     },
   ],
   default: [
@@ -752,6 +860,69 @@ const INFLUENCER_SETS: Record<string, InfluencerSet> = {
       },
     ],
   },
+  anilx: {
+    supporters: [
+      {
+        username: "@comedy_film_hub",
+        classification: "supporter",
+        influence_score: 84,
+        reach: 195_000,
+        engagement_rate: 4.5,
+        impact_percentage: 16,
+        recent_sentiment: 0.85,
+        avatar_color: "#22c55e",
+        proof_url: "https://www.youtube.com/watch?v=Xa3R5LmN7Wp&lc=UgxTR1aB2cD3eF4gH4AaABAg",
+      },
+      {
+        username: "@tollywood_box_office",
+        classification: "supporter",
+        influence_score: 77,
+        reach: 142_000,
+        engagement_rate: 3.7,
+        impact_percentage: 12,
+        recent_sentiment: 0.79,
+        avatar_color: "#16a34a",
+        proof_url: "https://www.youtube.com/watch?v=Xa3R5LmN7Wp&lc=UgxTC2bC3dE4fG5hI4AaABAg",
+      },
+    ],
+    attackers: [
+      {
+        username: "@indie_cinema_critic",
+        classification: "attacker",
+        influence_score: 58,
+        reach: 47_000,
+        engagement_rate: 5.9,
+        impact_percentage: 6,
+        recent_sentiment: -0.38,
+        avatar_color: "#ef4444",
+        proof_url: "https://www.youtube.com/watch?v=Xa3R5LmN7Wp&lc=UgxFC4dE5fG6hI7jK4AaABAg",
+      },
+    ],
+    neutrals: [
+      {
+        username: "@telugu_film_journal",
+        classification: "neutral",
+        influence_score: 72,
+        reach: 118_000,
+        engagement_rate: 2.8,
+        impact_percentage: 9,
+        recent_sentiment: 0.07,
+        avatar_color: "#a3a3a3",
+        proof_url: "https://www.youtube.com/watch?v=Xa3R5LmN7Wp&lc=UgxEN5eF6gH7iJ8kL4AaABAg",
+      },
+      {
+        username: "@mass_entertainer_weekly",
+        classification: "neutral",
+        influence_score: 66,
+        reach: 85_000,
+        engagement_rate: 3.0,
+        impact_percentage: 7,
+        recent_sentiment: 0.10,
+        avatar_color: "#d4d4d4",
+        proof_url: "https://www.youtube.com/watch?v=Xa3R5LmN7Wp&lc=UgxSF6fG7hI8jK9lM4AaABAg",
+      },
+    ],
+  },
   default: {
     supporters: [
       {
@@ -846,7 +1017,7 @@ export async function fetchAuthenticity(
   tenantId: string,
 ): Promise<AuthenticityReport> {
   const p = profile(tenantId);
-  const totalAnalyzed = jitterInt(tenantId === "prabhasx" ? 4_820 : 2_340, 0.03);
+  const totalAnalyzed = jitterInt(tenantId === "prabhasx" ? 4_820 : tenantId === "anilx" ? 2_180 : 2_340, 0.03);
   const botPct = clamp(jitter(p.botPct, 0.03), 0, 100);
   const genuinePct = Math.round((100 - botPct) * 100) / 100;
   const suspicious = Math.round(totalAnalyzed * (botPct / 100));
@@ -864,7 +1035,12 @@ export async function fetchAuthenticity(
             { type: "Abnormal engagement ratio", count: jitterInt(12), severity: "low", proof_url: "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxAU5eF6gH7iJ8kL4AaABAg" },
             { type: "New-account surge", count: jitterInt(8), severity: "low", proof_url: "https://www.youtube.com/watch?v=LkY3F-GR8Xc&lc=UgxAU6fG7hI8jK9lM4AaABAg" },
           ]
-        : [
+        : tenantId === "anilx"
+          ? [
+              { type: "Abnormal engagement ratio", count: jitterInt(10), severity: "low", proof_url: "https://www.youtube.com/watch?v=Xa3R5LmN7Wp&lc=UgxAU5eF6gH7iJ8kL4AaABAg" },
+              { type: "New-account surge", count: jitterInt(6), severity: "low", proof_url: "https://www.youtube.com/watch?v=Xa3R5LmN7Wp&lc=UgxAU6fG7hI8jK9lM4AaABAg" },
+            ]
+          : [
             { type: "Duplicate content", count: jitterInt(31), severity: "medium", proof_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxAU7gH8iJ9kL0mN4AaABAg" },
             { type: "Abnormal engagement ratio", count: jitterInt(22), severity: "medium", proof_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxAU8hI9jK0lM1nO4AaABAg" },
             { type: "New-account surge", count: jitterInt(15), severity: "low", proof_url: "https://www.youtube.com/watch?v=dQw4w9WgXcQ&lc=UgxAU9iJ0kL1mN2oP4AaABAg" },
@@ -875,7 +1051,7 @@ export async function fetchAuthenticity(
     genuine_percentage: genuinePct,
     suspicious_accounts: suspicious,
     total_analyzed: totalAnalyzed,
-    confidence: clamp(jitter(tenantId === "prabhasx" ? 94 : 88, 0.02), 0, 100),
+    confidence: clamp(jitter(tenantId === "prabhasx" ? 94 : tenantId === "anilx" ? 89 : 88, 0.02), 0, 100),
     patterns,
   };
 }
@@ -897,13 +1073,17 @@ export async function fetchVelocity(
         ? base * 1.8
         : tenantId === "prabhasx"
           ? base * 0.6
-          : base * 1.1;
+          : tenantId === "anilx"
+            ? base * 1.5
+            : base * 1.1;
     const negativeBase =
       tenantId === "prabhasx"
         ? base * 1.6
         : tenantId === "vijayx"
           ? base * 0.3
-          : base * 0.8;
+          : tenantId === "anilx"
+            ? base * 0.4
+            : base * 0.8;
 
     return {
       hour: `${String(i).padStart(2, "0")}:00`,
@@ -913,7 +1093,7 @@ export async function fetchVelocity(
     };
   });
 
-  const videoId = tenantId === "vijayx" ? "LkY3F-GR8Xc" : tenantId === "prabhasx" ? "Qrf4Z9AMbgI" : "dQw4w9WgXcQ";
+  const videoId = tenantId === "vijayx" ? "LkY3F-GR8Xc" : tenantId === "prabhasx" ? "Qrf4Z9AMbgI" : tenantId === "anilx" ? "Xa3R5LmN7Wp" : "dQw4w9WgXcQ";
 
   const spike_proof_urls = timeline
     .filter((_, i) => i % 6 === 3)
@@ -931,7 +1111,7 @@ export async function fetchVelocity(
         ? "accelerating"
         : "stable",
     acceleration: jitter(
-      tenantId === "prabhasx" ? 12.4 : tenantId === "vijayx" ? -3.1 : 0.7,
+      tenantId === "prabhasx" ? 12.4 : tenantId === "vijayx" ? -3.1 : tenantId === "anilx" ? 1.2 : 0.7,
       0.03,
     ),
     spike_proof_urls,
@@ -958,7 +1138,7 @@ export async function fetchMoodMap(
   tenantId: string,
 ): Promise<MoodMapReport> {
   const p = profile(tenantId);
-  const mmVideoId = tenantId === "vijayx" ? "LkY3F-GR8Xc" : tenantId === "prabhasx" ? "Qrf4Z9AMbgI" : "dQw4w9WgXcQ";
+  const mmVideoId = tenantId === "vijayx" ? "LkY3F-GR8Xc" : tenantId === "prabhasx" ? "Qrf4Z9AMbgI" : tenantId === "anilx" ? "Xa3R5LmN7Wp" : "dQw4w9WgXcQ";
 
   const positiveEmotions: readonly string[] = ["joy", "trust", "anticipation"];
   const negativeEmotions: readonly string[] = ["anger", "disgust", "sadness", "fear"];
@@ -969,7 +1149,9 @@ export async function fetchMoodMap(
         ? 0.55 + Math.random() * 0.3
         : tenantId === "prabhasx"
           ? -0.1 + Math.random() * 0.4 - 0.2
-          : 0.1 + Math.random() * 0.3;
+          : tenantId === "anilx"
+            ? 0.4 + Math.random() * 0.3
+            : 0.1 + Math.random() * 0.3;
 
     const emotionPool =
       baseSentiment > 0.3
@@ -991,7 +1173,7 @@ export async function fetchMoodMap(
         1,
       ),
       dominant_emotion: emotion,
-      comment_count: jitterInt(tenantId === "prabhasx" ? 420 : 185, 0.15),
+      comment_count: jitterInt(tenantId === "prabhasx" ? 420 : tenantId === "anilx" ? 210 : 185, 0.15),
       is_spike: isSpike,
       proof_url: `https://www.youtube.com/watch?v=${mmVideoId}&lc=UgxMM${String(i).padStart(2, "0")}aB2cD3eF4AaABAg`,
     };
@@ -1014,7 +1196,9 @@ export async function fetchMoodMap(
         ? "Fan sentiment for Vijay Deverakonda is predominantly positive with occasional spikes around film teasers and public appearances. Trust and joy are the dominant emotions across all segments."
         : tenantId === "prabhasx"
           ? "Sentiment around Prabhas is volatile with frequent negative spikes driven by box office performance concerns. Anger and frustration dominate recent segments following his latest release."
-          : "Mixed sentiment with a slight positive lean. Audience mood is relatively stable with no significant spikes in the last 24 hours.",
+          : tenantId === "anilx"
+            ? "Audience sentiment for Anil Ravipudi is consistently warm and cheerful, driven by his reputation as Telugu cinema's top comedy director. Joy and anticipation dominate, with positive spikes around film announcements and box office milestones."
+            : "Mixed sentiment with a slight positive lean. Audience mood is relatively stable with no significant spikes in the last 24 hours.",
   };
 }
 
@@ -1113,6 +1297,41 @@ const ACTION_SETS: Record<string, ActionRecommendation[]> = {
       expected_impact: "Prevent narrative loss to competitor actors",
       icon: "👀",
       proof_url: "https://www.youtube.com/watch?v=Qrf4Z9AMbgI&lc=UgxAC8hI9jK0lM1nO4AaABAg",
+    },
+  ],
+  anilx: [
+    {
+      id: "act-a-1",
+      priority: "medium",
+      category: "Fan Engagement",
+      title: "Amplify positive buzz around Anil Ravipudi's comedy blockbusters",
+      description:
+        "Film review channels are praising Anil Ravipudi's consistent track record of comedy hits like F2, F3, and Sarileru Neekevvaru. Repost and co-create content to maximise reach among family audiences.",
+      expected_impact: "+4% positive sentiment within 48h",
+      icon: "📣",
+      proof_url: "https://www.youtube.com/watch?v=Xa3R5LmN7Wp&lc=UgxAC1aB2cD3eF4gH4AaABAg",
+    },
+    {
+      id: "act-a-2",
+      priority: "low",
+      category: "Monitoring",
+      title: "Track narrative around Anil Ravipudi's upcoming film announcement",
+      description:
+        "A growing narrative cluster is speculating about Anil Ravipudi's next directorial project. Set up keyword alerts to stay ahead of fan expectations and media coverage.",
+      expected_impact: "Early narrative control, reduced risk of misinformation",
+      icon: "🎬",
+      proof_url: "https://www.youtube.com/watch?v=Xa3R5LmN7Wp&lc=UgxAC2bC3dE4fG5hI4AaABAg",
+    },
+    {
+      id: "act-a-3",
+      priority: "low",
+      category: "Content",
+      title: "Share behind-the-scenes content from Anil Ravipudi's film sets",
+      description:
+        "Fan following and mass appeal is a strong narrative for Anil Ravipudi. Exclusive BTS content from his comedy film sets could further boost engagement and positive sentiment among family audiences.",
+      expected_impact: "+3 points on narrative positivity score",
+      icon: "🎥",
+      proof_url: "https://www.youtube.com/watch?v=Xa3R5LmN7Wp&lc=UgxAC3cD4eF5gH6iJ4AaABAg",
     },
   ],
   default: [
@@ -1214,7 +1433,9 @@ export async function fetchPredictions(
       ? "Low risk — Vijay Deverakonda's reputation trajectory is positive. No significant threats detected on the horizon. Film buzz and fan loyalty are strong."
       : tenantId === "prabhasx"
         ? "High risk — Prabhas's reputation score is projected to drop below 45 within 30 days if current negative film reception trends continue unchecked."
-        : "Moderate risk — score is expected to remain stable. Monitor emerging narratives for early warning signs.";
+        : tenantId === "anilx"
+          ? "Low risk — Anil Ravipudi's reputation as Telugu cinema's most reliable comedy director remains strong. Box office consistency and loyal family audiences provide a stable foundation with no significant threats on the horizon."
+          : "Moderate risk — score is expected to remain stable. Monitor emerging narratives for early warning signs.";
 
   return { forecasts, historical, risk_forecast: riskForecast };
 }
@@ -1321,6 +1542,55 @@ export async function fetchCampaignImpact(
         "Add a direct fan outreach component through meet-and-greet events",
         "Announce a compelling upcoming project to shift narrative towards anticipation",
         "Invest in bot mitigation before the next film release campaign",
+      ],
+    };
+  }
+
+  if (tenantId === "anilx") {
+    return {
+      campaign_name: "Comedy Blockbuster Release Campaign",
+      impact_score: jitterInt(74, 0.02),
+      status: "positive",
+      metrics: [
+        {
+          name: "Positive Fan Mentions",
+          before: jitterInt(980),
+          after: jitterInt(1_860),
+          change: jitterInt(880),
+          change_percentage: jitter(89.8),
+          proof_url: "https://www.youtube.com/watch?v=Xa3R5LmN7Wp&lc=UgxCM1aB2cD3eF4gH4AaABAg",
+        },
+        {
+          name: "Director Recognition Score",
+          before: jitterInt(58),
+          after: jitterInt(72),
+          change: jitterInt(14),
+          change_percentage: jitter(24.1),
+          proof_url: "https://www.youtube.com/watch?v=Xa3R5LmN7Wp&lc=UgxCM2bC3dE4fG5hI4AaABAg",
+        },
+        {
+          name: "Family Audience Engagement",
+          before: jitter(3.5),
+          after: jitter(5.4),
+          change: jitter(1.9),
+          change_percentage: jitter(54.3),
+          proof_url: "https://www.youtube.com/watch?v=Xa3R5LmN7Wp&lc=UgxCM3cD4eF5gH6iJ4AaABAg",
+        },
+        {
+          name: "Box Office Buzz Index",
+          before: jitterInt(45),
+          after: jitterInt(68),
+          change: jitterInt(23),
+          change_percentage: jitter(51.1),
+          proof_url: "https://www.youtube.com/watch?v=Xa3R5LmN7Wp&lc=UgxCM4dE5fG6hI7jK4AaABAg",
+        },
+      ],
+      assessment:
+        "Anil Ravipudi's comedy blockbuster release campaign delivered strong results. Positive fan mentions nearly doubled, and director recognition among family audiences surged. The campaign successfully positioned Anil Ravipudi as Telugu cinema's most bankable comedy director.",
+      recommendations: [
+        "Sustain momentum with exclusive comedy clip releases on social media leading up to the film's OTT debut",
+        "Leverage Anil Ravipudi's mass appeal by partnering with regional entertainment influencers for wider coverage",
+        "Announce the next comedy project early to capitalise on current positive sentiment",
       ],
     };
   }

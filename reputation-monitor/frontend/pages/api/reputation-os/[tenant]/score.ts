@@ -1,5 +1,5 @@
 /**
- * /api/reputation-os/[tenant]/score — Returns reputation score for a tenant.
+ * /api/reputation-os/[tenant]/score — Single-tenant — always returns Vijay Deverakonda data.
  */
 
 import type { NextApiRequest, NextApiResponse } from "next";
@@ -21,11 +21,6 @@ export default async function handler(
 ) {
   if (req.method !== "GET") {
     return res.status(405).json({ error: "Method not allowed" });
-  }
-
-  const { tenant } = req.query;
-  if (typeof tenant !== "string" || !tenant.trim()) {
-    return res.status(400).json({ error: "Missing or invalid tenant parameter" });
   }
 
   res.setHeader("Cache-Control", "public, s-maxage=30, stale-while-revalidate=60");

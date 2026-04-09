@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import Head from "next/head";
 import ROSidebar from "./ROSidebar";
 import { useTenant } from "@/contexts/TenantContext";
 
@@ -23,7 +24,7 @@ const MODULE_TITLES: Record<string, string> = {
 };
 
 export default function ROLayout({ children, activeModule }: ROLayoutProps) {
-  const { tenantId, setTenantId, tenantName } = useTenant();
+  const { tenantId, tenantName, tenantConfig, isLoading, error } = useTenant();
   const [collapsed, setCollapsed] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string>("");
 
@@ -45,13 +46,42 @@ export default function ROLayout({ children, activeModule }: ROLayoutProps) {
 
   const moduleTitle = MODULE_TITLES[activeModule] ?? activeModule;
 
+  // Show error if tenant could not be resolved
+  if (error && !tenantId) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#030712]">
+        <div className="text-center">
+          <h1 className="mb-2 text-2xl font-bold text-white">Unknown Tenant</h1>
+          <p className="text-slate-400">
+            This subdomain is not configured. Please access the dashboard via a
+            valid subdomain (e.g. vijay.repscan.ai).
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show loading while tenant is being resolved
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-[#030712]">
+        <div className="h-8 w-8 animate-spin rounded-full border-2 border-slate-700 border-t-rose-500" />
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-[#030712]">
+      <Head>
+        <title>
+          {tenantName ? `${tenantName} — Reputation OS` : "Reputation OS"}
+        </title>
+      </Head>
+
       <ROSidebar
         collapsed={collapsed}
         onToggleCollapse={() => setCollapsed((p) => !p)}
-        tenantId={tenantId}
-        onTenantChange={setTenantId}
+        tenantName={tenantName}
         activeModule={activeModule}
       />
 

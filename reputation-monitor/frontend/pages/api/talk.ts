@@ -386,11 +386,13 @@ export default async function handler(
     : undefined;
   const search = typeof req.query.search === "string" ? req.query.search.trim() : undefined;
   const sort = req.query.sort === "oldest" ? "oldest" : "newest";
-  const bot = (["human", "suspicious", "bot"] as const).includes(
-    req.query.bot as "human" | "suspicious" | "bot"
-  )
-    ? (req.query.bot as "human" | "suspicious" | "bot")
-    : undefined;
+  const BOT_LABELS = ["human", "suspicious", "bot"] as const;
+  type BotLabelFilter = (typeof BOT_LABELS)[number];
+  const botParam = req.query.bot as string | undefined;
+  const bot: BotLabelFilter | undefined =
+    botParam && BOT_LABELS.includes(botParam as BotLabelFilter)
+      ? (botParam as BotLabelFilter)
+      : undefined;
 
   // Cache headers
   res.setHeader("Cache-Control", "public, s-maxage=30, stale-while-revalidate=60");

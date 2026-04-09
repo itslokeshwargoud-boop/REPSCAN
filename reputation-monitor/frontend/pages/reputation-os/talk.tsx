@@ -5,7 +5,7 @@
  * Proof links are allowed here (context: "talk_comment").
  */
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/router";
 import { TenantProvider, useTenant } from "@/contexts/TenantContext";
 import { useKeyword } from "@/contexts/KeywordContext";
@@ -171,9 +171,32 @@ function SentimentSummary({
 
 function TalkCard({ item }: { item: TalkItem }) {
   const [showReasons, setShowReasons] = useState(false);
+  const popoverRef = useRef<HTMLDivElement>(null);
   const botLabel = (item.botLabel ?? "human") as BotLabel;
   const botReasons: string[] = Array.isArray(item.botReasons) ? item.botReasons : [];
   const botScore = item.botScore ?? 0;
+
+  // Close popover on click outside or Escape key
+  const handleClickOutside = useCallback((e: MouseEvent) => {
+    if (popoverRef.current && !popoverRef.current.contains(e.target as Node)) {
+      setShowReasons(false);
+    }
+  }, []);
+
+  const handleKeyDown = useCallback((e: KeyboardEvent) => {
+    if (e.key === "Escape") setShowReasons(false);
+  }, []);
+
+  useEffect(() => {
+    if (showReasons) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("keydown", handleKeyDown);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+        document.removeEventListener("keydown", handleKeyDown);
+      };
+    }
+  }, [showReasons, handleClickOutside, handleKeyDown]);
 
   return (
     <div className="rounded-xl border border-slate-800/60 bg-slate-900/50 p-3 hover:border-slate-600/60 transition-all duration-200 backdrop-blur">
@@ -194,7 +217,7 @@ function TalkCard({ item }: { item: TalkItem }) {
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
           {/* Bot badge */}
-          <div className="relative">
+          <div className="relative" ref={popoverRef}>
             <button
               onClick={() => setShowReasons(!showReasons)}
               className={`inline-flex items-center gap-1 rounded-full border px-2 py-0.5 text-xs font-medium cursor-pointer transition-colors ${botBadgeColor(botLabel)}`}

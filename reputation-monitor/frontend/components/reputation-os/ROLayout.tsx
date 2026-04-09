@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import ROSidebar from "./ROSidebar";
-import { useTenant } from "@/contexts/TenantContext";
+import { VIJAY_DISPLAY_NAME, PAGE_TITLE } from "@/lib/constants";
+import Head from "next/head";
 
 interface ROLayoutProps {
   children: React.ReactNode;
@@ -23,7 +24,6 @@ const MODULE_TITLES: Record<string, string> = {
 };
 
 export default function ROLayout({ children, activeModule }: ROLayoutProps) {
-  const { tenantId, setTenantId, tenantName } = useTenant();
   const [collapsed, setCollapsed] = useState(false);
   const [lastUpdated, setLastUpdated] = useState<string>("");
 
@@ -47,11 +47,12 @@ export default function ROLayout({ children, activeModule }: ROLayoutProps) {
 
   return (
     <div className="min-h-screen bg-[#030712]">
+      <Head>
+        <title>{PAGE_TITLE}</title>
+      </Head>
       <ROSidebar
         collapsed={collapsed}
         onToggleCollapse={() => setCollapsed((p) => !p)}
-        tenantId={tenantId}
-        onTenantChange={setTenantId}
         activeModule={activeModule}
       />
 
@@ -68,7 +69,7 @@ export default function ROLayout({ children, activeModule }: ROLayoutProps) {
               {moduleTitle}
             </span>
             <span className="rounded-full bg-slate-800/60 px-2.5 py-0.5 text-xs text-slate-400">
-              {tenantName}
+              {VIJAY_DISPLAY_NAME}
             </span>
           </div>
 

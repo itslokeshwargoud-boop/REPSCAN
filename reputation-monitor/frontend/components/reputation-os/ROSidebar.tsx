@@ -1,4 +1,3 @@
-import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import {
@@ -14,10 +13,10 @@ import {
   BarChart3,
   ChevronLeft,
   ChevronRight,
-  ChevronDown,
   Rss,
   MessagesSquare,
 } from "lucide-react";
+import { VIJAY_DISPLAY_NAME } from "@/lib/constants";
 
 interface NavItem {
   icon: React.ComponentType<{ size?: string | number }>;
@@ -40,29 +39,18 @@ const NAV_ITEMS: NavItem[] = [
   { icon: BarChart3, label: "Campaigns", href: "/reputation-os/campaigns" },
 ];
 
-const TENANTS = [
-  { id: "vijayx", name: "Vijay Deverakonda" },
-  { id: "prabhasx", name: "Prabhas" },
-];
-
 interface ROSidebarProps {
   collapsed: boolean;
   onToggleCollapse: () => void;
-  tenantId: string;
-  onTenantChange: (id: string) => void;
   activeModule?: string;
 }
 
 export default function ROSidebar({
   collapsed,
   onToggleCollapse,
-  tenantId,
-  onTenantChange,
   activeModule,
 }: ROSidebarProps) {
   const router = useRouter();
-  const [tenantOpen, setTenantOpen] = useState(false);
-  const currentTenant = TENANTS.find((t) => t.id === tenantId) ?? TENANTS[0];
 
   function isActive(href: string): boolean {
     if (activeModule) {
@@ -99,44 +87,12 @@ export default function ROSidebar({
         )}
       </div>
 
-      {/* Tenant Selector */}
+      {/* Static client label — Vijay Deverakonda (no selector) */}
       {!collapsed && (
         <div className="border-b border-slate-800/60 px-3 py-3">
-          <button
-            type="button"
-            onClick={() => setTenantOpen(!tenantOpen)}
-            className="flex w-full items-center justify-between rounded-lg bg-slate-800/40 px-3 py-2 text-sm text-slate-300 transition-colors hover:bg-slate-800/60"
-          >
-            <span className="truncate">{currentTenant.name}</span>
-            <ChevronDown
-              size={14}
-              className={`shrink-0 text-slate-500 transition-transform ${
-                tenantOpen ? "rotate-180" : ""
-              }`}
-            />
-          </button>
-
-          {tenantOpen && (
-            <div className="mt-1 overflow-hidden rounded-lg border border-slate-800/60 bg-slate-900">
-              {TENANTS.map((t) => (
-                <button
-                  key={t.id}
-                  type="button"
-                  onClick={() => {
-                    onTenantChange(t.id);
-                    setTenantOpen(false);
-                  }}
-                  className={`flex w-full items-center px-3 py-2 text-sm transition-colors ${
-                    t.id === tenantId
-                      ? "bg-rose-500/10 text-rose-400"
-                      : "text-slate-400 hover:bg-slate-800/60 hover:text-slate-300"
-                  }`}
-                >
-                  {t.name}
-                </button>
-              ))}
-            </div>
-          )}
+          <div className="flex w-full items-center rounded-lg bg-slate-800/40 px-3 py-2 text-sm text-slate-300">
+            <span className="truncate font-medium">{VIJAY_DISPLAY_NAME}</span>
+          </div>
         </div>
       )}
 

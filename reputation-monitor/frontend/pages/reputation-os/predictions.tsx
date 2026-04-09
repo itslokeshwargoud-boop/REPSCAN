@@ -17,7 +17,7 @@ import {
   ShieldAlert,
   Target,
 } from "lucide-react";
-import { TenantProvider, useTenant } from "@/contexts/TenantContext";
+import { TenantProvider } from "@/contexts/TenantContext";
 import {
   useReputationOs,
   type PredictionsReport,
@@ -65,8 +65,7 @@ function riskBadgeVariant(
 // ---------------------------------------------------------------------------
 
 function PredictionsContent() {
-  const { tenantId } = useTenant();
-  const { predictions } = useReputationOs(tenantId);
+  const { predictions } = useReputationOs();
 
   const data: PredictionsReport | undefined = predictions.data;
 

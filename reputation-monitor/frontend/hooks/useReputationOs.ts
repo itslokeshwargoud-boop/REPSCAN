@@ -1,6 +1,8 @@
 /**
  * useReputationOs — React hook for all 10 REPUTATION OS modules.
  * Uses @tanstack/react-query for caching, deduplication, and background refresh.
+ *
+ * Single-tenant: always uses Vijay Deverakonda data.
  */
 
 import { useQuery } from "@tanstack/react-query";
@@ -26,64 +28,64 @@ export type {
 
 const STALE_TIME = 30_000; // 30 seconds
 
-export function useReputationOs(tenantId: string) {
+export function useReputationOs() {
   const score = useQuery({
-    queryKey: ["rep-score", tenantId],
-    queryFn: () => api.fetchReputationScore(tenantId),
+    queryKey: ["rep-score"],
+    queryFn: () => api.fetchReputationScore(),
     staleTime: STALE_TIME,
   });
 
   const alerts = useQuery({
-    queryKey: ["rep-alerts", tenantId],
-    queryFn: () => api.fetchAlerts(tenantId),
+    queryKey: ["rep-alerts"],
+    queryFn: () => api.fetchAlerts(),
     staleTime: STALE_TIME,
   });
 
   const narratives = useQuery({
-    queryKey: ["rep-narratives", tenantId],
-    queryFn: () => api.fetchNarratives(tenantId),
+    queryKey: ["rep-narratives"],
+    queryFn: () => api.fetchNarratives(),
     staleTime: STALE_TIME,
   });
 
   const influencers = useQuery({
-    queryKey: ["rep-influencers", tenantId],
-    queryFn: () => api.fetchInfluencers(tenantId),
+    queryKey: ["rep-influencers"],
+    queryFn: () => api.fetchInfluencers(),
     staleTime: STALE_TIME,
   });
 
   const authenticity = useQuery({
-    queryKey: ["rep-authenticity", tenantId],
-    queryFn: () => api.fetchAuthenticity(tenantId),
+    queryKey: ["rep-authenticity"],
+    queryFn: () => api.fetchAuthenticity(),
     staleTime: STALE_TIME,
   });
 
   const velocity = useQuery({
-    queryKey: ["rep-velocity", tenantId],
-    queryFn: () => api.fetchVelocity(tenantId),
+    queryKey: ["rep-velocity"],
+    queryFn: () => api.fetchVelocity(),
     staleTime: STALE_TIME,
   });
 
   const moodmap = useQuery({
-    queryKey: ["rep-moodmap", tenantId],
-    queryFn: () => api.fetchMoodMap(tenantId),
+    queryKey: ["rep-moodmap"],
+    queryFn: () => api.fetchMoodMap(),
     staleTime: STALE_TIME,
   });
 
   const actions = useQuery({
-    queryKey: ["rep-actions", tenantId],
-    queryFn: () => api.fetchActions(tenantId),
+    queryKey: ["rep-actions"],
+    queryFn: () => api.fetchActions(),
     staleTime: STALE_TIME,
   });
 
   const predictions = useQuery({
-    queryKey: ["rep-predictions", tenantId],
-    queryFn: () => api.fetchPredictions(tenantId),
+    queryKey: ["rep-predictions"],
+    queryFn: () => api.fetchPredictions(),
     staleTime: STALE_TIME,
   });
 
   const campaigns = useQuery({
-    queryKey: ["rep-campaigns", tenantId],
-    queryFn: () => api.fetchCampaignImpact(tenantId),
+    queryKey: ["rep-campaigns"],
+    queryFn: () => api.fetchCampaignImpact(),
     staleTime: STALE_TIME,
   });
 

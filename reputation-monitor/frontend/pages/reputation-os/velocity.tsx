@@ -18,7 +18,7 @@ import {
   ArrowUpRight,
   Clock,
 } from "lucide-react";
-import { TenantProvider, useTenant } from "@/contexts/TenantContext";
+import { TenantProvider } from "@/contexts/TenantContext";
 import { useReputationOs } from "@/hooks/useReputationOs";
 import ROLayout from "@/components/reputation-os/ROLayout";
 import ROCard from "@/components/reputation-os/ROCard";
@@ -54,8 +54,7 @@ const TREND_ICON: Record<string, React.ReactNode> = {
 // ---------------------------------------------------------------------------
 
 function VelocityContent() {
-  const { tenantId } = useTenant();
-  const { velocity } = useReputationOs(tenantId);
+  const { velocity } = useReputationOs();
 
   const data = velocity.data;
 

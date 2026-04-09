@@ -19,7 +19,7 @@ import {
   Zap,
   Filter,
 } from "lucide-react";
-import { TenantProvider, useTenant } from "@/contexts/TenantContext";
+import { TenantProvider } from "@/contexts/TenantContext";
 import { useReputationOs, type Alert } from "@/hooks/useReputationOs";
 import ROLayout from "@/components/reputation-os/ROLayout";
 import ROCard from "@/components/reputation-os/ROCard";
@@ -84,8 +84,7 @@ function timeAgo(iso: string): string {
 // ---------------------------------------------------------------------------
 
 function AlertsContent() {
-  const { tenantId } = useTenant();
-  const { alerts } = useReputationOs(tenantId);
+  const { alerts } = useReputationOs();
 
   const [severityFilter, setSeverityFilter] = useState<"all" | Severity>("all");
   const [typeFilter, setTypeFilter] = useState<"all" | AlertType>("all");

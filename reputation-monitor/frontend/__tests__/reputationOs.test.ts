@@ -1,10 +1,9 @@
 /**
  * Reputation OS — Entity relevance & data integrity tests.
  *
- * These tests ensure the "vijayx" (Vijay Deverakonda, actor) and
- * "prabhasx" (Prabhas, actor) tenants return data strictly relevant
- * to their respective personas — no generic SaaS, tech-product, or
- * other-domain content leaking in.
+ * Single-tenant: permanently scoped to Vijay Deverakonda.
+ * These tests ensure data is strictly relevant to the persona —
+ * no generic SaaS, tech-product, or other-domain content leaking in.
  */
 
 import { describe, it, expect } from "vitest";
@@ -51,26 +50,6 @@ const VIJAY_RELEVANT = [
   "fan",
 ];
 
-/** Keywords/phrases that should NOT appear in Prabhas data. */
-const PRABHAS_IRRELEVANT = [
-  "product",
-  "SaaS",
-  "enterprise",
-  "delivery delays",
-  "delivery complaints",
-  "customer",
-  "support response",
-  "post-mortem",
-  "brand ambassador programme",
-];
-
-/** Keywords that SHOULD appear somewhere in Prabhas narrative/alert/action data. */
-const PRABHAS_RELEVANT = [
-  "Prabhas",
-  "film",
-  "box office",
-];
-
 // ── Helpers ──────────────────────────────────────────────────────────────────
 
 function allTexts(obj: unknown): string {
@@ -89,18 +68,16 @@ function containsAny(text: string, keywords: string[]): string[] {
 
 // ── Tests ────────────────────────────────────────────────────────────────────
 
-describe("VijayX (Vijay Deverakonda) tenant relevance", () => {
-  const TENANT = "vijayx";
-
+describe("Vijay Deverakonda data relevance", () => {
   it("narratives contain no irrelevant SaaS/tech keywords", async () => {
-    const narratives = await fetchNarratives(TENANT);
+    const narratives = await fetchNarratives();
     const text = allTexts(narratives);
     const hits = containsAny(text, VIJAY_IRRELEVANT);
     expect(hits).toEqual([]);
   });
 
   it("narratives reference Vijay Deverakonda, film, or fan culture", async () => {
-    const narratives = await fetchNarratives(TENANT);
+    const narratives = await fetchNarratives();
     const text = allTexts(narratives);
     for (const kw of VIJAY_RELEVANT) {
       expect(text.toLowerCase()).toContain(kw.toLowerCase());
@@ -108,27 +85,27 @@ describe("VijayX (Vijay Deverakonda) tenant relevance", () => {
   });
 
   it("alerts contain no irrelevant SaaS/tech keywords", async () => {
-    const alerts = await fetchAlerts(TENANT);
+    const alerts = await fetchAlerts();
     const text = allTexts(alerts);
     const hits = containsAny(text, VIJAY_IRRELEVANT);
     expect(hits).toEqual([]);
   });
 
   it("alerts reference Vijay Deverakonda or Telugu cinema", async () => {
-    const alerts = await fetchAlerts(TENANT);
+    const alerts = await fetchAlerts();
     const text = allTexts(alerts);
     expect(text.toLowerCase()).toContain("vijay deverakonda");
   });
 
   it("actions contain no irrelevant SaaS/tech keywords", async () => {
-    const actions = await fetchActions(TENANT);
+    const actions = await fetchActions();
     const text = allTexts(actions);
     const hits = containsAny(text, VIJAY_IRRELEVANT);
     expect(hits).toEqual([]);
   });
 
   it("influencers have entertainment/film usernames, not tech", async () => {
-    const inf = await fetchInfluencers(TENANT);
+    const inf = await fetchInfluencers();
     const allUsernames = [
       ...inf.supporters,
       ...inf.attackers,
@@ -143,66 +120,28 @@ describe("VijayX (Vijay Deverakonda) tenant relevance", () => {
   });
 
   it("campaign data references film/teaser, not product launch", async () => {
-    const campaign = await fetchCampaignImpact(TENANT);
+    const campaign = await fetchCampaignImpact();
     expect(campaign.campaign_name.toLowerCase()).not.toContain("product");
     expect(campaign.campaign_name.toLowerCase()).toContain("film");
   });
 
   it("mood map summary references Vijay Deverakonda", async () => {
-    const mood = await fetchMoodMap(TENANT);
+    const mood = await fetchMoodMap();
     expect(mood.summary.toLowerCase()).toContain("vijay deverakonda");
     expect(mood.summary.toLowerCase()).not.toContain("product");
   });
 
   it("predictions risk forecast references Vijay Deverakonda", async () => {
-    const predictions = await fetchPredictions(TENANT);
+    const predictions = await fetchPredictions();
     expect(predictions.risk_forecast.toLowerCase()).toContain(
       "vijay deverakonda",
     );
   });
 });
 
-describe("PrabhasX (Prabhas) tenant relevance", () => {
-  const TENANT = "prabhasx";
-
-  it("narratives contain no irrelevant SaaS/product keywords", async () => {
-    const narratives = await fetchNarratives(TENANT);
-    const text = allTexts(narratives);
-    const hits = containsAny(text, PRABHAS_IRRELEVANT);
-    expect(hits).toEqual([]);
-  });
-
-  it("narratives reference Prabhas, film, or box office", async () => {
-    const narratives = await fetchNarratives(TENANT);
-    const text = allTexts(narratives);
-    for (const kw of PRABHAS_RELEVANT) {
-      expect(text.toLowerCase()).toContain(kw.toLowerCase());
-    }
-  });
-
-  it("alerts reference Prabhas by name", async () => {
-    const alerts = await fetchAlerts(TENANT);
-    const text = allTexts(alerts);
-    expect(text.toLowerCase()).toContain("prabhas");
-  });
-
-  it("actions contain no irrelevant product/delivery keywords", async () => {
-    const actions = await fetchActions(TENANT);
-    const text = allTexts(actions);
-    const hits = containsAny(text, PRABHAS_IRRELEVANT);
-    expect(hits).toEqual([]);
-  });
-
-  it("campaign data references image recovery, not customer trust", async () => {
-    const campaign = await fetchCampaignImpact(TENANT);
-    expect(campaign.campaign_name.toLowerCase()).not.toContain("customer");
-    expect(campaign.assessment.toLowerCase()).toContain("prabhas");
-  });
-});
-
 describe("Reputation score data integrity", () => {
-  it("vijayx score is in 0-100 range with valid breakdown", async () => {
-    const score = await fetchReputationScore("vijayx");
+  it("score is in 0-100 range with valid breakdown", async () => {
+    const score = await fetchReputationScore();
     expect(score.score).toBeGreaterThanOrEqual(0);
     expect(score.score).toBeLessThanOrEqual(100);
     expect(score.risk_level).toBe("low");
@@ -212,32 +151,18 @@ describe("Reputation score data integrity", () => {
       expect(val).toBeLessThanOrEqual(100);
     }
   });
-
-  it("prabhasx score reflects high risk", async () => {
-    const score = await fetchReputationScore("prabhasx");
-    expect(score.score).toBeGreaterThanOrEqual(0);
-    expect(score.score).toBeLessThanOrEqual(100);
-    expect(score.risk_level).toBe("high");
-    expect(score.trend).toBe("declining");
-  });
-
-  it("unknown tenant falls back to default profile", async () => {
-    const score = await fetchReputationScore("unknown_tenant");
-    expect(score.risk_level).toBe("medium");
-    expect(score.trend).toBe("stable");
-  });
 });
 
 describe("Authenticity report data integrity", () => {
   it("bot + genuine percentages sum to ~100%", async () => {
-    const auth = await fetchAuthenticity("vijayx");
+    const auth = await fetchAuthenticity();
     const sum = auth.bot_percentage + auth.genuine_percentage;
     expect(sum).toBeGreaterThan(98);
     expect(sum).toBeLessThan(102);
   });
 
   it("confidence is between 0 and 100", async () => {
-    const auth = await fetchAuthenticity("vijayx");
+    const auth = await fetchAuthenticity();
     expect(auth.confidence).toBeGreaterThanOrEqual(0);
     expect(auth.confidence).toBeLessThanOrEqual(100);
   });
@@ -245,12 +170,70 @@ describe("Authenticity report data integrity", () => {
 
 describe("Velocity report data integrity", () => {
   it("timeline has 24 hourly entries", async () => {
-    const vel = await fetchVelocity("vijayx");
+    const vel = await fetchVelocity();
     expect(vel.timeline).toHaveLength(24);
     for (const entry of vel.timeline) {
       expect(entry.positive).toBeGreaterThanOrEqual(0);
       expect(entry.negative).toBeGreaterThanOrEqual(0);
       expect(entry.neutral).toBeGreaterThanOrEqual(0);
     }
+  });
+});
+
+// ── Single-tenant enforcement tests ─────────────────────────────────────────
+
+describe("Single-tenant enforcement (Vijay Deverakonda only)", () => {
+  it("data functions accept no tenant parameter", () => {
+    // All fetch functions should have zero required parameters.
+    // If someone accidentally re-adds a tenantId param, TS will catch it
+    // at compile time, but this runtime check is a safety net.
+    expect(fetchReputationScore.length).toBe(0);
+    expect(fetchAlerts.length).toBe(0);
+    expect(fetchNarratives.length).toBe(0);
+    expect(fetchInfluencers.length).toBe(0);
+    expect(fetchAuthenticity.length).toBe(0);
+    expect(fetchVelocity.length).toBe(0);
+    expect(fetchMoodMap.length).toBe(0);
+    expect(fetchActions.length).toBe(0);
+    expect(fetchPredictions.length).toBe(0);
+    expect(fetchCampaignImpact.length).toBe(0);
+  });
+
+  it("score always returns low risk (Vijay profile)", async () => {
+    const score = await fetchReputationScore();
+    expect(score.risk_level).toBe("low");
+    expect(score.trend).toBe("improving");
+    expect(score.score).toBeGreaterThanOrEqual(70);
+  });
+
+  it("alerts are Vijay-specific (not Prabhas or default)", async () => {
+    const alerts = await fetchAlerts();
+    const text = allTexts(alerts);
+    // Vijay alerts should reference him
+    expect(text.toLowerCase()).toContain("vijay deverakonda");
+    // Should NOT contain Prabhas-specific content
+    expect(text.toLowerCase()).not.toContain("prabhas");
+  });
+
+  it("campaign is Film Teaser Launch (Vijay), not recovery or brand", async () => {
+    const campaign = await fetchCampaignImpact();
+    expect(campaign.campaign_name).toBe("Film Teaser Launch Campaign");
+    expect(campaign.status).toBe("positive");
+    // Must not be Prabhas recovery campaign
+    expect(campaign.campaign_name.toLowerCase()).not.toContain("recovery");
+  });
+
+  it("predictions risk forecast is low-risk Vijay profile", async () => {
+    const predictions = await fetchPredictions();
+    expect(predictions.risk_forecast.toLowerCase()).toContain("low risk");
+    expect(predictions.risk_forecast.toLowerCase()).toContain("vijay deverakonda");
+    expect(predictions.risk_forecast.toLowerCase()).not.toContain("prabhas");
+  });
+
+  it("constants module exports correct values", async () => {
+    const { VIJAY_TENANT_ID, VIJAY_DISPLAY_NAME, PAGE_TITLE } = await import("@/lib/constants");
+    expect(VIJAY_TENANT_ID).toBe("vijay_deverakonda");
+    expect(VIJAY_DISPLAY_NAME).toBe("Vijay Deverakonda");
+    expect(PAGE_TITLE).toContain("Vijay Deverakonda");
   });
 });

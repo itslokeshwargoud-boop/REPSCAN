@@ -1,5 +1,6 @@
 /**
- * /api/reputation-os/[tenant]/velocity — Returns mention velocity report for a tenant.
+ * /api/reputation-os/[tenant]/velocity — Single-tenant — always returns Vijay Deverakonda data.
+ * Note: The [tenant] URL segment is kept for backward compatibility but is ignored.
  */
 
 import type { NextApiRequest, NextApiResponse } from "next";
@@ -23,15 +24,10 @@ export default async function handler(
     return res.status(405).json({ error: "Method not allowed" });
   }
 
-  const { tenant } = req.query;
-  if (typeof tenant !== "string" || !tenant.trim()) {
-    return res.status(400).json({ error: "Missing or invalid tenant parameter" });
-  }
-
   res.setHeader("Cache-Control", "public, s-maxage=30, stale-while-revalidate=60");
 
   try {
-    const data = await fetchVelocity(tenant);
+    const data = await fetchVelocity();
     return res.status(200).json(data);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";

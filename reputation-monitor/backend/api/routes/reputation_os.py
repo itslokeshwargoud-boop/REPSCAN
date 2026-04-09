@@ -1,10 +1,10 @@
 """
 REPUTATION OS — Unified API routes for the Reputation Operating System.
 
-Provides 10 single-tenant endpoints that orchestrate all ML engines into a
-single coherent reputation intelligence layer.
-
-All routes are prefixed with ``/reputation-os/{tenant_id}/``.
+Single-tenant: permanently scoped to Vijay Deverakonda.
+All routes keep the ``/reputation-os/{tenant_id}/`` URL prefix for backward
+compatibility, but the ``tenant_id`` path parameter is ignored — every
+response is scoped to ``VIJAY_TENANT_ID``.
 """
 
 import logging

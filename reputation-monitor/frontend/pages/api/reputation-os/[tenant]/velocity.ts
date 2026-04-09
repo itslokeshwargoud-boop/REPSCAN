@@ -1,5 +1,6 @@
 /**
  * /api/reputation-os/[tenant]/velocity — Single-tenant — always returns Vijay Deverakonda data.
+ * Note: The [tenant] URL segment is kept for backward compatibility but is ignored.
  */
 
 import type { NextApiRequest, NextApiResponse } from "next";

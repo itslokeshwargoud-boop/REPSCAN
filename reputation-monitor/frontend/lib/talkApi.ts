@@ -30,6 +30,7 @@ export interface FetchTalkParams {
   page?: number;
   limit?: number;
   sentiment?: SentimentLabel;
+  bot?: "human" | "suspicious" | "bot";
   search?: string;
   sort?: "newest" | "oldest";
 }
@@ -60,6 +61,7 @@ export async function fetchTalkItems(params: FetchTalkParams): Promise<TalkDataR
     if (params.page) url.searchParams.set("page", String(params.page));
     if (params.limit) url.searchParams.set("limit", String(params.limit));
     if (params.sentiment) url.searchParams.set("sentiment", params.sentiment);
+    if (params.bot) url.searchParams.set("bot", params.bot);
     if (params.search) url.searchParams.set("search", params.search);
     if (params.sort) url.searchParams.set("sort", params.sort);
 

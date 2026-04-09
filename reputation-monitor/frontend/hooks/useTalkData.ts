@@ -36,6 +36,8 @@ export interface TalkData {
   // Filters
   sentimentFilter: SentimentLabel | null;
   setSentimentFilter: (s: SentimentLabel | null) => void;
+  botFilter: "human" | "suspicious" | "bot" | null;
+  setBotFilter: (b: "human" | "suspicious" | "bot" | null) => void;
   searchQuery: string;
   setSearchQuery: (q: string) => void;
   sortOrder: "newest" | "oldest";
@@ -70,6 +72,7 @@ export function useTalkData(initialKeyword?: string): TalkData {
   const [limit] = useState(50);
 
   const [sentimentFilter, setSentimentFilter] = useState<SentimentLabel | null>(null);
+  const [botFilter, setBotFilter] = useState<"human" | "suspicious" | "bot" | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
   const [sortOrder, setSortOrder] = useState<"newest" | "oldest">("newest");
 
@@ -104,6 +107,7 @@ export function useTalkData(initialKeyword?: string): TalkData {
         page,
         limit,
         sentiment: sentimentFilter ?? undefined,
+        bot: botFilter ?? undefined,
         search: searchQuery || undefined,
         sort: sortOrder,
       });
@@ -124,7 +128,7 @@ export function useTalkData(initialKeyword?: string): TalkData {
       isFetching.current = false;
       setHasSearched(true);
     }
-  }, [activeKeyword, page, limit, sentimentFilter, searchQuery, sortOrder, fetchKey]);
+  }, [activeKeyword, page, limit, sentimentFilter, botFilter, searchQuery, sortOrder, fetchKey]);
 
   useEffect(() => {
     if (activeKeyword.trim()) {
@@ -160,6 +164,13 @@ export function useTalkData(initialKeyword?: string): TalkData {
     setFetchKey((k) => k + 1);
   }, []);
 
+  const handleSetBotFilter = useCallback((b: "human" | "suspicious" | "bot" | null) => {
+    setBotFilter(b);
+    setPage(1);
+    isFetching.current = false;
+    setFetchKey((k) => k + 1);
+  }, []);
+
   const handleSetSearchQuery = useCallback((q: string) => {
     setSearchQuery(q);
     // Don't auto-fetch on every keystroke — user calls search or we debounce
@@ -186,6 +197,8 @@ export function useTalkData(initialKeyword?: string): TalkData {
     goToPage,
     sentimentFilter,
     setSentimentFilter: handleSetSentimentFilter,
+    botFilter,
+    setBotFilter: handleSetBotFilter,
     searchQuery,
     setSearchQuery: handleSetSearchQuery,
     sortOrder,

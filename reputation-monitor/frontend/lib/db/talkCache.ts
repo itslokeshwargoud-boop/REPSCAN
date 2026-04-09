@@ -30,6 +30,9 @@ export interface TalkItemRow {
   proofUrl: string;
   keyword: string;
   fetchedAt: string;
+  botScore: number;
+  botLabel: "human" | "suspicious" | "bot";
+  botReasons: string; // JSON-encoded string[]
 }
 
 export interface VideoFetchStatus {
@@ -46,6 +49,28 @@ export interface VideoFetchStatus {
 // ---------------------------------------------------------------------------
 
 let _db: Database.Database | null = null;
+
+/**
+ * Safe migration: add bot columns to talk_items if they are missing.
+ * Uses PRAGMA table_info to detect existing columns.
+ */
+function migrateBotColumns(db: Database.Database): void {
+  const columns = db.prepare("PRAGMA table_info(talk_items)").all() as Array<{ name: string }>;
+  const colNames = new Set(columns.map((c) => c.name));
+
+  if (!colNames.has("botScore")) {
+    db.exec("ALTER TABLE talk_items ADD COLUMN botScore INTEGER NOT NULL DEFAULT 0");
+  }
+  if (!colNames.has("botLabel")) {
+    db.exec("ALTER TABLE talk_items ADD COLUMN botLabel TEXT NOT NULL DEFAULT 'human'");
+  }
+  if (!colNames.has("botReasons")) {
+    db.exec("ALTER TABLE talk_items ADD COLUMN botReasons TEXT NOT NULL DEFAULT '[]'");
+  }
+
+  // Ensure index exists
+  db.exec("CREATE INDEX IF NOT EXISTS idx_talk_botLabel ON talk_items(botLabel)");
+}
 
 function getDbPath(): string {
   // On serverless platforms (e.g. Vercel) the project directory is read-only.
@@ -78,13 +103,17 @@ export function getDb(): Database.Database {
       sentiment   TEXT NOT NULL CHECK(sentiment IN ('positive','negative','neutral')),
       proofUrl    TEXT NOT NULL,
       keyword     TEXT NOT NULL DEFAULT '',
-      fetchedAt   TEXT NOT NULL DEFAULT (datetime('now'))
+      fetchedAt   TEXT NOT NULL DEFAULT (datetime('now')),
+      botScore    INTEGER NOT NULL DEFAULT 0,
+      botLabel    TEXT NOT NULL DEFAULT 'human' CHECK(botLabel IN ('human','suspicious','bot')),
+      botReasons  TEXT NOT NULL DEFAULT '[]'
     );
 
     CREATE INDEX IF NOT EXISTS idx_talk_keyword   ON talk_items(keyword);
     CREATE INDEX IF NOT EXISTS idx_talk_sentiment  ON talk_items(sentiment);
     CREATE INDEX IF NOT EXISTS idx_talk_videoId    ON talk_items(videoId);
     CREATE INDEX IF NOT EXISTS idx_talk_publishedAt ON talk_items(publishedAt);
+    CREATE INDEX IF NOT EXISTS idx_talk_botLabel   ON talk_items(botLabel);
 
     CREATE TABLE IF NOT EXISTS video_fetch_status (
       videoId       TEXT NOT NULL,
@@ -97,6 +126,9 @@ export function getDb(): Database.Database {
     );
   `);
 
+  // Safe migration: add bot columns if the table already existed without them
+  migrateBotColumns(_db);
+
   return _db;
 }
 
@@ -108,12 +140,17 @@ export function upsertTalkItem(item: TalkItemRow): void {
   const db = getDb();
   db.prepare(`
     INSERT INTO talk_items (commentId, videoId, text, author, publishedAt,
-                            videoTitle, channelTitle, sentiment, proofUrl, keyword, fetchedAt)
+                            videoTitle, channelTitle, sentiment, proofUrl, keyword, fetchedAt,
+                            botScore, botLabel, botReasons)
     VALUES (@commentId, @videoId, @text, @author, @publishedAt,
-            @videoTitle, @channelTitle, @sentiment, @proofUrl, @keyword, @fetchedAt)
+            @videoTitle, @channelTitle, @sentiment, @proofUrl, @keyword, @fetchedAt,
+            @botScore, @botLabel, @botReasons)
     ON CONFLICT(commentId) DO UPDATE SET
       sentiment = excluded.sentiment,
-      fetchedAt = excluded.fetchedAt
+      fetchedAt = excluded.fetchedAt,
+      botScore  = excluded.botScore,
+      botLabel  = excluded.botLabel,
+      botReasons = excluded.botReasons
   `).run(item);
 }
 
@@ -121,12 +158,17 @@ export function upsertTalkItems(items: TalkItemRow[]): void {
   const db = getDb();
   const stmt = db.prepare(`
     INSERT INTO talk_items (commentId, videoId, text, author, publishedAt,
-                            videoTitle, channelTitle, sentiment, proofUrl, keyword, fetchedAt)
+                            videoTitle, channelTitle, sentiment, proofUrl, keyword, fetchedAt,
+                            botScore, botLabel, botReasons)
     VALUES (@commentId, @videoId, @text, @author, @publishedAt,
-            @videoTitle, @channelTitle, @sentiment, @proofUrl, @keyword, @fetchedAt)
+            @videoTitle, @channelTitle, @sentiment, @proofUrl, @keyword, @fetchedAt,
+            @botScore, @botLabel, @botReasons)
     ON CONFLICT(commentId) DO UPDATE SET
       sentiment = excluded.sentiment,
-      fetchedAt = excluded.fetchedAt
+      fetchedAt = excluded.fetchedAt,
+      botScore  = excluded.botScore,
+      botLabel  = excluded.botLabel,
+      botReasons = excluded.botReasons
   `);
 
   const insertMany = db.transaction((rows: TalkItemRow[]) => {
@@ -148,6 +190,7 @@ export function getCachedSentiment(commentId: string): "positive" | "negative" |
 export interface TalkQueryParams {
   keyword: string;
   sentiment?: "positive" | "negative" | "neutral";
+  bot?: "human" | "suspicious" | "bot";
   search?: string;
   sort?: "newest" | "oldest";
   page?: number;
@@ -165,7 +208,7 @@ export interface TalkQueryResult {
 
 export function queryTalkItems(params: TalkQueryParams): TalkQueryResult {
   const db = getDb();
-  const { keyword, sentiment, search, sort = "newest", page = 1, limit = 50 } = params;
+  const { keyword, sentiment, bot, search, sort = "newest", page = 1, limit = 50 } = params;
 
   const conditions: string[] = ["keyword = @keyword"];
   const bindings: Record<string, string | number> = { keyword };
@@ -173,6 +216,11 @@ export function queryTalkItems(params: TalkQueryParams): TalkQueryResult {
   if (sentiment) {
     conditions.push("sentiment = @sentiment");
     bindings.sentiment = sentiment;
+  }
+
+  if (bot) {
+    conditions.push("botLabel = @bot");
+    bindings.bot = bot;
   }
 
   if (search) {

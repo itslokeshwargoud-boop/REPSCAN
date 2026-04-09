@@ -32,6 +32,7 @@ import {
   validateYouTubeCommentProofUrl,
   logProofRejection,
 } from "@/lib/proofValidation";
+import { scoreBotBatch, type BotLabel } from "@/lib/botDetection";
 
 // ---------------------------------------------------------------------------
 // YouTube Comment Thread fetching
@@ -215,7 +216,7 @@ async function aggregateTalkItems(
     }
   }
 
-  // Run sentiment analysis on new comments in batches
+  // Run sentiment analysis on new comments in batches, then compute bot scores
   if (newComments.length > 0) {
     const talkRows: TalkItemRow[] = [];
 
@@ -256,7 +257,28 @@ async function aggregateTalkItems(
           proofUrl,
           keyword,
           fetchedAt: new Date().toISOString(),
+          // Bot fields set below after batch scoring
+          botScore: 0,
+          botLabel: "human",
+          botReasons: "[]",
         });
+      }
+    }
+
+    // Compute bot detection across the entire batch
+    if (talkRows.length > 0) {
+      const botInputs = talkRows.map((r) => ({
+        commentId: r.commentId,
+        videoId: r.videoId,
+        text: r.text,
+        publishedAt: r.publishedAt,
+        keyword: r.keyword,
+      }));
+      const botResults = scoreBotBatch(botInputs);
+      for (let i = 0; i < talkRows.length; i++) {
+        talkRows[i].botScore = botResults[i].botScore;
+        talkRows[i].botLabel = botResults[i].botLabel;
+        talkRows[i].botReasons = JSON.stringify(botResults[i].botReasons);
       }
     }
 
@@ -264,6 +286,21 @@ async function aggregateTalkItems(
   }
 
   return { fetched: newComments.length, errors };
+}
+
+// ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/** Safely parse botReasons JSON string into a string array */
+function parseBotReasons(raw: string | undefined | null): string[] {
+  if (!raw) return [];
+  try {
+    const parsed = JSON.parse(raw);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch {
+    return [];
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -280,6 +317,9 @@ export interface TalkItem {
   channelTitle: string;
   sentiment: SentimentLabel;
   proofUrl: string;
+  botScore: number;
+  botLabel: BotLabel;
+  botReasons: string[];
 }
 
 export interface TalkApiResponse {
@@ -346,6 +386,11 @@ export default async function handler(
     : undefined;
   const search = typeof req.query.search === "string" ? req.query.search.trim() : undefined;
   const sort = req.query.sort === "oldest" ? "oldest" : "newest";
+  const bot = (["human", "suspicious", "bot"] as const).includes(
+    req.query.bot as "human" | "suspicious" | "bot"
+  )
+    ? (req.query.bot as "human" | "suspicious" | "bot")
+    : undefined;
 
   // Cache headers
   res.setHeader("Cache-Control", "public, s-maxage=30, stale-while-revalidate=60");
@@ -388,6 +433,7 @@ export default async function handler(
     const result: TalkQueryResult = queryTalkItems({
       keyword,
       sentiment,
+      bot,
       search,
       sort: sort as "newest" | "oldest",
       page,
@@ -407,6 +453,9 @@ export default async function handler(
         channelTitle: item.channelTitle,
         sentiment: item.sentiment,
         proofUrl: item.proofUrl,
+        botScore: item.botScore ?? 0,
+        botLabel: (item.botLabel ?? "human") as BotLabel,
+        botReasons: parseBotReasons(item.botReasons),
       }));
 
     return res.status(200).json({

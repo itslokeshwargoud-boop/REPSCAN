@@ -18,7 +18,7 @@ import {
   TrendingUp,
   Zap,
 } from "lucide-react";
-import { TenantProvider, useTenant } from "@/contexts/TenantContext";
+import { TenantProvider } from "@/contexts/TenantContext";
 import { useReputationOs } from "@/hooks/useReputationOs";
 import ROLayout from "@/components/reputation-os/ROLayout";
 import ROCard from "@/components/reputation-os/ROCard";
@@ -72,9 +72,8 @@ function timeAgo(iso: string): string {
 // ---------------------------------------------------------------------------
 
 function OverviewContent() {
-  const { tenantId } = useTenant();
   const { score, predictions, alerts, narratives, actions } =
-    useReputationOs(tenantId);
+    useReputationOs();
 
   const trendData = useMemo(() => {
     if (!predictions.data?.historical) return [];

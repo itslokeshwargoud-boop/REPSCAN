@@ -31,7 +31,7 @@ export default async function handler(
   res.setHeader("Cache-Control", "public, s-maxage=30, stale-while-revalidate=60");
 
   try {
-    const data = await fetchAlerts(tenant);
+    const data = await fetchAlerts();
     return res.status(200).json(data);
   } catch (err) {
     const message = err instanceof Error ? err.message : "Unknown error";

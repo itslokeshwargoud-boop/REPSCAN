@@ -7,7 +7,7 @@ import {
   ResponsiveContainer,
 } from "recharts";
 import { Fingerprint, ShieldCheck, ShieldAlert, Info } from "lucide-react";
-import { TenantProvider, useTenant } from "@/contexts/TenantContext";
+import { TenantProvider } from "@/contexts/TenantContext";
 import { useReputationOs } from "@/hooks/useReputationOs";
 import ROLayout from "@/components/reputation-os/ROLayout";
 import ROCard from "@/components/reputation-os/ROCard";
@@ -43,8 +43,7 @@ function SkeletonBlock({ className = "" }: { className?: string }) {
 // ---------------------------------------------------------------------------
 
 function AuthenticityContent() {
-  const { tenantId } = useTenant();
-  const { authenticity } = useReputationOs(tenantId);
+  const { authenticity } = useReputationOs();
 
   const data = authenticity.data;
 

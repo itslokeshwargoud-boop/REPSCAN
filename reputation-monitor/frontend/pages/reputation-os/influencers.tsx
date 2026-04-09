@@ -1,6 +1,6 @@
 import { useMemo, useState } from "react";
 import { Users, Star, ShieldAlert, UserCheck } from "lucide-react";
-import { TenantProvider, useTenant } from "@/contexts/TenantContext";
+import { TenantProvider } from "@/contexts/TenantContext";
 import { useReputationOs, type Influencer } from "@/hooks/useReputationOs";
 import ROLayout from "@/components/reputation-os/ROLayout";
 import ROCard from "@/components/reputation-os/ROCard";
@@ -135,8 +135,7 @@ function InfluencerCard({ inf }: { inf: Influencer }) {
 // ---------------------------------------------------------------------------
 
 function InfluencersContent() {
-  const { tenantId } = useTenant();
-  const { influencers } = useReputationOs(tenantId);
+  const { influencers } = useReputationOs();
   const [tab, setTab] = useState<Tab>("all");
 
   const all = useMemo(() => {

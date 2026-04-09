@@ -17,7 +17,7 @@ import {
   Sparkles,
   MessageCircle,
 } from "lucide-react";
-import { TenantProvider, useTenant } from "@/contexts/TenantContext";
+import { TenantProvider } from "@/contexts/TenantContext";
 import {
   useReputationOs,
   type MoodMapReport,
@@ -73,8 +73,7 @@ function intensityColor(intensity: number): string {
 // ---------------------------------------------------------------------------
 
 function MoodMapContent() {
-  const { tenantId } = useTenant();
-  const { moodmap } = useReputationOs(tenantId);
+  const { moodmap } = useReputationOs();
 
   const data: MoodMapReport | undefined = moodmap.data;
 

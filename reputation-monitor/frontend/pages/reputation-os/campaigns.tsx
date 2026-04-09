@@ -17,7 +17,7 @@ import {
   CheckCircle2,
   ListChecks,
 } from "lucide-react";
-import { TenantProvider, useTenant } from "@/contexts/TenantContext";
+import { TenantProvider } from "@/contexts/TenantContext";
 import {
   useReputationOs,
   type CampaignReport,
@@ -49,8 +49,7 @@ const STATUS_BADGE: Record<string, "positive" | "negative" | "neutral"> = {
 // ---------------------------------------------------------------------------
 
 function CampaignsContent() {
-  const { tenantId } = useTenant();
-  const { campaigns } = useReputationOs(tenantId);
+  const { campaigns } = useReputationOs();
 
   const data: CampaignReport | undefined = campaigns.data;
 

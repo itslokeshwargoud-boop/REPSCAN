@@ -15,7 +15,7 @@ import {
   TrendingUp,
   Minus,
 } from "lucide-react";
-import { TenantProvider, useTenant } from "@/contexts/TenantContext";
+import { TenantProvider } from "@/contexts/TenantContext";
 import { useReputationOs, type NarrativeCluster } from "@/hooks/useReputationOs";
 import ROLayout from "@/components/reputation-os/ROLayout";
 import ROCard from "@/components/reputation-os/ROCard";
@@ -157,8 +157,7 @@ function NarrativeCard({
 // ---------------------------------------------------------------------------
 
 function NarrativesContent() {
-  const { tenantId } = useTenant();
-  const { narratives } = useReputationOs(tenantId);
+  const { narratives } = useReputationOs();
 
   const clusters = useMemo(() => narratives.data ?? [], [narratives.data]);
 

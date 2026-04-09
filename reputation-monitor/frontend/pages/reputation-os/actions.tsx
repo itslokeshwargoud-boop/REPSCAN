@@ -5,7 +5,7 @@ import {
   BarChart3,
   ShieldCheck,
 } from "lucide-react";
-import { TenantProvider, useTenant } from "@/contexts/TenantContext";
+import { TenantProvider } from "@/contexts/TenantContext";
 import {
   useReputationOs,
   type ActionRecommendation,
@@ -45,8 +45,7 @@ function SkeletonBlock({ className = "" }: { className?: string }) {
 // ---------------------------------------------------------------------------
 
 function ActionsContent() {
-  const { tenantId } = useTenant();
-  const { actions } = useReputationOs(tenantId);
+  const { actions } = useReputationOs();
 
   const [filter, setFilter] = useState<"all" | Priority>("all");
 

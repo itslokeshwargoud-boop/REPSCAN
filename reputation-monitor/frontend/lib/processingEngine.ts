@@ -531,8 +531,9 @@ function detectInfluencers(
       // Engagement score: comment frequency * 10 + reach estimate
       const engagementScore = Math.min(data.count * 15, 100);
 
-      // Reach estimate based on activity
-      const reachEstimate = data.count * 1000 + Math.round(Math.random() * 5000);
+      // Reach estimate based on activity (deterministic: username hash * count)
+      const nameHash = username.split("").reduce((h, c) => h + c.charCodeAt(0), 0);
+      const reachEstimate = data.count * 1000 + (nameHash % 50) * 100;
 
       // Classification based on average sentiment
       let classification: "supporter" | "attacker" | "neutral";
@@ -1069,11 +1070,13 @@ export function derivePredictions(
               ? i * 0.15
               : score.trend === "declining"
                 ? -i * 0.22
-                : (Math.random() - 0.5) * 0.8;
+                : ((i % 5) - 2) * 0.2; // deterministic wave pattern
+          // Deterministic variation using day index
+          const variation = ((i * 7 + 3) % 5) - 2; // -2 to 2
           return {
             date: daysAgoDate(dayOffset),
             score: clamp(
-              Math.round(baseScore - 4 + drift + (Math.random() - 0.5) * 2),
+              Math.round(baseScore - 4 + drift + variation * 0.5),
               0,
               100,
             ),

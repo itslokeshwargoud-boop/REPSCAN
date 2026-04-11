@@ -14,6 +14,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import * as fallback from "@/lib/reputationOs";
+import { DEFAULT_KEYWORD, CACHE_TTL_MS } from "@/lib/constants";
 
 // Re-export types for consumer convenience
 export type {
@@ -31,8 +32,6 @@ export type {
 // Unified API fetchers — fetch from /api/reputation/* (Processing Engine)
 // with graceful fallback to mock data if the API is unavailable.
 // ---------------------------------------------------------------------------
-
-const DEFAULT_KEYWORD = "Vijay Deverakonda";
 
 async function fetchFromApi<T>(
   endpoint: string,
@@ -59,7 +58,7 @@ async function fetchFromApi<T>(
 // Hook
 // ---------------------------------------------------------------------------
 
-const STALE_TIME = 30_000; // 30 seconds
+const STALE_TIME = CACHE_TTL_MS;
 
 export function useReputationOs(keyword: string = DEFAULT_KEYWORD) {
   const score = useQuery({

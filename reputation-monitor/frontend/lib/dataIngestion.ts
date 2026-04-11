@@ -20,6 +20,7 @@ import {
   processAll,
   type ProcessedIntelligence,
 } from "@/lib/processingEngine";
+import { CACHE_TTL_MS } from "@/lib/constants";
 
 // ---------------------------------------------------------------------------
 // In-memory cache to avoid repeated processing for the same keyword
@@ -31,7 +32,6 @@ interface CacheEntry {
 }
 
 const cache = new Map<string, CacheEntry>();
-const CACHE_TTL_MS = 30_000; // 30 seconds
 
 // ---------------------------------------------------------------------------
 // Main entry point

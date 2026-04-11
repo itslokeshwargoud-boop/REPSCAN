@@ -733,7 +733,9 @@ export function deriveReputationScore(
     100,
   );
 
-  const trendDelta = data.trendVelocity > 0 ? Math.min(data.trendVelocity / 10, 10) : Math.max(data.trendVelocity / 10, -10);
+  const trendDelta = data.trendVelocity > 0
+    ? Math.min(data.trendVelocity / 10, 10)
+    : Math.max(data.trendVelocity / 10, -10);
   const trend: ReputationScore["trend"] =
     trendDelta > 1 ? "improving" : trendDelta < -1 ? "declining" : "stable";
 
@@ -1071,8 +1073,15 @@ export function derivePredictions(
               : score.trend === "declining"
                 ? -i * 0.22
                 : ((i % 5) - 2) * 0.2; // deterministic wave pattern
-          // Deterministic variation using day index
-          const variation = ((i * 7 + 3) % 5) - 2; // -2 to 2
+          // Deterministic variation using a simple linear congruential sequence.
+          // Coefficients (multiplier=7, offset=3, modulus=5) produce a repeating
+          // pattern of [-2, 0, -1, 1, 2] that adds realistic noise without randomness.
+          const VARIATION_MULTIPLIER = 7;
+          const VARIATION_OFFSET = 3;
+          const VARIATION_MODULUS = 5;
+          const VARIATION_CENTER = 2;
+          const variation =
+            ((i * VARIATION_MULTIPLIER + VARIATION_OFFSET) % VARIATION_MODULUS) - VARIATION_CENTER;
           return {
             date: daysAgoDate(dayOffset),
             score: clamp(

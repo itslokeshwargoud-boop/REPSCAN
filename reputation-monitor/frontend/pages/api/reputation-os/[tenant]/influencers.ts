@@ -1,9 +1,12 @@
 /**
  * /api/reputation-os/[tenant]/influencers — Single-tenant — always returns Vijay Deverakonda data.
+ * Now powered by the unified Processing Engine (real Talk + Feed data).
+ * Falls back to mock data if processing fails.
  */
 
 import type { NextApiRequest, NextApiResponse } from "next";
 import { fetchInfluencers, type Influencer } from "@/lib/reputationOs";
+import { fetchAndProcess } from "@/lib/dataIngestion";
 
 // ---------------------------------------------------------------------------
 // Response type
@@ -32,10 +35,16 @@ export default async function handler(
   res.setHeader("Cache-Control", "public, s-maxage=30, stale-while-revalidate=60");
 
   try {
-    const data = await fetchInfluencers();
-    return res.status(200).json(data);
-  } catch (err) {
-    const message = err instanceof Error ? err.message : "Unknown error";
-    return res.status(500).json({ error: message });
+    const processed = await fetchAndProcess("Vijay Deverakonda");
+    return res.status(200).json(processed.influencers);
+  } catch {
+    // Fallback to mock data
+    try {
+      const data = await fetchInfluencers();
+      return res.status(200).json(data);
+    } catch (err) {
+      const message = err instanceof Error ? err.message : "Unknown error";
+      return res.status(500).json({ error: message });
+    }
   }
 }
